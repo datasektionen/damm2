@@ -1,0 +1,38 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Patch {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String
+  date        DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  creators    String[]
+  tags        Tag[]
+  images      String[]
+}
+
+model Tag {
+  id              Int      @id @default(autoincrement())
+  name            String
+  color           String
+  backgroundColor String
+  description     String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  Patch           Patch?   @relation(fields: [patchId], references: [id])
+  patchId         Int?
+  children        Tag[]    @relation("TagToTag")
+  Tag             Tag?     @relation("TagToTag", fields: [tagId], references: [id])
+  tagId           Int?
+}

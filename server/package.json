@@ -1,0 +1,56 @@
+{
+  "name": "damm-server",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc",
+    "dev": "nodemon",
+    "start": "node dist/app.js",
+    "test": "NODE_ENV=testing mocha -r ts-node/register test/*.ts --exit",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix"
+  },
+  "engines": {
+    "node": "^12.20.0 || ^14.13.1 || >=16.0.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^2.21.2",
+    "aws-sdk": "^2.921.0",
+    "axios": "^0.21.1",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-validator": "^6.10.1",
+    "http-status-codes": "^2.1.4",
+    "jimp": "^0.16.1",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.2",
+    "node-fetch": "^2.6.1",
+    "path": "^0.12.7",
+    "typescript": "^4.2.4",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@types/aws-sdk": "^2.7.0",
+    "@types/chai": "^4.2.17",
+    "@types/chai-http": "^4.2.0",
+    "@types/cors": "^2.8.10",
+    "@types/dotenv": "^8.2.0",
+    "@types/express": "^4.17.11",
+    "@types/express-validator": "^3.0.0",
+    "@types/jimp": "^0.2.28",
+    "@types/mocha": "^8.2.2",
+    "@types/morgan": "^1.9.2",
+    "@types/multer": "^1.4.5",
+    "@types/node-fetch": "^2.5.10",
+    "@types/uuid": "^8.3.0",
+    "@typescript-eslint/eslint-plugin": "^4.22.0",
+    "@typescript-eslint/parser": "^4.22.0",
+    "chai": "^4.3.4",
+    "chai-http": "^4.3.0",
+    "eslint": "^7.25.0",
+    "mocha": "^8.3.2",
+    "nodemon": "^2.0.7",
+    "prisma": "^2.21.2",
+    "ts-node": "^9.1.1"
+  }
+}

@@ -1,0 +1,68 @@
+import express from 'express';
+import { validationResult } from 'express-validator';
+import { StatusCodes } from 'http-status-codes';
+import { errorResponse, unauthorizedResponse } from './ApiResponse';
+import axios from 'axios';
+import configuration from './configuration';
+import { IUserRequest } from './requests';
+
+/**
+ * Middleware that checks if there are any validation errors, if there are, it
+ * sends 400 Bad Request. Otherwise it calls the next function in the chain.
+ * @param req the request object
+ * @param res the response object
+ * @param next next function
+ */
+export const validationCheck = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        errorResponse(res, StatusCodes.BAD_REQUEST, errors.array());
+        return;
+    }
+    next();
+};
+
+export const authorizePls = async (req: IUserRequest, res: express.Response, next: express.NextFunction): Promise<void> => {
+    const authorizationHeader = req.headers.authorization;
+    const token = authorizationHeader && authorizationHeader.split(" ")[1];
+    if (!token || token.length === 0) {
+        unauthorizedResponse(res);
+        return;
+    }
+
+    try {
+        const response = await axios.get(`${configuration.LOGIN_API_URL}/verify/${token}.json?api_key=${configuration.LOGIN_API_KEY}`);
+        if (response.status !== StatusCodes.OK) {
+            unauthorizedResponse(res);
+            return;
+        }
+        
+        const user = response.data;
+    
+        const plsResponse = await axios.get(`${configuration.PLS_API_URL}/user/${user.user}/damm`);
+        req.user = { ...user, admin: plsResponse.data }
+    
+        next();
+    } catch (err) {
+        unauthorizedResponse(res);
+        return;
+    }
+};
+
+export const adminAuth = async (req: IUserRequest, res: express.Response, next: express.NextFunction): Promise<void> => {
+    if (req.user?.admin.includes("admin")) return next();
+    
+    unauthorizedResponse(res);
+}
+
+export const prylisAuth = async (req: IUserRequest, res: express.Response, next: express.NextFunction): Promise<void> => {
+    if (req.user?.admin.includes("prylis")) return next();
+    
+    unauthorizedResponse(res);
+}
+
+export const adminPrylisAuth = async (req: IUserRequest, res: express.Response, next: express.NextFunction): Promise<void> => {
+    if (req.user?.admin.includes("admin") || req.user?.admin.includes("prylis")) return next();
+    
+    unauthorizedResponse(res);
+}
