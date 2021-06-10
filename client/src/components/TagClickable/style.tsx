@@ -23,8 +23,10 @@ export const StyledTagClickable = styled.div({
         color: props.clicked ? props.tag.color : Theme.palette.blackgrey,
 
         ":hover": {
-            backgroundColor: props.clicked ? props.tag.backgroundColor : Theme.palette.taggreyhover,
-            transform: "scale(1.03)"
+            backgroundColor: props.clicked ? props.tag.backgroundColor : (props.disabled ? Theme.palette.taggrey : Theme.palette.taggreyhover),
+            transform: props.disabled ? "scale(1)" : "scale(1.03)"
         },
+
+        cursor: props.disabled ? "initial" : "pointer"
     })
 );

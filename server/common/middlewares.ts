@@ -22,9 +22,17 @@ export const validationCheck = (req: express.Request, res: express.Response, nex
     next();
 };
 
+// Authorizes against pls.
+// Takes token either in Authorization header or as a query string
 export const authorizePls = async (req: IUserRequest, res: express.Response, next: express.NextFunction): Promise<void> => {
     const authorizationHeader = req.headers.authorization;
-    const token = authorizationHeader && authorizationHeader.split(" ")[1];
+    let token;
+    if (authorizationHeader) {
+        token = authorizationHeader.split(" ")[1]
+    } else if (req.query.token) {
+        token = req.query.token;
+    }
+
     if (!token || token.length === 0) {
         unauthorizedResponse(res);
         return;
@@ -65,4 +73,38 @@ export const adminPrylisAuth = async (req: IUserRequest, res: express.Response, 
     if (req.user?.admin.includes("admin") || req.user?.admin.includes("prylis")) return next();
     
     unauthorizedResponse(res);
+}
+
+// Checks authorization but does not reject.
+// Takes token either in Authorization header or as a query string
+export const silentAuthorization = async (req: IUserRequest, res: express.Response, next: express.NextFunction): Promise<void> => {
+    const authorizationHeader = req.headers.authorization;
+    let token;
+    if (authorizationHeader) {
+        token = authorizationHeader.split(" ")[1]
+    } else if (req.query.token) {
+        token = req.query.token;
+    }
+
+    if (!token || token.length === 0) {
+        next();
+        return;
+    }
+
+    try {
+        const response = await axios.get(`${configuration.LOGIN_API_URL}/verify/${token}.json?api_key=${configuration.LOGIN_API_KEY}`);
+        if (response.status !== StatusCodes.OK) {
+            next();
+            return;
+        }
+        
+        const user = response.data;
+    
+        const plsResponse = await axios.get(`${configuration.PLS_API_URL}/user/${user.user}/damm`);
+        req.user = { ...user, admin: plsResponse.data }
+    
+        next();
+    } catch (err) {
+        next();
+    }
 }

@@ -9,6 +9,7 @@ export interface IPatch {
     creators: string[];
     tags: ITag[];
     images: string[];
+    files: string[];
 }
 
 export interface ITag {

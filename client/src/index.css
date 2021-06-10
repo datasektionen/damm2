@@ -5,3 +5,11 @@ a[href="/login"] {
 a[href="/logout"] {
     color: white;
 }
+
+a {
+    color: #E83D84;
+}
+
+body {
+    background-color: #eee;
+}

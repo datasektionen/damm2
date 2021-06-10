@@ -12,7 +12,7 @@ export const StyledFilterAndSort = styled.div({
     backgroundColor: "#fff",
 
     [maxWidth(600)]: {
-        padding: "0px"
+        padding: "25px 0px"
     }
 })
 
@@ -42,20 +42,3 @@ export const Expander = styled.h3({
         }
     })
 )
-
-export const Tags = styled.div({
-    display: "flex",
-    flexWrap: "wrap",
-    color: "grey",
-    justifyContent: "center",
-    margin: "20px",
-})
-
-export const StyledFlipMove = styled(FlipMove)({
-    display: "flex",
-    flexWrap: "wrap",
-    width: "100%",
-    minHeight: "55px",
-    alignItems: "center",
-    justifyContent: "center",
-})

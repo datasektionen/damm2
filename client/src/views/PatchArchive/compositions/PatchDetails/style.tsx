@@ -9,7 +9,8 @@ export const StyledPatchDetails = styled.div({
     padding: "45px 25px",
     margin: "0px 0px 0px 15px",
     position: "sticky",
-    // top: "350px",
+    overflowY: "auto",
+    maxHeight: "90vh",
     top: "50px",
     backgroundColor: "#fff",
 
@@ -77,7 +78,7 @@ export const Right = styled.div({
 export const Meta = styled.div({
     color: "#00000099",
     "> span i": {
-        margin: "0px 5px"
+        margin: "0px 5px",
     },
     marginBottom: "20px",
 })
@@ -98,4 +99,22 @@ export const Description = styled.div({
 export const Tags = styled.div({
     display: "flex",
     flexWrap: "wrap",
+})
+
+export const Files = styled.div({
+    display: "flex",
+    flexDirection: "column",
+})
+
+export const Creators = styled.span({
+    wordBreak: "break-word"
+})
+
+export const Thrash = styled.span({
+    marginLeft: "5px",
+    cursor: "pointer",
+})
+
+export const H1 = styled.h1({
+    wordBreak: "break-all",
 })

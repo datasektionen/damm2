@@ -6,12 +6,13 @@ interface Props {
     tag: ITag;
     clicked: boolean;
     onClick: (event: any) => void;
+    disabled?: boolean;
 }
 
-export const TagClickable: React.FC<Props> = ({tag, clicked, onClick}) => {
+export const TagClickable: React.FC<Props> = ({tag, clicked, onClick, disabled}) => {
 
     return (
-        <StyledTagClickable onClick={onClick} clicked={clicked} tag={tag}>
+        <StyledTagClickable onClick={onClick} clicked={clicked} tag={tag} disabled={disabled}>
             <span>{tag.name}</span>
             {clicked ?
                 <i className="fas fa-check" />

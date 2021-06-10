@@ -3,11 +3,12 @@ CREATE TABLE "Patch" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
-    "date" TIMESTAMP(3),
+    "date" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "creators" TEXT[],
     "images" TEXT[],
+    "files" TEXT[],
 
     PRIMARY KEY ("id")
 );
@@ -21,14 +22,28 @@ CREATE TABLE "Tag" (
     "description" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "patchId" INTEGER,
     "tagId" INTEGER,
 
     PRIMARY KEY ("id")
 );
 
--- AddForeignKey
-ALTER TABLE "Tag" ADD FOREIGN KEY ("patchId") REFERENCES "Patch"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+-- CreateTable
+CREATE TABLE "_PatchToTag" (
+    "A" INTEGER NOT NULL,
+    "B" INTEGER NOT NULL
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_PatchToTag_AB_unique" ON "_PatchToTag"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_PatchToTag_B_index" ON "_PatchToTag"("B");
 
 -- AddForeignKey
 ALTER TABLE "Tag" ADD FOREIGN KEY ("tagId") REFERENCES "Tag"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_PatchToTag" ADD FOREIGN KEY ("A") REFERENCES "Patch"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_PatchToTag" ADD FOREIGN KEY ("B") REFERENCES "Tag"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -1,17 +1,40 @@
-import React from 'react';
+import React, { useContext, useState } from 'react';
 import { IPatch, ITag } from '../../../../types/definitions';
 import Moment from 'react-moment';
-import { StyledPatchDetails, PatchImage, Left, Right, Description, Tags, Meta, CloseButton, Content } from './style';
+import { PatchImage, Left, Right, Description, Tags, Meta, CloseButton, Content, Files, Creators, Thrash, H1 } from './style';
 import { Button } from '../../../../components/Button/Button';
 import { Tag } from '../../../../components/Tag/Tag';
+import { url } from '../../../../common/api';
+import { AdminContext } from '../../../../App';
+import axios from 'axios';
 
 interface Props {
     patch: IPatch;
     onClose: () => void;
     onEditClick: () => void;
+    fetchPatches: () => void;
 }
 
-export const DetailsView: React.FC<Props> = ({patch, onEditClick, onClose}) => {
+export const DetailsView: React.FC<Props> = ({patch, onEditClick, onClose, fetchPatches}) => {
+    const admin = useContext(AdminContext)
+    const isAdmin = admin.includes("admin") || admin.includes("prylis");
+
+    const [loading, setLoading] = useState(false);
+    
+    const deleteFile = (name: string) => {
+        setLoading(true)
+        axios.delete(url(`/api/files/patch-file/?name=${encodeURIComponent(name)}&patchId=${patch.id}`), {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`
+            }
+        })
+        .then(async res => {
+            await fetchPatches();
+        })
+        .finally(() => {
+            setLoading(false)
+        })
+    }
 
     return (
         <>
@@ -19,14 +42,33 @@ export const DetailsView: React.FC<Props> = ({patch, onEditClick, onClose}) => {
                 <a href={patch.images[0]} target="_blank" rel="noopener noreferrer" title="Öppna i ny flik">
                     <PatchImage src={patch.images[0] ?? ""} draggable={false} />
                 </a>
-                <Button label="Redigera" onClick={onEditClick} />
+                {isAdmin && <Button label="Redigera" onClick={onEditClick} disabled={loading} /> }
+                {isAdmin && patch.files && patch.files.length !== 0 &&
+                    <Files>
+                        <h4>Filer</h4>
+                        {patch.files.map((f: string) => {
+                            const completeUrl = url(`/api/files/get/${encodeURIComponent(f)}?token=${localStorage.getItem("token")}`)
+                            return (
+                                <div key={"patch-file-"+f}>
+                                    <a target="_blank" rel="noopener noreferrer" href={completeUrl}>{f}</a>
+                                    <Thrash onClick={() => {
+                                        if (loading) return;
+                                        if (window.confirm("Är du säker? Filen tas bort permanent från AWS S3.")) deleteFile(f)
+                                    }}>
+                                        <i className="fas fa-trash" />
+                                    </Thrash>
+                                </div>
+                            );
+                        })}
+                    </Files>
+                }
             </Left>
             <Right>
-                <h1>{patch.name}</h1>
+                <H1>{patch.name}</H1>
                 <Meta>
                     <span title="Datum">
                         <i className="far fa-clock" />
-                        {patch.date === null ?
+                        {patch.date.length === 0 ?
                             "Okänt"
                             :
                             <Moment format="Do MMMM YYYY" locale="sv">
@@ -40,6 +82,17 @@ export const DetailsView: React.FC<Props> = ({patch, onEditClick, onClose}) => {
                             {patch.createdAt}
                         </Moment>
                     </span>
+                    <span title="Senast redigerad">
+                        <i className="fas fa-edit"></i>
+                        <Moment format="Do MMMM YYYY HH:mm:ss" locale="sv">
+                                {patch.updatedAt}
+                        </Moment>
+                    </span>
+                    {patch.creators.length !== 0 &&
+                        <div>
+                            Skapad av: <Creators>{patch.creators.join(", ")}</Creators>
+                        </div>
+                    }
                 </Meta>
                 <Content>
                     <Description>

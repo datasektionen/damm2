@@ -8,6 +8,7 @@ import { IPatch } from '../../types/definitions';
 interface Props {
     patch: IPatch;
     onClick: (patch: IPatch) => void;
+    disabled?: boolean;
 }
 
 export const PatchComponent: React.FC<Props> = props => {
@@ -19,11 +20,12 @@ export const PatchComponent: React.FC<Props> = props => {
 
     return (
         <StyledPatch
-            onMouseEnter={_ => setHover(true)}
-            onMouseLeave={_ => setHover(false)}
-            onTouchStart={_ => setHover(true)}
-            onTouchMove={_ => setHover(false)}
-            onTouchEnd={_ => setHover(false)}
+            disabled={props.disabled}
+            onMouseEnter={() => setHover(true)}
+            onMouseLeave={() => setHover(false)}
+            onTouchStart={() => setHover(true)}
+            onTouchMove={() => setHover(false)}
+            onTouchEnd={() => setHover(false)}
             onClick={() => props.onClick(patch)}
             title={patch.description}
         >
@@ -47,7 +49,7 @@ export const PatchComponent: React.FC<Props> = props => {
             <PatchInfo>
                 <PatchItemDate>
                     <i className="far fa-clock"></i>
-                    {patch.date === null ?
+                    {patch.date.length === 0 ?
                         "Okänt"
                         :
                         <Moment format="Do MMM YYYY">

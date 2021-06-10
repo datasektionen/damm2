@@ -11,15 +11,16 @@ generator client {
 }
 
 model Patch {
-  id          Int       @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   name        String
   description String
-  date        DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  date        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   creators    String[]
   tags        Tag[]
   images      String[]
+  files       String[]
 }
 
 model Tag {
@@ -30,8 +31,7 @@ model Tag {
   description     String
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  Patch           Patch?   @relation(fields: [patchId], references: [id])
-  patchId         Int?
+  patches         Patch[]
   children        Tag[]    @relation("TagToTag")
   Tag             Tag?     @relation("TagToTag", fields: [tagId], references: [id])
   tagId           Int?

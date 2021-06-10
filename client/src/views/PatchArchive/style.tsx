@@ -8,10 +8,12 @@ export const StyledPatchArchive = styled.div({
     display: "flex",
     flexWrap: "wrap",
     minHeight: "500px",
+    padding: "10px 0px",
     // Jävla aurora
     "*": {
         transition: "none"
-    }
+    },
+    position: "relative",
 });
 
 export const StyledPatchArchiveDivider = styled.div({

@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { ITag } from '../../../../types/definitions';
-import { StyledFilterAndSort, Row, ButtonRow, Expander, Tags, StyledFlipMove } from './style';
+import { StyledFilterAndSort, Row, ButtonRow, Expander } from './style';
 import { Button } from '../../../../components/Button/Button';
 import { Search } from '../../../../components/Search/Search';
 import { Selector } from '../../../../components/Selector/Selector';
-import { TagClickable } from '../../../../components/TagClickable/TagClickable';
-import axios from 'axios';
-import { url } from '../../../../common/api';
 import { PATCH_SORT_MODES } from '../../PatchArhive';
+import { TagSelector } from '../../../../components/TagSelector/TagSelector';
 
 interface Props {
     numberOfPatches: number;
@@ -17,14 +15,14 @@ interface Props {
     setSortOption: (value: string) => void;
     selectedTags: ITag[];
     setSelectedTags: (next: any) => void;
+    tags: ITag[];
 }
 
 export const FilterAndSort: React.FC<Props> = props => {
 
-    const { patchQuery, setPatchQuery, sortOption, setSortOption, selectedTags, setSelectedTags } = props;
+    const { patchQuery, setPatchQuery, sortOption, setSortOption, selectedTags, setSelectedTags, tags } = props;
 
-    const [tags, setTags] = useState([]);
-    const [filteredTags, setFilteredTags] = useState([]);
+    const [filteredTags, setFilteredTags] = useState<ITag[]>([]);
     const [tagsExpanded, setTagsExpanded] = useState(true);
     const [tagFilter, setTagFilter] = useState("");
 
@@ -34,37 +32,11 @@ export const FilterAndSort: React.FC<Props> = props => {
         { groupLabel: "Uppladdningsdatum", values: [{key: PATCH_SORT_MODES.oldnew, label: "Äldst-nyast"}, {key: PATCH_SORT_MODES.newold, label: "Nyast-äldst"}] },
     ]
 
-    const toggleTag = (tag: ITag) => {
-        // Tag is not in list, add it
-        if (selectedTags.filter((t: ITag) => t.id === tag.id).length === 0) {
-            setSelectedTags(selectedTags.concat(tag as any));
-        } else { // Remove it
-            setSelectedTags(selectedTags.filter((t: ITag) => t.id !== tag.id));
-        }
-    }
-
-    const isTagClicked = (tag: ITag) => {
-        return selectedTags.filter((t: ITag) => tag.id === t.id).length === 0 ? false : true
-    }
-
     const clearAll = () => {
         setSelectedTags([]);
         setPatchQuery("");
         setTagFilter("");
     }
-
-    useEffect(() => {
-        (async () => {
-            const response = await axios.get(url("/api/tags/all"));
-            if (response.status !== 200) {
-                // TODO
-                return;
-            }
-
-            setTags(response.data.body);
-        })()
-
-    }, []);
 
     useEffect(() => {
         setFilteredTags(tags.filter((t: ITag) => t.name.toLowerCase().match(new RegExp(tagFilter.toLowerCase(), "g")) !== null));
@@ -106,20 +78,11 @@ export const FilterAndSort: React.FC<Props> = props => {
                     onClear={() => setTagFilter("")}
                     onChange={(e: any) => setTagFilter(e.target.value)}
                 />
-                <Tags>
-                    {tags.length === 0 ?
-                        "Hittade inga taggar"
-                        :
-                        filteredTags.map((t: ITag, i) =>
-                            <TagClickable
-                                key={"filter-tags-"+t.id}
-                                tag={t}
-                                clicked={isTagClicked(t)}
-                                onClick={() => toggleTag(t)}
-                            />
-                        )
-                    }
-                </Tags>
+                <TagSelector
+                    tags={tags}
+                    selectedTags={selectedTags}
+                    setSelectedTags={setSelectedTags}
+                />
             </div>
         </StyledFilterAndSort>
     )

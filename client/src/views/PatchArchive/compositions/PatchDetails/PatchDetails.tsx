@@ -6,24 +6,37 @@ import Moment from 'react-moment';
 import 'moment/locale/sv';
 import { Button } from '../../../../components/Button/Button';
 import { DetailsView } from './DetailsView'
-import { EditDetails } from './EditDetails'
+import { EditDetails } from '../EditDetails/EditDetails'
 
 interface Props {
     patch: IPatch;
     onClose: () => void;
+    allTags: ITag[];
+    fetchPatches: () => Promise<void>;
+    edit: boolean;
+    setEdit: (state: boolean) => void;
 }
 
-export const PatchDetails: React.FC<Props> = props => {
+export const PatchDetails: React.FC<Props> = ({patch, onClose, allTags, fetchPatches, edit, setEdit}) => {
 
-    const { patch } = props;
-    const [edit, setEdit] = useState(false);
+    // const [edit, setEdit] = useState(false);
 
     return (
         <StyledPatchDetails>
             {edit ?
-                <EditDetails onCancel={() => setEdit(false)} />
+                <EditDetails
+                    onCancel={() => setEdit(false)}
+                    patch={patch}
+                    tags={allTags}
+                    fetchPatches={fetchPatches}
+                />
                 :
-                <DetailsView onClose={props.onClose} onEditClick={() => setEdit(true)} patch={patch} />
+                <DetailsView
+                    onClose={onClose}
+                    onEditClick={() => setEdit(true)}
+                    patch={patch}
+                    fetchPatches={fetchPatches}
+                />
             }
         </StyledPatchDetails>
     )

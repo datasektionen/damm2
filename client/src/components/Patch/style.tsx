@@ -7,18 +7,20 @@ export const StyledPatch = styled.div({
     borderRadius: "2px",
     display: "flex",
     flexDirection: "column",
-    // width: "240px",
     height: "350px",
     margin: "10px",
     userSelect: "none",
-    cursor: "pointer",
     transition: "all 0.25s ease-in-out",
     position: "relative",
 
     ":hover": {
         transform: "scale(1.05)"
     },
-});
+},
+    (props: any) => ({
+        cursor: props.disabled ? "not-allowed" : "pointer",
+    })
+);
 
 export const PatchImage = styled.div({
     width: "100%",

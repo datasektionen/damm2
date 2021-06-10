@@ -6,6 +6,7 @@ import path from 'path';
 import Jimp from 'jimp';
 import { StatusCodes } from 'http-status-codes';
 import prisma from '../../common/client';
+import { resolve } from 'path/posix';
 
 AWS.config.update({ region: configuration.AWS_REGION });
 const s3 = new AWS.S3({ apiVersion: "2006-03-01" });
@@ -84,7 +85,7 @@ export const uploadPatchImage = async (file: Express.Multer.File): Promise<ApiRe
     }
 };
 
-export const attachToPatch = async (patchId: number, images: string[]): Promise<ApiResponse> => {
+export const attachImageToPatch = async (patchId: number, images: string[]): Promise<ApiResponse> => {
     try {
         await prisma.patch.update({
             where: {
@@ -106,3 +107,104 @@ export const attachToPatch = async (patchId: number, images: string[]): Promise<
         };
     }
 };
+
+// Patch files require auth to GET
+export const uploadPatchFile = async (file: Express.Multer.File): Promise<ApiResponse> => {
+    const fileName = Date.now() + "-" + file.originalname;
+
+    try {
+        const result = await uploadToS3({
+            Bucket: configuration.AWS_S3_BUCKET,
+            Key: `patch-files/${fileName}`,
+            Body: Buffer.from(file.buffer),
+            ContentType: file.mimetype,
+        }).promise();
+
+        return {
+            statusCode: StatusCodes.CREATED,
+            body: result,
+        };
+
+    } catch (err) {
+        console.log(err);
+        return {
+            statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+            error: err,
+        };
+    }
+}
+
+export const attachFileToPatch = async (patchId: number, fileName: string): Promise<ApiResponse> => {
+    try {
+        await prisma.patch.update({
+            where: {
+                id: patchId,
+            },
+            data: {
+                files: {
+                    push: fileName,
+                }
+            },
+        });
+
+        return {
+            statusCode: StatusCodes.OK,
+        };
+    } catch (err) {
+        console.log(err);
+        return {
+            statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+            error: err,
+        };
+    }
+};
+
+export const getPatchFile = async (name: string) => {
+    return new Promise((resolve, reject) => {
+        s3.getObject({
+            Bucket: configuration.AWS_S3_BUCKET,
+            Key: `${name}`,
+        })
+        .promise()
+        .then(res => {
+            resolve(res.Body);
+        })
+        .catch(err => {
+            reject(null);
+        })
+    });
+}
+
+export const deletePatchFile = async (name: string) => {
+    return new Promise((resolve, reject) => {
+        s3.deleteObject({
+            Bucket: configuration.AWS_S3_BUCKET,
+            Key: `${name}`,
+        })
+        .promise()
+        .then(res => {
+            resolve(res)
+        })
+        .catch(err => {
+            reject(err)
+        })
+    })
+}
+
+export const deleteFileFromPatch = async (patchId: number, name: string) => {
+    const files = (await prisma.patch.findUnique({
+        where: {
+            id: patchId
+        }
+    }))?.files
+    return await prisma.patch.update({
+        where: {
+            id: patchId,
+        },
+        data: {
+            files: {
+                set: files?.filter(f => f !== name)
+            }
+        }
+    })
+}
