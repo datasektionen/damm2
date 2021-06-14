@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Field } from '../../../../components/Field/Field';
 import { Button } from '../../../../components/Button/Button';
 import { TextArea } from '../../../../components/TextArea/TextArea';
@@ -11,6 +11,7 @@ import { TagSelector } from '../../../../components/TagSelector/TagSelector';
 import { CreatorHandler } from '../../../../components/CreatorHandler/CreatorHandler';
 import { SpinnerCover } from '../../../../components/SpinnerCover/SpinnerCover';
 import { uploadFiles } from '../../../../functions/fileUploading';
+import { Alert } from '../../../../components/Alert/Alert';
 
 interface Props {
     onCancel: () => void;
@@ -25,6 +26,9 @@ export const EditDetails: React.FC<Props> = ({patch, onCancel, tags, fetchPatche
     const [creator, setCreator] = useState("");
     const [loading, setLoading] = useState(false);
     const [files, setFiles] = useState<File[]>([]);
+    const [requestError, setRequestError] = useState("");
+
+    const ref = useRef(document.createElement("div"));
 
     useEffect(() => {
         setEditState(patch);
@@ -37,6 +41,7 @@ export const EditDetails: React.FC<Props> = ({patch, onCancel, tags, fetchPatche
 
     const put = () => {
         setLoading(true);
+        setRequestError("");
         axios.put(url("/api/patches/update"), {
             patchId: editState.id,
             name: editState.name,
@@ -59,19 +64,26 @@ export const EditDetails: React.FC<Props> = ({patch, onCancel, tags, fetchPatche
                 await fetchPatches();
                 onCancel();
             },
-            res => {
 
-            }
         )
+        .catch(err => {
+            setRequestError(JSON.stringify(err.response.data))
+        })
         .finally(() => {
             setLoading(false)
+            ref?.current?.scrollIntoView({behavior: "smooth"})
         })
     }
 
     return (
-        <StyledEditDetails>
+        <StyledEditDetails ref={ref}>
             {loading &&
                 <SpinnerCover />
+            }
+            {requestError &&
+                <Alert type="error">
+                    {requestError}
+                </Alert>
             }
             <H1>Redigera "{patch.name}"</H1>
             <Image src={editState.images[1]} alt="Bild på märket" draggable={false} />
@@ -113,6 +125,7 @@ export const EditDetails: React.FC<Props> = ({patch, onCancel, tags, fetchPatche
                 selectedTags={editState.tags}
                 setSelectedTags={(next: ITag[]) => setEditState({ ...editState, tags: next })}
                 disabled={loading}
+                query=""
             />
             <H4>Skapare</H4>
             <CreatorHandler

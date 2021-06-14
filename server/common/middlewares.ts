@@ -28,7 +28,7 @@ export const authorizePls = async (req: IUserRequest, res: express.Response, nex
     const authorizationHeader = req.headers.authorization;
     let token;
     if (authorizationHeader) {
-        token = authorizationHeader.split(" ")[1]
+        token = authorizationHeader.split(" ")[1];
     } else if (req.query.token) {
         token = req.query.token;
     }
@@ -48,7 +48,7 @@ export const authorizePls = async (req: IUserRequest, res: express.Response, nex
         const user = response.data;
     
         const plsResponse = await axios.get(`${configuration.PLS_API_URL}/user/${user.user}/damm`);
-        req.user = { ...user, admin: plsResponse.data }
+        req.user = { ...user, admin: plsResponse.data };
     
         next();
     } catch (err) {
@@ -61,19 +61,19 @@ export const adminAuth = async (req: IUserRequest, res: express.Response, next: 
     if (req.user?.admin.includes("admin")) return next();
     
     unauthorizedResponse(res);
-}
+};
 
 export const prylisAuth = async (req: IUserRequest, res: express.Response, next: express.NextFunction): Promise<void> => {
     if (req.user?.admin.includes("prylis")) return next();
     
     unauthorizedResponse(res);
-}
+};
 
 export const adminPrylisAuth = async (req: IUserRequest, res: express.Response, next: express.NextFunction): Promise<void> => {
     if (req.user?.admin.includes("admin") || req.user?.admin.includes("prylis")) return next();
     
     unauthorizedResponse(res);
-}
+};
 
 // Checks authorization but does not reject.
 // Takes token either in Authorization header or as a query string
@@ -81,7 +81,7 @@ export const silentAuthorization = async (req: IUserRequest, res: express.Respon
     const authorizationHeader = req.headers.authorization;
     let token;
     if (authorizationHeader) {
-        token = authorizationHeader.split(" ")[1]
+        token = authorizationHeader.split(" ")[1];
     } else if (req.query.token) {
         token = req.query.token;
     }
@@ -101,10 +101,10 @@ export const silentAuthorization = async (req: IUserRequest, res: express.Respon
         const user = response.data;
     
         const plsResponse = await axios.get(`${configuration.PLS_API_URL}/user/${user.user}/damm`);
-        req.user = { ...user, admin: plsResponse.data }
+        req.user = { ...user, admin: plsResponse.data };
     
         next();
     } catch (err) {
         next();
     }
-}
+};

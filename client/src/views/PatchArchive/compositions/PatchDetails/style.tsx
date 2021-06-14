@@ -20,6 +20,9 @@ export const StyledPatchDetails = styled.div({
 
     [maxWidth(600)]: {
         flexDirection: "column",
+        position: "relative",
+        top: "0px",
+        zIndex: 100,
     },
 })
 

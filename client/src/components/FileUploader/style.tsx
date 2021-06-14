@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { maxWidth } from '../../common/Theme';
 
 export const StyledFileUploader = styled.div({
     display: "flex",
@@ -13,7 +14,11 @@ export const Row = styled.div({
     marginBottom: "20px",
     "> button": {
         minWidth: "110px"
-    }
+    },
+    [maxWidth(400)]: {
+        flexDirection: "column",
+        textAlign: "center"
+    },
 })
 
 export const Label = styled.span({

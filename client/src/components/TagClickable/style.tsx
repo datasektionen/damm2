@@ -9,6 +9,7 @@ export const StyledTagClickable = styled.div({
     margin: "5px",
     cursor: "pointer",
     width: "min-content",
+    // transition: "0.25s ease-in-out",
 
     "> *": {
         margin: "0px 5px"

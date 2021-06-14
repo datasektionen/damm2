@@ -24,7 +24,7 @@ async (req: IUserRequest, res) => {
         statusCode: StatusCodes.NOT_FOUND,
     });
     return res.status(StatusCodes.OK).json(req.user);
-})
+});
 
 router.get("*", (req, res) => {
     res.status(StatusCodes.NOT_FOUND).json({

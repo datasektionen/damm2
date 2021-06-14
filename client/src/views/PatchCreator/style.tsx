@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { maxWidth } from '../../common/Theme';
+import Theme, { maxWidth, px } from '../../common/Theme';
 
 export const StyledPatchCreator = styled.div({
     display: "flex",
@@ -33,15 +33,22 @@ export const ImagePreview = styled.img({
 
 export const Content = styled.div({
     boxShadow: "0 2px 5px rgb(0 0 0 / 20%)",
-    maxWidth: "1240px",
+    maxWidth: px(Theme.sizes.maxContainerWidth),
     minWidth: "60%",
     backgroundColor: "#fff",
     padding: "50px",
 
+    "> input, textarea": {
+        width: "60%"
+    },
+
     [maxWidth(700)]: {
         minWidth: "100%",
         maxWidth: "100%",
-        padding: "40px 20px"
+        padding: "40px 20px",
+        "> input, textarea": {
+            width: "100%"
+        },
     }
 })
 

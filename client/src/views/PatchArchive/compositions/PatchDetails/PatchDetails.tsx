@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { IPatch, ITag } from '../../../../types/definitions';
 import { StyledPatchDetails, PatchImage, Left, Right, Description, Tags, Meta, CloseButton, Content } from './style';
 import { Tag } from '../../../../components/Tag/Tag';
@@ -19,10 +19,14 @@ interface Props {
 
 export const PatchDetails: React.FC<Props> = ({patch, onClose, allTags, fetchPatches, edit, setEdit}) => {
 
-    // const [edit, setEdit] = useState(false);
+    const ref = useRef(document.createElement("div"));
+    
+    useEffect(() => {
+        ref.current.scrollTo(0, 0)
+    }, [patch])
 
     return (
-        <StyledPatchDetails>
+        <StyledPatchDetails ref={ref}>
             {edit ?
                 <EditDetails
                     onCancel={() => setEdit(false)}

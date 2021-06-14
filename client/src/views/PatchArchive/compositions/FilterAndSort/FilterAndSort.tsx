@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { ITag } from '../../../../types/definitions';
-import { StyledFilterAndSort, Row, ButtonRow, Expander } from './style';
+import { StyledFilterAndSort, Row, ButtonRow, Expander, Tags } from './style';
 import { Button } from '../../../../components/Button/Button';
 import { Search } from '../../../../components/Search/Search';
 import { Selector } from '../../../../components/Selector/Selector';
-import { PATCH_SORT_MODES } from '../../PatchArhive';
+import { PATCH_SORT_MODES } from '../../PatchArchive';
 import { TagSelector } from '../../../../components/TagSelector/TagSelector';
 
 interface Props {
@@ -22,7 +22,6 @@ export const FilterAndSort: React.FC<Props> = props => {
 
     const { patchQuery, setPatchQuery, sortOption, setSortOption, selectedTags, setSelectedTags, tags } = props;
 
-    const [filteredTags, setFilteredTags] = useState<ITag[]>([]);
     const [tagsExpanded, setTagsExpanded] = useState(true);
     const [tagFilter, setTagFilter] = useState("");
 
@@ -36,11 +35,8 @@ export const FilterAndSort: React.FC<Props> = props => {
         setSelectedTags([]);
         setPatchQuery("");
         setTagFilter("");
+        setSortOption(PATCH_SORT_MODES.nu1983)
     }
-
-    useEffect(() => {
-        setFilteredTags(tags.filter((t: ITag) => t.name.toLowerCase().match(new RegExp(tagFilter.toLowerCase(), "g")) !== null));
-    }, [tagFilter, tags])
 
     const toggleExpander = () => {
         setTagsExpanded(!tagsExpanded);
@@ -71,7 +67,7 @@ export const FilterAndSort: React.FC<Props> = props => {
                 Taggar
                 <i className="fas fa-arrow-down" />
             </Expander>
-            <div style={tagsExpanded ? {display: "flex", flexDirection: "column", alignItems: "center"} : {display: "none"}}>
+            <Tags expanded={tagsExpanded}>
                 <Search
                     placeholder="Filtrera taggar"
                     value={tagFilter}
@@ -82,8 +78,9 @@ export const FilterAndSort: React.FC<Props> = props => {
                     tags={tags}
                     selectedTags={selectedTags}
                     setSelectedTags={setSelectedTags}
+                    query={tagFilter}
                 />
-            </div>
+            </Tags>
         </StyledFilterAndSort>
     )
 }

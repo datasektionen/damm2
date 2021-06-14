@@ -12,7 +12,7 @@ interface Props {
 export const TagClickable: React.FC<Props> = ({tag, clicked, onClick, disabled}) => {
 
     return (
-        <StyledTagClickable onClick={onClick} clicked={clicked} tag={tag} disabled={disabled}>
+        <StyledTagClickable onClick={onClick} clicked={clicked} tag={tag} disabled={disabled} title={tag.description}>
             <span>{tag.name}</span>
             {clicked ?
                 <i className="fas fa-check" />

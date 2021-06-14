@@ -53,11 +53,12 @@ export const PatchCreator: React.FC<Props> = props => {
 
     useEffect(() => {
         (async () => {
+            setLoading(true)
             const result = await axios.get(url("/api/tags/all"))
             if (result.status === 200) {
                 setAllTags(result.data.body);
+                setLoading(false)
             }
-
             // TODO Handle error
         })()
     }, []);
@@ -236,6 +237,7 @@ export const PatchCreator: React.FC<Props> = props => {
                         selectedTags={form.tags}
                         setSelectedTags={(next: ITag[]) => setForm({...form, tags: next})}
                         disabled={loading}
+                        query=""
                     />
                     <H3>Filer</H3>
                     <H4>Test</H4>

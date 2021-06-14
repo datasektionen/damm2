@@ -50,6 +50,6 @@ async (req, res) => {
 
     const result = await update(patchId, { name, date, description, tags, creators, files });
     return res.status(result.statusCode).json(result);
-})
+});
 
 export default router;

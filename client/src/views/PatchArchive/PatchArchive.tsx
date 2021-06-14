@@ -1,5 +1,5 @@
-import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
-import { StyledPatchArchive, StyledFlipMove, Centered, StyledPatchArchiveDivider, Left, Right, StyledFlipMoveDetails } from './style';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { StyledPatchArchive, StyledFlipMove, StyledPatchArchiveDivider, Left, Right, StyledFlipMoveDetails } from './style';
 import { FancyHeader } from '../../components/FancyHeader/FancyHeader';
 import axios from 'axios';
 import { url } from '../../common/api';
@@ -7,11 +7,11 @@ import { Patch } from '../../components/Patch/Patch';
 import { IPatch, ITag } from '../../types/definitions';
 import { FilterAndSort } from './compositions/FilterAndSort/FilterAndSort';
 import { PatchDetails, WrappedPatchDetails } from './compositions/PatchDetails/PatchDetails';
-import FlipMove from 'react-flip-move';
-import { useHistory, useLocation, useParams, useRouteMatch } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { ROUTES } from '../../common/routes';
 import { SpinnerCover } from '../../components/SpinnerCover/SpinnerCover';
 import queryString from 'query-string';
+import useScreenSizeChecker from '../../hooks/useScreenSizeChecker';
 
 export const PATCH_SORT_MODES = {
     AÖ: "a-ö",
@@ -20,10 +20,6 @@ export const PATCH_SORT_MODES = {
     nu1983: "nu-1983",
     newold: "ny-äldst",
     oldnew: "äldst-new",
-}
-
-interface Params {
-    patchId: string;
 }
 
 export const PatchArchive: React.FC = props => {
@@ -36,9 +32,10 @@ export const PatchArchive: React.FC = props => {
     const [sortOption, setSortOption] = useState(PATCH_SORT_MODES.nu1983);
     const [selectedTags, setSelectedTags] = useState([]);
     const [selectedPatch, setSelectedPatch] = useState<IPatch | null>(null);
-    const headerRef = useRef(document.createElement("div"));
+    const pageRef = useRef(document.createElement("div"));
     const history = useHistory();
     const location = useLocation();
+    const isSmallScreen = useScreenSizeChecker(1100);
 
     const fetchPatches = async () => {
         const response = await axios.get(url("/api/patches/all"), {
@@ -78,6 +75,12 @@ export const PatchArchive: React.FC = props => {
         const { patch } = queryString.parse(search);
         if (patch) {
             setSelectedPatch(patches.filter((p: IPatch) => p.id === Number(patch))[0] ?? null);
+            if (isSmallScreen) {
+                setTimeout(() =>
+                    pageRef.current.scrollIntoView({ behavior: "smooth" })
+                    , 50
+                )
+            }
         }
     }, [location, patches])
 
@@ -88,6 +91,9 @@ export const PatchArchive: React.FC = props => {
             search: `?patch=${patch.id}`,
             state: { from: ROUTES.PATCH_ARCHIVE }
         })
+        if (isSmallScreen) {
+            pageRef.current.scrollTo({ behavior: "smooth", top: 0 })
+        }
     }
 
     const patchClose = () => {
@@ -125,25 +131,25 @@ export const PatchArchive: React.FC = props => {
     }
 
     const sortPatches = useMemo(() => {
-        if (sortOption === PATCH_SORT_MODES.AÖ) return [...patches].sort((a: IPatch, b: IPatch) => {
+        if (sortOption === PATCH_SORT_MODES.AÖ) return patches.sort((a: IPatch, b: IPatch) => {
             const A = a.name.toLowerCase();
             const B = b.name.toLowerCase();
             if (A < B) return -1;
             if (A > B) return 1;
             else return 0;
         })
-        if (sortOption === PATCH_SORT_MODES.ÖA) return [...patches].sort((a: IPatch, b: IPatch) => {
+        if (sortOption === PATCH_SORT_MODES.ÖA) return patches.sort((a: IPatch, b: IPatch) => {
             const A = a.name.toLowerCase();
             const B = b.name.toLowerCase();
             if (A > B) return -1;
             if (A < B) return 1;
             else return 0;
         })
-        if (sortOption === PATCH_SORT_MODES.nu1983) return [...patches].sort((a: IPatch, b: IPatch) => (b.date === "" ? 0 : new Date(b.date).getTime()) - (a.date === "" ? 0 : new Date(a.date).getTime()));
-        if (sortOption === PATCH_SORT_MODES['1983nu']) return [...patches].sort((a: IPatch, b: IPatch) => (a.date === "" ? 0 : new Date(a.date).getTime()) - (b.date === "" ? 0 : new Date(b.date).getTime()));
-        if (sortOption === PATCH_SORT_MODES.newold) return [...patches].sort((a: IPatch, b: IPatch) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        if (sortOption === PATCH_SORT_MODES.oldnew) return [...patches].sort((a: IPatch, b: IPatch) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-        return [...patches];
+        if (sortOption === PATCH_SORT_MODES.nu1983) return patches.sort((a: IPatch, b: IPatch) => (b.date === "" ? 0 : new Date(b.date).getTime()) - (a.date === "" ? 0 : new Date(a.date).getTime()));
+        if (sortOption === PATCH_SORT_MODES['1983nu']) return patches.sort((a: IPatch, b: IPatch) => (a.date === "" ? 0 : new Date(a.date).getTime()) - (b.date === "" ? 0 : new Date(b.date).getTime()));
+        if (sortOption === PATCH_SORT_MODES.newold) return patches.sort((a: IPatch, b: IPatch) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        if (sortOption === PATCH_SORT_MODES.oldnew) return patches.sort((a: IPatch, b: IPatch) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        return patches;
     }, [patches, sortOption])
 
     const matchesSearch = (patch: IPatch): boolean => {
@@ -155,8 +161,8 @@ export const PatchArchive: React.FC = props => {
     }, [sortOption, patchQuery, selectedTags, patches])
 
     return (
-        <div style={{ backgroundColor: "#eee" }}>
-            <FancyHeader ref={headerRef} />
+        <div style={{ backgroundColor: "#eee" }} ref={pageRef}>
+            <FancyHeader />
             <StyledPatchArchiveDivider>
                 <Left>
                     <FilterAndSort
@@ -173,9 +179,15 @@ export const PatchArchive: React.FC = props => {
                         {fetchingPatches &&
                             <SpinnerCover />
                         }
-                        <StyledFlipMove duration={250} appearAnimation="elevator" enterAnimation="elevator" leaveAnimation="elevator" maintainContainerHeight={true}>
-                            {
-                                resultingPatches
+                        {!fetchingPatches && resultingPatches.length === 0 &&
+                            <div style={{textAlign: "center", width: "100%", margin: "auto"}}>
+                                Inga märken hittades
+                            </div>
+                        }
+                        {!fetchingPatches && resultingPatches.length !== 0 &&
+                            <StyledFlipMove duration={150} appearAnimation="fade" enterAnimation="fade" leaveAnimation="fade">
+                                {
+                                    resultingPatches
                                     .map((x: IPatch, i: number) =>
                                         <Patch
                                             key={`patch-${i}-${x.id}`}
@@ -184,14 +196,22 @@ export const PatchArchive: React.FC = props => {
                                             disabled={edit}
                                         />
                                     )
-                            }
-                        </StyledFlipMove>
+                                }
+                            </StyledFlipMove>
+                        }
                     </StyledPatchArchive>
                 </Left>
                 {selectedPatch !== null &&
                     <Right>
                         <StyledFlipMoveDetails appearAnimation="fade" leaveAnimation="fade" enterAnimation="fade" duration={250}>
-                            <WrappedPatchDetails patch={selectedPatch} onClose={patchClose} allTags={tags} fetchPatches={fetchPatches} edit={edit} setEdit={setEdit} />
+                            <WrappedPatchDetails
+                                patch={selectedPatch}
+                                onClose={patchClose}
+                                allTags={tags}
+                                fetchPatches={fetchPatches}
+                                edit={edit}
+                                setEdit={setEdit}
+                            />
                         </StyledFlipMoveDetails>
                     </Right>
                 }

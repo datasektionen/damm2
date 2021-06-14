@@ -25,7 +25,7 @@ model Patch {
 
 model Tag {
   id              Int      @id @default(autoincrement())
-  name            String
+  name            String   @unique
   color           String
   backgroundColor String
   description     String

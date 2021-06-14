@@ -4,7 +4,6 @@ import chaiHttp from 'chai-http';
 import { StatusCodes } from 'http-status-codes';
 
 import app from '../app';
-import prisma from '../common/client';
 
 chai.use(chaiHttp);
 

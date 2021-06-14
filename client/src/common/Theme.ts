@@ -4,10 +4,15 @@ const Theme = {
         cerise: "#E83D84",
         blackgrey: "#333333",
         taggrey: "#D1D1D1F9",
-        taggreyhover: "#A7A7A7F9"
+        taggreyhover: "#A7A7A7F9",
+        red: "#D73A4A"
+    },
+    sizes: {
+        maxContainerWidth: 1240,
     }
 };
 
-export const maxWidth = (width: number) => `@media (max-width: ${width}px)`
+export const px = (n: number) => `${n}px`;
+export const maxWidth = (width: number) => `@media (max-width: ${width}px)`;
 
 export default Theme;

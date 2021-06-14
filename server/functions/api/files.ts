@@ -6,11 +6,11 @@ import path from 'path';
 import Jimp from 'jimp';
 import { StatusCodes } from 'http-status-codes';
 import prisma from '../../common/client';
-import { resolve } from 'path/posix';
 
 AWS.config.update({ region: configuration.AWS_REGION });
 const s3 = new AWS.S3({ apiVersion: "2006-03-01" });
 
+// Gets aws key from AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY in the .env file
 AWS.config.getCredentials((err) => {
     if (err) console.log(err);
     else console.log(AWS.config.credentials?.accessKeyId);
@@ -132,7 +132,7 @@ export const uploadPatchFile = async (file: Express.Multer.File): Promise<ApiRes
             error: err,
         };
     }
-}
+};
 
 export const attachFileToPatch = async (patchId: number, fileName: string): Promise<ApiResponse> => {
     try {
@@ -169,11 +169,11 @@ export const getPatchFile = async (name: string) => {
         .then(res => {
             resolve(res.Body);
         })
-        .catch(err => {
+        .catch(() => {
             reject(null);
-        })
+        });
     });
-}
+};
 
 export const deletePatchFile = async (name: string) => {
     return new Promise((resolve, reject) => {
@@ -183,20 +183,20 @@ export const deletePatchFile = async (name: string) => {
         })
         .promise()
         .then(res => {
-            resolve(res)
+            resolve(res);
         })
         .catch(err => {
-            reject(err)
-        })
-    })
-}
+            reject(err);
+        });
+    });
+};
 
 export const deleteFileFromPatch = async (patchId: number, name: string) => {
     const files = (await prisma.patch.findUnique({
         where: {
             id: patchId
         }
-    }))?.files
+    }))?.files;
     return await prisma.patch.update({
         where: {
             id: patchId,
@@ -206,5 +206,5 @@ export const deleteFileFromPatch = async (patchId: number, name: string) => {
                 set: files?.filter(f => f !== name)
             }
         }
-    })
-}
+    });
+};

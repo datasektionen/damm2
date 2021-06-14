@@ -34,6 +34,9 @@ CREATE TABLE "_PatchToTag" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Tag.name_unique" ON "Tag"("name");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "_PatchToTag_AB_unique" ON "_PatchToTag"("A", "B");
 
 -- CreateIndex

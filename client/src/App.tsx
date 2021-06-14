@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import Methone from 'methone';
 import { BrowserRouter, Link, Route, Switch, Redirect } from 'react-router-dom';
-import { PatchArchive } from './views/PatchArchive/PatchArhive';
+import { PatchArchive } from './views/PatchArchive/PatchArchive';
+import { TagsManager } from './views/TagsManager/TagsManager';
 import './index.css';
 import { ROUTES } from './common/routes';
 import axios from 'axios';
 import { url } from './common/api';
 import { PatchCreator } from './views/PatchCreator/PatchCreator';
 import { ScrollToTop } from './components/ScrollToTop/ScrollToTop';
+import { NotFound } from './views/NotFound/NotFound';
 
 export const AdminContext = React.createContext<string[]>([])
 
@@ -40,6 +42,7 @@ export const App: React.FC = props => {
     <Link to={ROUTES.HOME} key={"methonel-1"}>Hem</Link>,
     <Link to={ROUTES.PATCH_ARCHIVE} key={"methonel-2"}>Märkesarkiv</Link>,
     <Link to={ROUTES.PATCH_CREATOR} key={"methonel-3"}>Skapa märke</Link>,
+    <Link to={ROUTES.TAGS_MANAGER} key={"methonel-4"}>Hantera taggar</Link>,
   ]
 
   return (
@@ -66,6 +69,9 @@ export const App: React.FC = props => {
             <Route exact path={ROUTES.PATCH_CREATOR}>
               <PatchCreator />
             </Route>
+            <Route exact path={ROUTES.TAGS_MANAGER}>
+              <TagsManager />
+            </Route>
 
             <Route exact path={ROUTES.LOGIN} render={match => {
               window.location = `https://login.datasektionen.se/login?callback=${encodeURIComponent(window.location.origin)}/token/` as any;
@@ -80,6 +86,9 @@ export const App: React.FC = props => {
               localStorage.setItem('token', match.params.token);
               return <Redirect to={ROUTES.HOME} />
             }}/>
+            <Route>
+              <NotFound />
+            </Route>
           </Switch>
         </BrowserRouter>
       </AdminContext.Provider>

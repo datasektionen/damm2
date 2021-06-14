@@ -3,13 +3,18 @@ import { StatusCodes } from 'http-status-codes';
 import prisma from '../../common/client';
 import { IUserRequest } from '../../common/requests';
 
+// export const DATE_FORMAT = new RegExp(/(^\d{4}-\d{2}-\d{2}$)|(^$)/);
 export const DATE_FORMAT = new RegExp(/^\d{4}-\d{2}-\d{2}$/);
 
 export const getAllPatches = async (user: IUserRequest["user"]): Promise<ApiResponse> => {
 
     const patches = await prisma.patch.findMany({
         include: {
-            tags: true,
+            tags: {
+                include: {
+                    children: true,
+                }
+            },
         }
     }) as any;
 
@@ -17,7 +22,7 @@ export const getAllPatches = async (user: IUserRequest["user"]): Promise<ApiResp
     if (!(user?.admin.includes("prylis") || user?.admin.includes("admin"))) {
         patches.forEach((x: any) => {
             delete x.files;
-        })
+        });
     }
 
     return {
@@ -29,7 +34,7 @@ export const getAllPatches = async (user: IUserRequest["user"]): Promise<ApiResp
 export const create = async (
     name: string,
     description = "",
-    date: string = "",
+    date = "",
     creators: string[] = [],
     tags: number[] = [],
 ): Promise<ApiResponse> => {
@@ -48,7 +53,11 @@ export const create = async (
                 images: [],
             },
             include: {
-                tags: true,
+                tags: {
+                    include: {
+                        children: true,
+                    }
+                },
             }
         });
 
@@ -80,18 +89,18 @@ export const update = async (patchId: number, {name, date, description, tags, cr
     }
     if (tags) {
         data.tags = {
-            set: tags.map((t: number) => {return {id: t}}),
-        }
+            set: tags.map((t: number) => {return {id: t};}),
+        };
     }
     if (creators) {
         data.creators = {
             set: creators,
-        }
+        };
     }
     if (files) {
         data.files = {
             set: files,
-        }
+        };
     }
 
     const result = await prisma.patch.update({
@@ -99,10 +108,10 @@ export const update = async (patchId: number, {name, date, description, tags, cr
             id: patchId,
         },
         data,
-    })
+    });
 
     return {
         statusCode: 200,
         body: result
-    }
-}
+    };
+};

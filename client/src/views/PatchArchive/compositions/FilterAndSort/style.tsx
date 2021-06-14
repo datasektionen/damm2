@@ -42,3 +42,16 @@ export const Expander = styled.h3({
         }
     })
 )
+
+export const Tags = styled.div({
+    flexDirection: "column",
+    alignItems: "center",
+    width: "100%",
+    "*": {
+        transition: "none"
+    }
+},
+    (props: any) => ({
+        display: props.expanded ? "flex" : "none"
+    })
+)

@@ -21,4 +21,5 @@ export interface ITag {
     createdAt: string;
     updatedAt: string;
     children: ITag[];
+    tagId: number;
 }

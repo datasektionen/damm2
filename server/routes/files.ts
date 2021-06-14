@@ -1,12 +1,11 @@
 import ApiResponse from '../common/ApiResponse';
 import { adminPrylisAuth, authorizePls, validationCheck } from '../common/middlewares';
 import express from 'express';
-import { body, check, param, query } from 'express-validator';
+import { body, check, query } from 'express-validator';
 import { StatusCodes } from 'http-status-codes';
 const router = express.Router();
 import multer from 'multer';
 import { uploadPatchImage, attachImageToPatch, uploadPatchFile, attachFileToPatch, getPatchFile, deletePatchFile, deleteFileFromPatch } from '../functions/api/files';
-import prisma from '../common/client';
 
 const imageUpload = multer({
     fileFilter: (req, file, callback) => {
@@ -113,7 +112,7 @@ async (req, res) => {
     .then((result: any) => {
         res.status(200).send(result);
     })
-    .catch(err => {
+    .catch(() => {
         return res.status(StatusCodes.NOT_FOUND).json({
             statusCode: StatusCodes.NOT_FOUND,
         });
@@ -128,21 +127,21 @@ router.delete("/patch-file",
     validationCheck,
 async (req, res) => {
     const { name, patchId } = req.query;
-    console.log(req.query)
+    console.log(req.query);
 
     deletePatchFile(name as string)
-    .then(async response => {
+    .then(async () => {
         await deleteFileFromPatch(Number(patchId as string), name as string);
         res.status(StatusCodes.OK).json({
             statusCode: StatusCodes.OK,
-        })
+        });
     })
-    .catch(err => {
+    .catch(() => {
         res.status(StatusCodes.NOT_FOUND).json({
             statusCode: StatusCodes.NOT_FOUND
-        })
+        });
         return;
-    })
-})
+    });
+});
 
 export default router;
