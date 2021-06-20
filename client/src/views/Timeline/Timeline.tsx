@@ -105,7 +105,6 @@ export const Timeline: React.FC = props => {
         })
     }
 
-    // TODO: useMemo
     const filterCards = (cards: IEvent[]) => cards.filter(x => show.includes(x.type))
 
     return (
