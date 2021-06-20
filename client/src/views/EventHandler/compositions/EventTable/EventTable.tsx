@@ -39,6 +39,9 @@ export const EventTable: React.FC<Props> = ({ items, requestSort, sortConfig, co
                         </HeadItem>
                         <HeadItem></HeadItem>
                     </ListHead>
+                    {items.length === 0 &&
+                        <div style={{textAlign: "center", padding: "20px"}}>Det finns inga händelser</div>
+                    }
                     <ListContent>
                         {items.map((e, i: number) =>
                             <ListEntry key={"event-"+i} index={i}>

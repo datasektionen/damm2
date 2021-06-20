@@ -29,6 +29,9 @@ const uploadToS3 = ({ Bucket, Key, Body, ContentType }: { Bucket: string, Key: s
         Key,
         Body,
         ContentType,
+        Metadata: {
+            "Cache-Control": "max-age: 86400"
+        }
     });
 };
 
