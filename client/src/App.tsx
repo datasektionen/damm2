@@ -10,6 +10,8 @@ import { url } from './common/api';
 import { PatchCreator } from './views/PatchCreator/PatchCreator';
 import { ScrollToTop } from './components/ScrollToTop/ScrollToTop';
 import { NotFound } from './views/NotFound/NotFound';
+import { Timeline } from './views/Timeline/Timeline';
+import { EventHandler } from './views/EventHandler/EventHandler';
 
 export const AdminContext = React.createContext<string[]>([])
 
@@ -40,9 +42,11 @@ export const App: React.FC = props => {
 
   const methoneLinks = [
     <Link to={ROUTES.HOME} key={"methonel-1"}>Hem</Link>,
-    <Link to={ROUTES.PATCH_ARCHIVE} key={"methonel-2"}>Märkesarkiv</Link>,
-    <Link to={ROUTES.PATCH_CREATOR} key={"methonel-3"}>Skapa märke</Link>,
-    <Link to={ROUTES.TAGS_MANAGER} key={"methonel-4"}>Hantera taggar</Link>,
+    <Link to={ROUTES.TIMELINE} key={"methonel-2"}>Tidslinje</Link>,
+    <Link to={ROUTES.PATCH_ARCHIVE} key={"methonel-3"}>Märkesarkiv</Link>,
+    <Link to={ROUTES.PATCH_CREATOR} key={"methonel-4"}>Skapa märke</Link>,
+    <Link to={ROUTES.TAGS_MANAGER} key={"methonel-5"}>Hantera taggar</Link>,
+    <Link to={ROUTES.EVENT_HANDLER} key={"methonel-6"}>Hantera händelser</Link>,
   ]
 
   return (
@@ -60,6 +64,9 @@ export const App: React.FC = props => {
             }}
           />
           <Switch>
+          <Route exact path={ROUTES.TIMELINE}>
+              <Timeline />
+            </Route>
             <Route exact path={ROUTES.HOME}>
               <Redirect to={ROUTES.PATCH_ARCHIVE} />
             </Route>
@@ -71,6 +78,9 @@ export const App: React.FC = props => {
             </Route>
             <Route exact path={ROUTES.TAGS_MANAGER}>
               <TagsManager />
+            </Route>
+            <Route exact path={ROUTES.EVENT_HANDLER}>
+              <EventHandler />
             </Route>
 
             <Route exact path={ROUTES.LOGIN} render={match => {

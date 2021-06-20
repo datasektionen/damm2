@@ -6,12 +6,14 @@ import { ping } from '../functions/api/ping';
 import patchesRouter from './patches';
 import tagsRouter from './tags';
 import filesRouter from './files';
+import eventsRouter from './events';
 import { silentAuthorization } from '../common/middlewares';
 import { IUserRequest } from 'common/requests';
 
 router.use("/patches", patchesRouter);
 router.use("/tags", tagsRouter);
 router.use("/files", filesRouter);
+router.use("/events", eventsRouter);
 
 router.get("/ping", (req, res) => {
     res.json(ping());

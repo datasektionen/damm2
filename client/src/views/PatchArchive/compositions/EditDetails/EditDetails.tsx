@@ -101,10 +101,9 @@ export const EditDetails: React.FC<Props> = ({patch, onCancel, tags, fetchPatche
                 disabled={loading}
             />
             <H4>Datum</H4>
-            <input
+            <Field
                 name="date"
                 type="date"
-                style={{height: "50px", padding: "10px"}}
                 value={editState.date}
                 onChange={onChange}
                 disabled={loading}

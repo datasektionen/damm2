@@ -36,3 +36,18 @@ model Tag {
   Tag             Tag?     @relation("TagToTag", fields: [tagId], references: [id])
   tagId           Int?
 }
+
+enum EventType {
+  SM_DM
+  GENERAL
+  ANNIVERSARY
+}
+
+model Event {
+  id Int @id @default(autoincrement())
+  title String
+  content String
+  date String
+  type EventType @default(SM_DM)
+  protocol String?
+}

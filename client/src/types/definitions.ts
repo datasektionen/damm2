@@ -1,3 +1,4 @@
+import moment from "moment";
 
 export interface IPatch {
     id: number;
@@ -22,4 +23,37 @@ export interface ITag {
     updatedAt: string;
     children: ITag[];
     tagId: number;
+}
+
+export interface IEvent {
+    id: number;
+    title: string;
+    content: string;
+    date: string;
+    type: "SM_DM" | "ANNIVERSARY" | "GENERAL" | "DFUNKT";
+    protocol?: string;
+    mandates?: { date: moment.Moment; role: IRole; user: IUser}[]
+}
+
+export interface IEventsPerYear {
+    year: number;
+    cards: IEvent[];
+}
+
+export interface IRole {
+    id: number;
+    title: string;
+    description: string;
+    identifier: string;
+    email: string;
+    active: boolean;
+    Group: { name: string; identifier: string; };
+}
+
+export interface IUser {
+    first_name: string,
+    last_name: string,
+    email: string | null,
+    kthid: string,
+    ugkthid: string
 }

@@ -13,6 +13,8 @@ import { CreatorHandler } from '../../components/CreatorHandler/CreatorHandler';
 import { Alert } from '../../components/Alert/Alert';
 import { SpinnerCover } from '../../components/SpinnerCover/SpinnerCover';
 import { uploadFiles } from '../../functions/fileUploading';
+import Helmet from 'react-helmet';
+import { title } from '../../common/strings';
 
 const Required: React.FC = props =>
     <StyledRequired>
@@ -128,7 +130,6 @@ export const PatchCreator: React.FC<Props> = props => {
             }, config)
             
         } catch (err) {
-            console.log(err);
             scrollTop();
             setLoading(false);
             setError(err.toString());
@@ -140,7 +141,6 @@ export const PatchCreator: React.FC<Props> = props => {
             try {
                 await uploadFiles(createPatchResult.data.body.id, files[0]);
             } catch (err) {
-                console.log(err);
                 scrollTop();
                 setLoading(false);
                 setSuccess(true);
@@ -172,6 +172,9 @@ export const PatchCreator: React.FC<Props> = props => {
     return (
         <>
             <Header title="Skapa märke" />
+            <Helmet>
+                <title>{title("Skapa märke")}</title>
+            </Helmet>
             <StyledPatchCreator>
                 {loading &&
                     <SpinnerCover />
@@ -222,10 +225,9 @@ export const PatchCreator: React.FC<Props> = props => {
                     />
                     <H3>Datum</H3>
                     <H4>Test</H4>
-                    <input
+                    <Field
                         name="date"
                         type="date"
-                        style={{height: "50px", padding: "10px"}}
                         value={form.date}
                         onChange={onChange}
                         disabled={loading}

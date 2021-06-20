@@ -1,3 +1,6 @@
+-- CreateEnum
+CREATE TYPE "EventType" AS ENUM ('SM_DM', 'GENERAL', 'ANNIVERSARY');
+
 -- CreateTable
 CREATE TABLE "Patch" (
     "id" SERIAL NOT NULL,
@@ -23,6 +26,18 @@ CREATE TABLE "Tag" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "tagId" INTEGER,
+
+    PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Event" (
+    "id" SERIAL NOT NULL,
+    "title" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
+    "date" TEXT NOT NULL,
+    "type" "EventType" NOT NULL DEFAULT E'SM_DM',
+    "protocol" TEXT,
 
     PRIMARY KEY ("id")
 );

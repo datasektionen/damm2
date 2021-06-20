@@ -28,12 +28,12 @@ if (configuration.NODE_ENV === "development") {
 
 app.use("/api", apiRouter);
 
-const fuzzyfile = fs.readFileSync("./fuzzyfile.json")
-app.get("/fuzzyfile", (req, res) => res.send(fuzzyfile))
+const fuzzyfile = fs.readFileSync("./fuzzyfile.json");
+app.get("/fuzzyfile", (req, res) => res.send(fuzzyfile));
 
 // Serve React app
 app.use(express.static("../client/build"));
-app.get("*", (req, res) => res.sendFile(path.resolve(__dirname + "/../client/build/index.html")))
+app.get("*", (req, res) => res.sendFile(path.resolve(__dirname + "/../client/build/index.html")));
 
 const PORT = configuration.PORT;
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`));

@@ -3,11 +3,16 @@ import { Header } from 'methone';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../../common/routes';
 import { StyledNotFound } from './style';
+import Helmet from 'react-helmet';
+import { title } from '../../common/strings';
 
 export const NotFound: React.FC = props => {
     return (
         <>
             <Header title="404 Not Found" />
+            <Helmet>
+                <title>{title("404")}</title>
+            </Helmet>
             <StyledNotFound>
             <h3>Det här gick ju inte så bra...</h3>
             <h4>Kanske stavade du fel i adressen, eller så har sidan flyttat. Om du tror att detta är fel,

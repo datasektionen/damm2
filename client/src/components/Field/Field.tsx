@@ -7,11 +7,13 @@ interface Props {
     placeholder?: string;
     name?: string;
     disabled?: boolean;
+    type?: "text" | "date"
 }
 
 export const Field: React.FC<Props> = props => {
     return (
         <StyledField
+            type={props.type ?? "text"}
             name={props.name}
             placeholder={props.placeholder}
             value={props.value}

@@ -3,9 +3,6 @@ import { StatusCodes } from 'http-status-codes';
 import prisma from '../../common/client';
 import { IUserRequest } from '../../common/requests';
 
-// export const DATE_FORMAT = new RegExp(/(^\d{4}-\d{2}-\d{2}$)|(^$)/);
-export const DATE_FORMAT = new RegExp(/^\d{4}-\d{2}-\d{2}$/);
-
 export const getAllPatches = async (user: IUserRequest["user"]): Promise<ApiResponse> => {
 
     const patches = await prisma.patch.findMany({

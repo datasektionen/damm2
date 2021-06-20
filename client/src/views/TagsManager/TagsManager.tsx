@@ -4,12 +4,11 @@ import { StyledTagManager, Content } from './style';
 import axios from 'axios';
 import { url } from '../../common/api';
 import { ITag } from '../../types/definitions';
-import { TagClickable } from '../../components/TagClickable/TagClickable';
-import { Field } from '../../components/Field/Field';
-import { TextArea } from '../../components/TextArea/TextArea';
 import { TagEditor, ITagEdit } from '../../components/TagEditor/TagEditor';
 import { SpinnerCover } from '../../components/SpinnerCover/SpinnerCover';
 import { Alert } from '../../components/Alert/Alert';
+import Helmet from 'react-helmet';
+import { title } from '../../common/strings';
 
 interface Props {
 
@@ -115,6 +114,9 @@ export const TagsManager: React.FC<Props> = ({}) => {
     return (
         <div ref={ref}>
             <Header title="Hantera märkestaggar" />
+            <Helmet>
+                <title>{title("Hantera märkestaggar")}</title>
+            </Helmet>
             <StyledTagManager>
                 {loading && <SpinnerCover />}
                 <Content>

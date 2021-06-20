@@ -1,11 +1,5 @@
 import { Request } from "express";
+import { User } from "./types";
 export interface IUserRequest extends Request {
-    user?: {
-        emails: string;
-        first_name: string;
-        last_name: string;
-        ugkthid: string;
-        user: string;
-        admin: string[];
-    }
+    user?: User
 }

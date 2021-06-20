@@ -12,6 +12,8 @@ import { ROUTES } from '../../common/routes';
 import { SpinnerCover } from '../../components/SpinnerCover/SpinnerCover';
 import queryString from 'query-string';
 import useScreenSizeChecker from '../../hooks/useScreenSizeChecker';
+import Helmet from 'react-helmet';
+import { title } from '../../common/strings';
 
 export const PATCH_SORT_MODES = {
     AÖ: "a-ö",
@@ -162,7 +164,10 @@ export const PatchArchive: React.FC = props => {
 
     return (
         <div style={{ backgroundColor: "#eee" }} ref={pageRef}>
-            <FancyHeader />
+            <FancyHeader title="Märkesarkiv" />
+            <Helmet>
+                <title>{title("Märkesarkiv")}</title>
+            </Helmet>
             <StyledPatchArchiveDivider>
                 <Left>
                     <FilterAndSort

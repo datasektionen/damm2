@@ -5,7 +5,8 @@ const Theme = {
         blackgrey: "#333333",
         taggrey: "#D1D1D1F9",
         taggreyhover: "#A7A7A7F9",
-        red: "#D73A4A"
+        red: "#D73A4A",
+        blue: "#2196F3"
     },
     sizes: {
         maxContainerWidth: 1240,

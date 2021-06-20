@@ -4,28 +4,18 @@ import logo from '../../skold.png'
 
 interface Props {
   children?: React.ReactNode;
+  title: string;
 }
 
-// export const FancyHeader: React.FC = props => {
-//   return (
-//     <StyledHeader>
-//       <div>
-//         <Logo src={logo} alt="Datasektionens sköld" className="Logo" />
-//         <H1>Konglig Datasektionens</H1>
-//         <H2>Märkesarkiv</H2>
-//         {props.children}
-//       </div>
-//     </StyledHeader>
-//   )
-// }
-
-export const FancyHeader = React.forwardRef<HTMLDivElement>((props: Props, ref) => (
-  <StyledHeader ref={ref}>
-    <div>
-      <Logo src={logo} alt="Datasektionens sköld" className="Logo" />
-      <H1>Konglig Datasektionens</H1>
-      <H2>Märkesarkiv</H2>
-      {props.children}
-    </div>
-  </StyledHeader>
-))
+export const FancyHeader: React.FC<Props> = ({ title, children }) => {
+  return (
+    <StyledHeader>
+      <div>
+        <Logo src={logo} alt="Datasektionens sköld" />
+        <H1>Konglig Datasektionens</H1>
+        <H2>{title}</H2>
+        {children}
+      </div>
+    </StyledHeader>
+  )
+}
