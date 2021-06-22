@@ -18,9 +18,9 @@ import { ProtectedRoute } from './components/ProtectedRoute/ProtectedRoute';
 export const AdminContext = React.createContext<{ loading: boolean; admin: string[]; }>({ loading: true, admin: [] })
 
 const defaultLinks = [
-    <Link to={ROUTES.HOME} key={"methonel-home"}>Hem</Link>,
+    // <Link to={ROUTES.HOME} key={"methonel-home"}>Hem</Link>,
+    <Link to={ROUTES.PATCH_ARCHIVE} key={"methonel-parchive"}>Märkesarkiv</Link>,
     <Link to={ROUTES.TIMELINE} key={"methonel-timeline"}>Tidslinje</Link>,
-    <Link to={ROUTES.PATCH_ARCHIVE} key={"methonel-parchive"}>Märkesarkiv</Link>
 ];
 
 export const App: React.FC = props => {
