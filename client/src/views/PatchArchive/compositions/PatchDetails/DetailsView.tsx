@@ -16,7 +16,7 @@ interface Props {
 }
 
 export const DetailsView: React.FC<Props> = ({patch, onEditClick, onClose, fetchPatches}) => {
-    const admin = useContext(AdminContext)
+    const { admin } = useContext(AdminContext)
     const isAdmin = admin.includes("admin") || admin.includes("prylis");
 
     const [loading, setLoading] = useState(false);

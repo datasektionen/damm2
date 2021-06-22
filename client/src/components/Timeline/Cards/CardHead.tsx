@@ -1,7 +1,7 @@
-import React from 'react';
-import ReactMarkdown from 'react-markdown'
+import React, { useContext } from 'react';
 import { StyledCardHead, Date, Day, Month, H2, Arrow, ArrowPoint } from './style';
 import 'moment/locale/sv';
+import { AdminContext } from '../../../App';
 
 interface Props {
     id: number;
@@ -13,6 +13,10 @@ interface Props {
 }
 
 export const CardHead: React.FC<Props> = ({ id, title, type, index, date, onEditClick }) => {
+
+    const { admin } = useContext(AdminContext);
+    const isAdmin = admin.includes("prylis") || admin.includes("admin");
+
     return (
         <StyledCardHead index={index}>
             <Date>
@@ -24,7 +28,7 @@ export const CardHead: React.FC<Props> = ({ id, title, type, index, date, onEdit
                 </Month>
             </Date>
             <H2>{title}</H2>
-            {type !== "DFUNKT" &&
+            {type !== "DFUNKT" && isAdmin &&
                 <i className="fas fa-edit" onClick={() => onEditClick(id)} title="Redigera" />
             }
             <Arrow index={index} />
