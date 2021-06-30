@@ -244,7 +244,7 @@ export const PatchCreator: React.FC<Props> = props => {
                         query=""
                     />
                     <H3>Filer</H3>
-                    <H4>Lägg upp tillhörande filer, exempelvis käll-filer</H4>
+                    <H4>Lägg upp tillhörande filer, exempelvis käll-filer. Endast admin kan se dessa filer</H4>
                     <FileUploader
                         files={files}
                         onAddFile={(file: File) => setFiles([file])}

@@ -242,6 +242,7 @@ export const ArtefactCreator: React.FC<Props> = props => {
                     />
                     <H3>Filer</H3>
                     <H4>Lägg upp tillhörande filer</H4>
+                    <H4><b>NOTERA!!!! Filer som laddas upp på artefakter är publika, till skillnad från filer på märken, som bara admin kan se.</b></H4>
                     <FileUploader
                         files={files}
                         onAddFile={(file: File) => setFiles([file])}

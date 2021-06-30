@@ -7,6 +7,7 @@ import { Tag } from '../../../../components/Tag/Tag';
 import { url } from '../../../../common/api';
 import { AdminContext } from '../../../../App';
 import axios from 'axios';
+import { Configuration } from '../../../../common/configuration';
 
 interface Props {
     patch: IPatch;
@@ -44,7 +45,7 @@ export const DetailsView: React.FC<Props> = ({ patch, onEditClick, onClose, fetc
                     <PatchImage src={patch.images[0] ?? ""} draggable={false} />
                 </a>
                 {isAdmin && <Button label="Redigera" onClick={onEditClick} disabled={loading} /> }
-                {isAdmin && patch.files && patch.files.length !== 0 &&
+                {isAdmin && type === "patch" && patch.files && patch.files.length !== 0 &&
                     <Files>
                         <h4>Filer</h4>
                         {patch.files.map((f: string) => {
@@ -62,6 +63,26 @@ export const DetailsView: React.FC<Props> = ({ patch, onEditClick, onClose, fetc
                             );
                         })}
                     </Files>
+                }
+                {type === "artefact" && patch.files.length !== 0 &&
+                    <Files>
+                    <h4>Filer</h4>
+                    {patch.files.map((f: string) => {
+                        return (
+                            <div key={"patch-file-"+f}>
+                                <a target="_blank" rel="noopener noreferrer" href={`https://${Configuration.s3Bucket}.s3.eu-north-1.amazonaws.com/${encodeURIComponent(f)}`}>{f}</a>
+                                {isAdmin &&
+                                    <Thrash onClick={() => {
+                                        if (loading) return;
+                                        if (window.confirm("Är du säker? Filen tas bort permanent från AWS S3.")) deleteFile(f)
+                                    }}>
+                                        <i className="fas fa-trash" />
+                                    </Thrash>
+                                }
+                            </div>
+                        );
+                    })}
+                </Files>
                 }
             </Left>
             <Right>
