@@ -11,12 +11,15 @@ const useAuthorization = () => {
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (token) setHasToken(true)
-        axios.get(url(`/api/check-token?token=${token}`))
+        axios.get(url("/api/check-token"), {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        })
         .then(res => setAdmin(res.data.admin))
         .catch(res => {
             setHasToken(false)
             setAdmin([])
-            setLoading(false)
         })
         .finally(() => setLoading(false))
     }, [])
