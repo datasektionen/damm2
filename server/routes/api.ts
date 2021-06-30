@@ -24,8 +24,8 @@ router.get("/ping", (req, res) => {
 router.get("/check-token",
     silentAuthorization,
 async (req: IUserRequest, res) => {
-    if (!req.user) return res.status(StatusCodes.NOT_FOUND).json({
-        statusCode: StatusCodes.NOT_FOUND,
+    if (!req.user) return res.status(StatusCodes.BAD_REQUEST).json({
+        statusCode: StatusCodes.BAD_REQUEST,
     });
     return res.status(StatusCodes.OK).json(req.user);
 });
