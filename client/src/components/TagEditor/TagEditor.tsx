@@ -10,6 +10,7 @@ import { TextArea } from '../../components/TextArea/TextArea';
 import { Button } from '../Button/Button';
 import { ColorRandomizer } from '../ColorRandomizer/ColorRandomizer';
 import Theme from '../../common/Theme';
+import { BiSwitch } from '../BiSwitch/BiSwitch';
 
 export interface ITagEdit {
     name: string;
@@ -18,6 +19,7 @@ export interface ITagEdit {
     backgroundColor: string;
     id?: number;
     parent?: number;
+    type: "PATCH" | "ARTEFACT"
 }
 
 interface Props {
@@ -61,6 +63,7 @@ export const TagEditor: React.FC<Props> = ({ tags, selectedTags, setSelectedTags
             backgroundColor: "#E83D84",
             color: "#FFF",
             children: [] as ITag[],
+            type: value.type
         } as ITagEdit;
         
         if (type === "head") {
@@ -88,11 +91,23 @@ export const TagEditor: React.FC<Props> = ({ tags, selectedTags, setSelectedTags
         setValue({...selected})
     }
 
+    const changeType = () => {
+        setValue({...value, type: value.type === "PATCH" ? "ARTEFACT" : "PATCH"})
+        setSelectedTags([])
+    }
+
     return (
         <StyledTagEditor>
+            <h2>Tagtyp</h2>
+            <BiSwitch
+                left={{label: "Märke", key:"PATCH"}}
+                right={{label: "Artefakt", key:"ARTEFACT"}}
+                value={value.type}
+                setValue={changeType}
+            />
             <h2>Huvudtaggar</h2>
             <HeadTags>
-                {tags.filter((t: any) => t.tagId === null).map((t: ITag) =>
+                {tags.filter((t: any) => t.tagId === null).filter(t => t.type === value.type).map((t: ITag) =>
                     <TagClickable
                         tag={t}
                         clicked={t === selectedTags[0]}

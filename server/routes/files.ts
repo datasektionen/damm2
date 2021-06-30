@@ -1,11 +1,11 @@
 import ApiResponse from '../common/ApiResponse';
-import { adminPrylisAuth, authorizePls, validationCheck } from '../common/middlewares';
+import { adminAuth, adminPrylisAuth, authorizePls, validationCheck } from '../common/middlewares';
 import express from 'express';
 import { body, check, query } from 'express-validator';
 import { StatusCodes } from 'http-status-codes';
 const router = express.Router();
 import multer from 'multer';
-import { uploadPatchImage, attachImageToPatch, uploadPatchFile, attachFileToPatch, getPatchFile, deletePatchFile, deleteFileFromPatch } from '../functions/api/files';
+import { uploadImage, attachImageTo, uploadFile, attachFileTo, getFile, deleteFileFrom, deleteFile } from '../functions/api/files';
 
 const imageUpload = multer({
     fileFilter: (req, file, callback) => {
@@ -57,21 +57,34 @@ router.post("/upload/patch-image",
     hasImage,
 async (req, res) => {
     
-    const result = await uploadPatchImage(req.file);
+    const result = await uploadImage(req.file, "patches");
     return res.status(result.statusCode).json(result);
 });
 
-router.post("/attach/img-to-patch",
+// Uploads images (image for an artefact)
+router.post("/upload/artefact-image",
     authorizePls,
-    adminPrylisAuth,
-    body("patchId").isInt().not().isString().withMessage("should be an integer"),
+    adminAuth,
+    imageUpload.single("image"),
+    hasImage,
+async (req, res) => {
+    
+    const result = await uploadImage(req.file, "artefacts");
+    return res.status(result.statusCode).json(result);
+});
+
+router.post("/attach/img-to",
+    authorizePls,
+    adminAuth,
+    body("id").isInt().not().isString().withMessage("should be an integer"),
     body("images").isArray().optional().withMessage("should be an array"),
     check("images.*").isURL().withMessage("should be an image url"),
+    body("type").matches(new RegExp(/^(patch)|(artefact)$/)),
     validationCheck,
 async (req, res) => {
-    const { patchId, images } = req.body;
+    const { id, images, type } = req.body;
 
-    const result = await attachImageToPatch(patchId, images);
+    const result = await attachImageTo(id, images, type);
 
     return res.status(result.statusCode).json(result);
 });
@@ -83,20 +96,32 @@ router.post("/upload/patch-file",
     fileUpload.single("file"),
     hasFile,
 async (req, res) => {
-    const result = await uploadPatchFile(req.file);
+    const result = await uploadFile(req.file, "patch-files");
     return res.status(result.statusCode).json(result);
 });
 
-router.post("/attach/file-to-patch",
+// Uploads files (for an artefact)
+router.post("/upload/artefact-file",
     authorizePls,
-    adminPrylisAuth,
-    body("patchId").isInt().not().isString().withMessage("should be an integer"),
+    adminAuth,
+    fileUpload.single("file"),
+    hasFile,
+async (req, res) => {
+    const result = await uploadFile(req.file, "artefact-files");
+    return res.status(result.statusCode).json(result);
+});
+
+router.post("/attach/file-to",
+    authorizePls,
+    adminAuth,
+    body("id").isInt().not().isString().withMessage("should be an integer"),
     body("file").trim().isString().notEmpty().withMessage("should be an URL"),
+    body("type").matches(new RegExp(/^(patch)|(artefact)$/)).withMessage("should be either 'patch' or 'artefact'"),
     validationCheck,
 async (req, res) => {
-    const { patchId, file } = req.body;
+    const { id, file, type } = req.body;
 
-    const result = await attachFileToPatch(patchId, file);
+    const result = await attachFileTo(id, file, type);
 
     return res.status(result.statusCode).json(result);
 });
@@ -108,7 +133,7 @@ async (req, res) => {
 
     const { name } = req.params;
 
-    getPatchFile(name)
+    getFile(name)
     .then((result: any) => {
         res.status(200).send(result);
     })
@@ -119,19 +144,19 @@ async (req, res) => {
     });
 });
 
-router.delete("/patch-file",
+router.delete("/file",
     authorizePls,
     adminPrylisAuth,
     query("name").isString().trim().notEmpty().withMessage("should be a string"),
-    query("patchId").isInt().withMessage("should be a string"),
+    query("id").isInt().withMessage("should be an integer"),
+    query("type").matches(new RegExp(/^(patch)|(artefact)$/)).withMessage("should be either 'patch' or 'artefact'"),
     validationCheck,
 async (req, res) => {
-    const { name, patchId } = req.query;
-    console.log(req.query);
+    const { name, id, type } = req.query;
 
-    deletePatchFile(name as string)
+    deleteFile(name as string)
     .then(async () => {
-        await deleteFileFromPatch(Number(patchId as string), name as string);
+        await deleteFileFrom(Number(id as string), name as string, type as any);
         res.status(StatusCodes.OK).json({
             statusCode: StatusCodes.OK,
         });

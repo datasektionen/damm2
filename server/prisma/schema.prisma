@@ -25,16 +25,25 @@ model Patch {
 
 model Tag {
   id              Int      @id @default(autoincrement())
-  name            String   @unique
+  name            String
   color           String
   backgroundColor String
   description     String
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  type            TagType
   patches         Patch[]
+  artefacts       Artefact[]
   children        Tag[]    @relation("TagToTag")
   Tag             Tag?     @relation("TagToTag", fields: [tagId], references: [id])
   tagId           Int?
+
+  @@unique([name, type])
+}
+
+enum TagType {
+  PATCH
+  ARTEFACT
 }
 
 enum EventType {
@@ -44,10 +53,22 @@ enum EventType {
 }
 
 model Event {
-  id Int @id @default(autoincrement())
-  title String
-  content String
-  date String
-  type EventType @default(SM_DM)
+  id       Int       @id @default(autoincrement())
+  title    String
+  content  String
+  date     String
+  type     EventType @default(SM_DM)
   protocol String?
+}
+
+model Artefact {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  date        String
+  images      String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  files       String[]
+  tags        Tag[]
 }

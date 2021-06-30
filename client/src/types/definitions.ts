@@ -23,6 +23,7 @@ export interface ITag {
     updatedAt: string;
     children: ITag[];
     tagId: number;
+    type: "PATCH" | "ARTEFACT"
 }
 
 export interface IEvent {
@@ -56,4 +57,16 @@ export interface IUser {
     email: string | null,
     kthid: string,
     ugkthid: string
+}
+
+export interface IArtefact {
+    id: number;
+    name: string;
+    description: string;
+    date: string;
+    images: string[];
+    createdAt: string;
+    updatedAt: string;
+    files: string[];
+    tags: ITag[];
 }

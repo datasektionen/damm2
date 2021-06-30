@@ -19,6 +19,7 @@ const defaultFormValue: ITagEdit = {
     description: "",
     color: "",
     backgroundColor: "",
+    type: "PATCH",
 }
 
 export const TagsManager: React.FC<Props> = ({}) => {
@@ -59,7 +60,7 @@ export const TagsManager: React.FC<Props> = ({}) => {
     }
 
     useEffect(() => {
-        setForm(selectedTags.length === 1 ? selectedTags[0] : (selectedTags.length === 2 ? selectedTags[1] : defaultFormValue))
+        setForm(selectedTags.length === 1 ? selectedTags[0] : (selectedTags.length === 2 ? selectedTags[1] : {...defaultFormValue, type: form.type}))
     }, [selectedTags])
 
     const submit = async () => {

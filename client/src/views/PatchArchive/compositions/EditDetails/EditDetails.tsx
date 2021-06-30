@@ -18,9 +18,10 @@ interface Props {
     patch: IPatch;
     fetchPatches: () => Promise<void>;
     tags: ITag[];
+    editApiPath: string;
 }
 
-export const EditDetails: React.FC<Props> = ({patch, onCancel, tags, fetchPatches}) => {
+export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatches, editApiPath}) => {
 
     const [editState, setEditState] = useState<IPatch>(patch);
     const [creator, setCreator] = useState("");
@@ -42,14 +43,17 @@ export const EditDetails: React.FC<Props> = ({patch, onCancel, tags, fetchPatche
     const put = () => {
         setLoading(true);
         setRequestError("");
-        axios.put(url("/api/patches/update"), {
-            patchId: editState.id,
+        const body = {
+            id: editState.id,
             name: editState.name,
             description: editState.description,
             date: editState.date,
             tags: editState.tags.map((x: ITag) => x.id),
             creators: editState.creators,
-        },
+        } as any
+
+        if (editState.date.length === 0) delete body.date
+        axios.put(url(editApiPath), body,
             {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`

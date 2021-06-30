@@ -16,10 +16,10 @@ AWS.config.getCredentials((err) => {
     else console.log(AWS.config.credentials?.accessKeyId);
 });
 
-const compressPatchImage = async (file: Express.Multer.File): Promise<Buffer> => {
+const compressImage = async (file: Express.Multer.File): Promise<Buffer> => {
     const image = await Jimp.read(file.buffer);
     return await image.resize(200, Jimp.AUTO)
-        .quality(30)
+        .quality(35)
         .getBufferAsync(image.getMIME());
 };
 
@@ -29,13 +29,14 @@ const uploadToS3 = ({ Bucket, Key, Body, ContentType }: { Bucket: string, Key: s
         Key,
         Body,
         ContentType,
-        Metadata: {
-            "Cache-Control": "max-age: 86400"
-        }
+        CacheControl: "max-age: 86400",
+        // Metadata: {
+        //     "Cache-Control": "max-age: 86400"
+        // }
     });
 };
 
-export const uploadPatchImage = async (file: Express.Multer.File): Promise<ApiResponse> => {
+export const uploadImage = async (file: Express.Multer.File, type: "patches" | "artefacts"): Promise<ApiResponse> => {
 
     const fileName = uuidv4();
     const extension = path.extname(file.originalname);
@@ -46,7 +47,7 @@ export const uploadPatchImage = async (file: Express.Multer.File): Promise<ApiRe
     try {
         const result = await uploadToS3({
             Bucket: configuration.AWS_S3_BUCKET,
-            Key: `patches/${fullFileName}`,
+            Key: `${type}/${fullFileName}`,
             Body: Buffer.from(file.buffer),
             ContentType: file.mimetype,
         }).promise();
@@ -62,11 +63,11 @@ export const uploadPatchImage = async (file: Express.Multer.File): Promise<ApiRe
     }
 
     try {
-        const compressedImage = await compressPatchImage(file);
+        const compressedImage = await compressImage(file);
 
         const result = await uploadToS3({
             Bucket: configuration.AWS_S3_BUCKET,
-            Key: `patches/${fileName}-compressed${extension}`,
+            Key: `${type}/${fileName}-compressed${extension}`,
             Body: compressedImage,
             ContentType: file.mimetype,
         }).promise();
@@ -88,16 +89,27 @@ export const uploadPatchImage = async (file: Express.Multer.File): Promise<ApiRe
     }
 };
 
-export const attachImageToPatch = async (patchId: number, images: string[]): Promise<ApiResponse> => {
+export const attachImageTo = async (id: number, images: string[], type: "patch" | "artefact"): Promise<ApiResponse> => {
     try {
-        await prisma.patch.update({
-            where: {
-                id: patchId,
-            },
-            data: {
-                images,
-            },
-        });
+        if (type === "patch") {
+            await prisma.patch.update({
+                where: {
+                    id,
+                },
+                data: {
+                    images,
+                },
+            });
+        } else {
+            await prisma.artefact.update({
+                where: {
+                    id,
+                },
+                data: {
+                    images,
+                },
+            });
+        }
 
         return {
             statusCode: StatusCodes.OK,
@@ -112,13 +124,13 @@ export const attachImageToPatch = async (patchId: number, images: string[]): Pro
 };
 
 // Patch files require auth to GET
-export const uploadPatchFile = async (file: Express.Multer.File): Promise<ApiResponse> => {
+export const uploadFile = async (file: Express.Multer.File, path: "patch-files" | "artefact-files"): Promise<ApiResponse> => {
     const fileName = Date.now() + "-" + file.originalname;
 
     try {
         const result = await uploadToS3({
             Bucket: configuration.AWS_S3_BUCKET,
-            Key: `patch-files/${fileName}`,
+            Key: `${path}/${fileName}`,
             Body: Buffer.from(file.buffer),
             ContentType: file.mimetype,
         }).promise();
@@ -137,18 +149,31 @@ export const uploadPatchFile = async (file: Express.Multer.File): Promise<ApiRes
     }
 };
 
-export const attachFileToPatch = async (patchId: number, fileName: string): Promise<ApiResponse> => {
+export const attachFileTo = async (id: number, fileName: string, type: "patch" | "artefact"): Promise<ApiResponse> => {
     try {
-        await prisma.patch.update({
-            where: {
-                id: patchId,
-            },
-            data: {
-                files: {
-                    push: fileName,
-                }
-            },
-        });
+        if (type === "patch") {
+            await prisma.patch.update({
+                where: {
+                    id,
+                },
+                data: {
+                    files: {
+                        push: fileName,
+                    }
+                },
+            });
+        } else {
+            await prisma.artefact.update({
+                where: {
+                    id,
+                },
+                data: {
+                    files: {
+                        push: fileName,
+                    }
+                },
+            });
+        }
 
         return {
             statusCode: StatusCodes.OK,
@@ -162,7 +187,7 @@ export const attachFileToPatch = async (patchId: number, fileName: string): Prom
     }
 };
 
-export const getPatchFile = async (name: string) => {
+export const getFile = async (name: string) => {
     return new Promise((resolve, reject) => {
         s3.getObject({
             Bucket: configuration.AWS_S3_BUCKET,
@@ -178,7 +203,7 @@ export const getPatchFile = async (name: string) => {
     });
 };
 
-export const deletePatchFile = async (name: string) => {
+export const deleteFile = async (name: string) => {
     return new Promise((resolve, reject) => {
         s3.deleteObject({
             Bucket: configuration.AWS_S3_BUCKET,
@@ -194,20 +219,40 @@ export const deletePatchFile = async (name: string) => {
     });
 };
 
-export const deleteFileFromPatch = async (patchId: number, name: string) => {
-    const files = (await prisma.patch.findUnique({
-        where: {
-            id: patchId
-        }
-    }))?.files;
-    return await prisma.patch.update({
-        where: {
-            id: patchId,
-        },
-        data: {
-            files: {
-                set: files?.filter(f => f !== name)
+export const deleteFileFrom = async (id: number, name: string, type: "patch" | "artefact") => {
+    let files;
+    if (type === "patch") {
+        files = (await prisma.patch.findUnique({
+            where: {
+                id
             }
-        }
-    });
+        }))?.files;
+        return await prisma.patch.update({
+            where: {
+                id,
+            },
+            data: {
+                files: {
+                    set: files?.filter(f => f !== name)
+                }
+            }
+        });
+    } else {
+        files = (await prisma.artefact.findUnique({
+            where: {
+                id
+            }
+        }))?.files;
+        return await prisma.artefact.update({
+            where: {
+                id,
+            },
+            data: {
+                files: {
+                    set: files?.filter(f => f !== name)
+                }
+            }
+        });
+    }
+
 };

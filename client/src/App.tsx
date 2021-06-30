@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import Methone from 'methone';
-import { BrowserRouter, Link, Route, Switch, Redirect, useHistory } from 'react-router-dom';
+import { Link, Route, Switch, Redirect } from 'react-router-dom';
 import { PatchArchive } from './views/PatchArchive/PatchArchive';
 import { TagsManager } from './views/TagsManager/TagsManager';
 import './index.css';
 import { ROUTES } from './common/routes';
-import axios from 'axios';
-import { url } from './common/api';
 import { PatchCreator } from './views/PatchCreator/PatchCreator';
 import { ScrollToTop } from './components/ScrollToTop/ScrollToTop';
 import { NotFound } from './views/NotFound/NotFound';
@@ -14,25 +12,27 @@ import { Timeline } from './views/Timeline/Timeline';
 import { EventHandler } from './views/EventHandler/EventHandler';
 import useAuthorization from './hooks/useAuthorization';
 import { ProtectedRoute } from './components/ProtectedRoute/ProtectedRoute';
+import { ArtefactArchive } from './views/ArtefactArchive/ArtefactArchive';
+import { ArtefactCreator } from './views/ArtefactCreator/ArtefactCreator';
 
 export const AdminContext = React.createContext<{ loading: boolean; admin: string[]; }>({ loading: true, admin: [] })
 
 const defaultLinks = [
-    // <Link to={ROUTES.HOME} key={"methonel-home"}>Hem</Link>,
     <Link to={ROUTES.PATCH_ARCHIVE} key={"methonel-parchive"}>Märkesarkiv</Link>,
+    <Link to={ROUTES.MUSEUM} key={"methonel-museum"}>Museum</Link>,
     <Link to={ROUTES.TIMELINE} key={"methonel-timeline"}>Tidslinje</Link>,
 ];
 
 export const App: React.FC = props => {
-    const [hasToken, setHasToken] = useState(false);
     const [methoneLinks, setMethoneLinks] = useState<React.ReactNode[]>(defaultLinks);
 
-    const { admin, loading } = useAuthorization();
+    const { admin, loading, hasToken } = useAuthorization();
 
     useEffect(() => {
         if (admin.includes("admin")) {
             setMethoneLinks([...defaultLinks].concat(
                 <Link to={ROUTES.PATCH_CREATOR} key={"methonel-pcreator"}>Skapa märke</Link>,
+                <Link to={ROUTES.ARTEFACT_CREATOR} key={"methonel-pcreator"}>Skapa föremål</Link>,
                 <Link to={ROUTES.TAGS_MANAGER} key={"methonel-tmanager"}>Hantera taggar</Link>,
                 <Link to={ROUTES.EVENT_HANDLER} key={"methonel-ehandler"}>Hantera händelser</Link>,
             ))
@@ -43,11 +43,6 @@ export const App: React.FC = props => {
             ))
         }
     }, [admin, loading])
-
-    useEffect(() => {
-        if (localStorage.getItem("token")) setHasToken(true)
-        else setHasToken(false)
-    })
 
     return (
         <div id="application" className="cerise">
@@ -72,9 +67,17 @@ export const App: React.FC = props => {
                     <Route exact path={ROUTES.PATCH_ARCHIVE}>
                         <PatchArchive />
                     </Route>
+                    <Route exact path={ROUTES.MUSEUM}>
+                        <ArtefactArchive />
+                    </Route>
                     <Route exact path={ROUTES.PATCH_CREATOR}>
                         <ProtectedRoute allowed="prylis">
                             <PatchCreator />
+                        </ProtectedRoute>
+                    </Route>
+                    <Route exact path={ROUTES.ARTEFACT_CREATOR}>
+                        <ProtectedRoute allowed="admin">
+                            <ArtefactCreator />
                         </ProtectedRoute>
                     </Route>
                     <Route exact path={ROUTES.TAGS_MANAGER}>

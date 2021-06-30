@@ -15,9 +15,11 @@ interface Props {
     fetchPatches: () => Promise<void>;
     edit: boolean;
     setEdit: (state: boolean) => void;
+    editApiPath: string;
+    type: "patch" | "artefact";
 }
 
-export const PatchDetails: React.FC<Props> = ({patch, onClose, allTags, fetchPatches, edit, setEdit}) => {
+export const PatchDetails: React.FC<Props> = ({ patch, onClose, allTags, fetchPatches, edit, setEdit, editApiPath, type }) => {
 
     const ref = useRef(document.createElement("div"));
     
@@ -33,6 +35,7 @@ export const PatchDetails: React.FC<Props> = ({patch, onClose, allTags, fetchPat
                     patch={patch}
                     tags={allTags}
                     fetchPatches={fetchPatches}
+                    editApiPath={editApiPath}
                 />
                 :
                 <DetailsView
@@ -40,6 +43,7 @@ export const PatchDetails: React.FC<Props> = ({patch, onClose, allTags, fetchPat
                     onEditClick={() => setEdit(true)}
                     patch={patch}
                     fetchPatches={fetchPatches}
+                    type={type}
                 />
             }
         </StyledPatchDetails>

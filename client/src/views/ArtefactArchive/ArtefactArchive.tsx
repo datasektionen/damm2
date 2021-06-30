@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { StyledPatchArchive, StyledFlipMove, StyledPatchArchiveDivider, Left, Right, StyledFlipMoveDetails } from './style';
+import { StyledPatchArchive, StyledFlipMove, StyledPatchArchiveDivider, Left, Right, StyledFlipMoveDetails } from '../PatchArchive/style';
 import { FancyHeader } from '../../components/FancyHeader/FancyHeader';
 import axios from 'axios';
 import { url } from '../../common/api';
 import { Patch } from '../../components/Patch/Patch';
-import { IPatch, ITag } from '../../types/definitions';
-import { FilterAndSort } from './compositions/FilterAndSort/FilterAndSort';
-import { WrappedPatchDetails } from './compositions/PatchDetails/PatchDetails';
+import { IArtefact, ITag } from '../../types/definitions';
+import { FilterAndSort } from '../PatchArchive/compositions/FilterAndSort/FilterAndSort';
+import { WrappedPatchDetails } from '../PatchArchive/compositions/PatchDetails/PatchDetails';
 import { useHistory, useLocation } from 'react-router-dom';
 import { ROUTES } from '../../common/routes';
 import { SpinnerCover } from '../../components/SpinnerCover/SpinnerCover';
@@ -15,7 +15,7 @@ import useScreenSizeChecker from '../../hooks/useScreenSizeChecker';
 import Helmet from 'react-helmet';
 import { title } from '../../common/strings';
 
-export const PATCH_SORT_MODES = {
+export const ARTEFACT_SORT_MODES = {
     AÖ: "a-ö",
     ÖA: "ö-a",
     "1983nu": "1983-nu",
@@ -24,23 +24,23 @@ export const PATCH_SORT_MODES = {
     oldnew: "äldst-new",
 }
 
-export const PatchArchive: React.FC = props => {
+export const ArtefactArchive: React.FC = props => {
 
-    const [patches, setPatches] = useState([]);
-    const [fetchingPatches, setFetchingPatches] = useState(true);
+    const [artefacts, setArtefacts] = useState([]);
+    const [fetchingArtefacts, setFetchingArtefacts] = useState(true);
     const [edit, setEdit] = useState(false);
     const [tags, setTags] = useState([]);
-    const [patchQuery, setPatchQuery] = useState("");
-    const [sortOption, setSortOption] = useState(PATCH_SORT_MODES.nu1983);
+    const [artefactQuery, setArtefactQuery] = useState("");
+    const [sortOption, setSortOption] = useState(ARTEFACT_SORT_MODES.nu1983);
     const [selectedTags, setSelectedTags] = useState([]);
-    const [selectedPatch, setSelectedPatch] = useState<IPatch | null>(null);
+    const [selectedArtefact, setSelectedArtefact] = useState<IArtefact | null>(null);
     const pageRef = useRef(document.createElement("div"));
     const history = useHistory();
     const location = useLocation();
     const isSmallScreen = useScreenSizeChecker(1100);
 
-    const fetchPatches = async () => {
-        const response = await axios.get(url("/api/patches/all"), {
+    const fetchArtefacts = async () => {
+        const response = await axios.get(url("/api/artefacts/all"), {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token") ?? ""}`,
             }
@@ -48,21 +48,21 @@ export const PatchArchive: React.FC = props => {
         if (response.status !== 200) {
             // TODO
         } else {
-            setFetchingPatches(false)
-            setPatches(response.data.body)
+            setFetchingArtefacts(false)
+            setArtefacts(response.data.body)
         }
     }
 
     useEffect(() => {
 
         (async () => {
-            await fetchPatches();
+            await fetchArtefacts();
         })()
     }, [])
 
     useEffect(() => {
         (async () => {
-            const response = await axios.get(url("/api/tags/all?type=PATCH"));
+            const response = await axios.get(url("/api/tags/all?type=ARTEFACT"));
             if (response.status !== 200) {
                 // TODO
                 return;
@@ -74,9 +74,9 @@ export const PatchArchive: React.FC = props => {
 
     useEffect(() => {
         const { search } = location;
-        const { patch } = queryString.parse(search);
-        if (patch) {
-            setSelectedPatch(patches.filter((p: IPatch) => p.id === Number(patch))[0] ?? null);
+        const { artefact } = queryString.parse(search);
+        if (artefact) {
+            setSelectedArtefact(artefacts.filter((a: IArtefact) => a.id === Number(artefact))[0] ?? null);
             if (isSmallScreen) {
                 setTimeout(() =>
                     pageRef.current.scrollIntoView({ behavior: "smooth" })
@@ -84,25 +84,25 @@ export const PatchArchive: React.FC = props => {
                 )
             }
         }
-    }, [location, patches])
+    }, [location, artefacts])
 
-    const clickPatch = (patch: IPatch) => {
+    const clickArtefact = (artefact: IArtefact) => {
         if (edit) return;
-        setSelectedPatch(patch);
+        setSelectedArtefact(artefact);
         history.push({
-            search: `?patch=${patch.id}`,
-            state: { from: ROUTES.PATCH_ARCHIVE }
+            search: `?artefact=${artefact.id}`,
+            state: { from: ROUTES.MUSEUM }
         })
         if (isSmallScreen) {
             pageRef.current.scrollTo({ behavior: "smooth", top: 0 })
         }
     }
 
-    const patchClose = () => {
-        setSelectedPatch(null);
+    const artefactClose = () => {
+        setSelectedArtefact(null);
         history.push({
-            pathname: ROUTES.PATCH_ARCHIVE,
-            state: { from: ROUTES.PATCH_ARCHIVE }
+            pathname: ROUTES.MUSEUM,
+            state: { from: ROUTES.MUSEUM }
         });
     }
 
@@ -110,13 +110,13 @@ export const PatchArchive: React.FC = props => {
         return selectedTags.filter((x: ITag) => x.id === tag.id).length > 0
     }
 
-    const patchTagsMatchesSelected = (patch: IPatch): boolean => {
-        const { tags } = patch;
-        //If no tags are selected, show all patches
+    const artefactTagsMatchesSelected = (artefact: IArtefact): boolean => {
+        const { tags } = artefact;
+        //If no tags are selected, show all artefacts
         if (selectedTags.length === 0) return true
         //Past the if statement above, we know we have selected at least one tag.
 
-        //If patch has no tags, do not match
+        //If artefact has no tags, do not match
         if (tags.length === 0) return false
 
         //Returns an array with booleans where each boolean represents a tag match.
@@ -132,53 +132,51 @@ export const PatchArchive: React.FC = props => {
         return tagMatches === selectedTags.length
     }
 
-    const sortPatches = useMemo(() => {
-        if (sortOption === PATCH_SORT_MODES.AÖ) return patches.sort((a: IPatch, b: IPatch) => {
+    const sortArtefacts = useMemo(() => {
+        if (sortOption === ARTEFACT_SORT_MODES.AÖ) return artefacts.sort((a: IArtefact, b: IArtefact) => {
             const A = a.name.toLowerCase();
             const B = b.name.toLowerCase();
             if (A < B) return -1;
             if (A > B) return 1;
             else return 0;
         })
-        if (sortOption === PATCH_SORT_MODES.ÖA) return patches.sort((a: IPatch, b: IPatch) => {
+        if (sortOption === ARTEFACT_SORT_MODES.ÖA) return artefacts.sort((a: IArtefact, b: IArtefact) => {
             const A = a.name.toLowerCase();
             const B = b.name.toLowerCase();
             if (A > B) return -1;
             if (A < B) return 1;
             else return 0;
         })
-        if (sortOption === PATCH_SORT_MODES.nu1983) return patches.sort((a: IPatch, b: IPatch) => (b.date === "" ? 0 : new Date(b.date).getTime()) - (a.date === "" ? 0 : new Date(a.date).getTime()));
-        if (sortOption === PATCH_SORT_MODES['1983nu']) return patches.sort((a: IPatch, b: IPatch) => (a.date === "" ? 0 : new Date(a.date).getTime()) - (b.date === "" ? 0 : new Date(b.date).getTime()));
-        if (sortOption === PATCH_SORT_MODES.newold) return patches.sort((a: IPatch, b: IPatch) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        if (sortOption === PATCH_SORT_MODES.oldnew) return patches.sort((a: IPatch, b: IPatch) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-        return patches;
-    }, [patches, sortOption])
+        if (sortOption === ARTEFACT_SORT_MODES.nu1983) return artefacts.sort((a: IArtefact, b: IArtefact) => (b.date === "" ? 0 : new Date(b.date).getTime()) - (a.date === "" ? 0 : new Date(a.date).getTime()));
+        if (sortOption === ARTEFACT_SORT_MODES['1983nu']) return artefacts.sort((a: IArtefact, b: IArtefact) => (a.date === "" ? 0 : new Date(a.date).getTime()) - (b.date === "" ? 0 : new Date(b.date).getTime()));
+        if (sortOption === ARTEFACT_SORT_MODES.newold) return artefacts.sort((a: IArtefact, b: IArtefact) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        if (sortOption === ARTEFACT_SORT_MODES.oldnew) return artefacts.sort((a: IArtefact, b: IArtefact) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        return artefacts;
+    }, [artefacts, sortOption])
 
-    const matchesSearch = (patch: IPatch): boolean => {
-        return patch.name.toLowerCase().match(new RegExp(patchQuery.toLowerCase(), "g")) !== null;
+    const matchesSearch = (artefact: IArtefact): boolean => {
+        return artefact.name.toLowerCase().match(new RegExp(artefactQuery.toLowerCase(), "g")) !== null;
     }
 
-    const resultingPatches = useMemo(() => {
-        return sortPatches.filter((p: IPatch) => matchesSearch(p) && patchTagsMatchesSelected(p))
-    }, [sortOption, patchQuery, selectedTags, patches])
+    const resultingArtefacts = useMemo(() => {
+        return sortArtefacts.filter((a: IArtefact) => matchesSearch(a) && artefactTagsMatchesSelected(a))
+    }, [sortOption, artefactQuery, selectedTags, artefacts])
 
     return (
         <div style={{ backgroundColor: "#eee" }} ref={pageRef}>
-            <FancyHeader title="Märkesarkiv">
+            <FancyHeader title="Museum">
                 <br />
-                <p>Har du ett märke som inte finns i arkivet? Är märket inte påsytt? Donera märket till arkivet. Mejla <a href="mailto:historiker@d.kth.se" target="_blank" rel="noopener noreferrer" style={{color: "white"}}>historiker@d.kth.se</a>.</p>
-                <p>För att se efterlysta märken, <a href="https://docs.google.com/document/d/1cqZVPaPqYPTMgjhl9T-CGxPSR4LRykVZ0uh3T0G6dMA/edit" target="_blank" rel="noopener noreferrer" style={{color: "white"}}>klicka här</a></p>
-                <br />
+                <p>Ta en titt på sektionens historiska föremål</p>
             </FancyHeader>
             <Helmet>
-                <title>{title("Märkesarkiv")}</title>
+                <title>{title("Museum")}</title>
             </Helmet>
             <StyledPatchArchiveDivider>
                 <Left>
                     <FilterAndSort
-                        label={"Sök bland " + patches.length + " märken"}
-                        patchQuery={patchQuery}
-                        setPatchQuery={setPatchQuery}
+                        label={"Sök bland " + artefacts.length + " föremål"}
+                        patchQuery={artefactQuery}
+                        setPatchQuery={setArtefactQuery}
                         sortOption={sortOption}
                         setSortOption={setSortOption}
                         selectedTags={selectedTags}
@@ -186,23 +184,23 @@ export const PatchArchive: React.FC = props => {
                         tags={tags}
                     />
                     <StyledPatchArchive>
-                        {fetchingPatches &&
+                        {fetchingArtefacts &&
                             <SpinnerCover />
                         }
-                        {!fetchingPatches && resultingPatches.length === 0 &&
+                        {!fetchingArtefacts && resultingArtefacts.length === 0 &&
                             <div style={{textAlign: "center", width: "100%", margin: "auto"}}>
-                                Inga märken hittades
+                                Inga föremål hittades
                             </div>
                         }
-                        {!fetchingPatches && resultingPatches.length !== 0 &&
+                        {!fetchingArtefacts && resultingArtefacts.length !== 0 &&
                             <StyledFlipMove duration={150} appearAnimation="fade" enterAnimation="fade" leaveAnimation="fade">
                                 {
-                                    resultingPatches
-                                    .map((x: IPatch, i: number) =>
+                                    resultingArtefacts
+                                    .map((x: IArtefact, i: number) =>
                                         <Patch
-                                            key={`patch-${i}-${x.id}`}
-                                            patch={x}
-                                            onClick={(patch: IPatch) => clickPatch(patch)}
+                                            key={`artefact-${i}-${x.id}`}
+                                            patch={{...x, creators: []}}
+                                            onClick={(artefact: IArtefact) => clickArtefact(artefact)}
                                             disabled={edit}
                                         />
                                     )
@@ -211,18 +209,18 @@ export const PatchArchive: React.FC = props => {
                         }
                     </StyledPatchArchive>
                 </Left>
-                {selectedPatch !== null &&
+                {selectedArtefact !== null &&
                     <Right>
                         <StyledFlipMoveDetails appearAnimation="fade" leaveAnimation="fade" enterAnimation="fade" duration={250}>
                             <WrappedPatchDetails
-                                editApiPath="/api/patches/update"
-                                patch={selectedPatch}
-                                onClose={patchClose}
+                                editApiPath="/api/artefacts/update"
+                                type="artefact"
+                                patch={{...selectedArtefact, creators: []}}
+                                onClose={artefactClose}
                                 allTags={tags}
-                                fetchPatches={fetchPatches}
+                                fetchPatches={fetchArtefacts}
                                 edit={edit}
                                 setEdit={setEdit}
-                                type="patch"
                             />
                         </StyledFlipMoveDetails>
                     </Right>

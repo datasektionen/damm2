@@ -1,19 +1,25 @@
 import ApiResponse from '../../common/ApiResponse';
 import { StatusCodes } from 'http-status-codes';
 import prisma from '../../common/client';
+import { TagType } from '.prisma/client';
 
 export const DEFAULT_TEXT_COLOR = "#FFFFFF";
 export const DEFAULT_BG_COLOR = "#E83D84";
 
-export const getAll = async (): Promise<ApiResponse> => {
+export const getAll = async (type?: string): Promise<ApiResponse> => {
+
+    const where = {
+        tagId: null,
+    } as any;
+
+    // If type provided, filter by type
+    if (type) where["type"] = type;
 
     const tags = await prisma.tag.findMany({
         include: {
             children: true,
         },
-        where: {
-            tagId: null
-        }
+        where,
     });
 
     return {
@@ -28,10 +34,11 @@ export const create = async (
     color: string = DEFAULT_TEXT_COLOR,
     backgroundColor: string = DEFAULT_BG_COLOR,
     parent: number,
+    type: string,
 ): Promise<ApiResponse> => {
 
     try {
-        if (await prisma.tag.findUnique({where: {name}}) !== null) {
+        if (await prisma.tag.findUnique({where: {name_type: { name, type: (<any>TagType)[type] }}}) !== null) {
             return {
                 statusCode: StatusCodes.BAD_REQUEST,
                 body: "Tagg med samma namn finns redan"
@@ -45,6 +52,7 @@ export const create = async (
                 color,
                 backgroundColor,
                 tagId: parent,
+                type: (<any>TagType)[type],
             },
             include: {
                 children: true,
@@ -72,9 +80,13 @@ export const update = async (
     backgroundColor: string = DEFAULT_BG_COLOR,
 ): Promise<ApiResponse> => {
 
+    const tagInQuestion = await prisma.tag.findUnique({where: {id}});
     const nameExists = await prisma.tag.findUnique({
         where: {
-            name,
+            name_type: {
+                name,
+                type: tagInQuestion?.type as TagType
+            }
         }
     });
 

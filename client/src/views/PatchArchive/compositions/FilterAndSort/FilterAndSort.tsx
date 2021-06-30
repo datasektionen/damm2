@@ -8,7 +8,6 @@ import { PATCH_SORT_MODES } from '../../PatchArchive';
 import { TagSelector } from '../../../../components/TagSelector/TagSelector';
 
 interface Props {
-    numberOfPatches: number;
     patchQuery: string;
     setPatchQuery: (value: string) => void;
     sortOption: string;
@@ -16,11 +15,12 @@ interface Props {
     selectedTags: ITag[];
     setSelectedTags: (next: any) => void;
     tags: ITag[];
+    label: string
 }
 
 export const FilterAndSort: React.FC<Props> = props => {
 
-    const { patchQuery, setPatchQuery, sortOption, setSortOption, selectedTags, setSelectedTags, tags } = props;
+    const { patchQuery, setPatchQuery, sortOption, setSortOption, selectedTags, setSelectedTags, tags, label } = props;
 
     const [tagsExpanded, setTagsExpanded] = useState(true);
     const [tagFilter, setTagFilter] = useState("");
@@ -45,7 +45,7 @@ export const FilterAndSort: React.FC<Props> = props => {
 
     return (
         <StyledFilterAndSort>
-            <h3>Sök bland {props.numberOfPatches} märken</h3>
+            <h3>{label}</h3>
             <ButtonRow>
                 <Button label="Rensa filter" onClick={() => clearAll()}/>
                 <Button label="Avmarkera taggar" onClick={() => setSelectedTags([])}/>

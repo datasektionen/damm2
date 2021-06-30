@@ -12,9 +12,17 @@ export const StyledHeader = styled.div({
   justifyContent: "center",
   userSelect: "none",
 
+  "p": {
+    fontSize: "14px",
+  },
+
   [maxWidth(600)]: {
     padding: 0,
     minHeight: "150px",
+    "p": {
+      fontSize: "12px",
+      padding: "0px 20px"
+    }
   }
 });
 

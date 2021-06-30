@@ -13,9 +13,10 @@ interface Props {
     onClose: () => void;
     onEditClick: () => void;
     fetchPatches: () => void;
+    type: "patch" | "artefact";
 }
 
-export const DetailsView: React.FC<Props> = ({patch, onEditClick, onClose, fetchPatches}) => {
+export const DetailsView: React.FC<Props> = ({ patch, onEditClick, onClose, fetchPatches, type }) => {
     const { admin } = useContext(AdminContext)
     const isAdmin = admin.includes("admin") || admin.includes("prylis");
 
@@ -23,7 +24,7 @@ export const DetailsView: React.FC<Props> = ({patch, onEditClick, onClose, fetch
     
     const deleteFile = (name: string) => {
         setLoading(true)
-        axios.delete(url(`/api/files/patch-file/?name=${encodeURIComponent(name)}&patchId=${patch.id}`), {
+        axios.delete(url(`/api/files/file/?name=${encodeURIComponent(name)}&id=${patch.id}&type=${type}`), {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`
             }
@@ -66,6 +67,10 @@ export const DetailsView: React.FC<Props> = ({patch, onEditClick, onClose, fetch
             <Right>
                 <H1>{patch.name}</H1>
                 <Meta>
+                <span title="Id">
+                    <i className="fas fa-fingerprint"></i>
+                    {patch.id}
+                </span>
                     <span title="Datum">
                         <i className="far fa-clock" />
                         {patch.date.length === 0 ?

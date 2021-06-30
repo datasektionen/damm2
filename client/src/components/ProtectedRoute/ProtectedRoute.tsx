@@ -6,7 +6,7 @@ import { SpinnerCover } from '../SpinnerCover/SpinnerCover';
 interface Props {
     allowed: "prylis" | "admin";
 }
-
+// Component that protects a route.
 export const ProtectedRoute: React.FC<Props> = ({ children, allowed }) => {
     const { admin, loading: checkingToken } = useContext(AdminContext)
     

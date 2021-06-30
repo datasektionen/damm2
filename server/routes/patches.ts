@@ -36,7 +36,7 @@ async (req, res) => {
 router.put("/update",
     authorizePls,
     adminPrylisAuth,
-    body("patchId").isInt().not().isString().withMessage("should be an integer"),
+    body("id").isInt().not().isString().withMessage("should be an integer"),
     body("name").trim().isString().notEmpty().optional().withMessage("should be a string"),
     body("description").trim().isString().optional().withMessage("should be a string"),
     body("date").matches(DATE_FORMAT).optional().withMessage("should be a date with format YYYY-MM-DD"),
@@ -47,9 +47,9 @@ router.put("/update",
     check("creators.*").isString().trim().notEmpty().withMessage("should be a string"),
     validationCheck,
 async (req, res) => {
-    const { patchId, name, date, description, tags, creators, files } = req.body;
+    const { id, name, date, description, tags, creators, files } = req.body;
 
-    const result = await update(patchId, { name, date, description, tags, creators, files });
+    const result = await update(id, { name, date, description, tags, creators, files });
     return res.status(result.statusCode).json(result);
 });
 

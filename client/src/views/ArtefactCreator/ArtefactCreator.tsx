@@ -30,7 +30,6 @@ interface Form {
     description: string;
     date: string;
     tags: ITag[];
-    creators: string[];
 }
 
 const defaultForm: Form = {
@@ -38,10 +37,9 @@ const defaultForm: Form = {
     description: "",
     date: "",
     tags: [],
-    creators: [],
 }
 
-export const PatchCreator: React.FC<Props> = props => {
+export const ArtefactCreator: React.FC<Props> = props => {
 
     const [allTags, setAllTags] = useState<ITag[]>([]);
     const [form, setForm] = useState<Form>(defaultForm);
@@ -56,7 +54,7 @@ export const PatchCreator: React.FC<Props> = props => {
     useEffect(() => {
         (async () => {
             setLoading(true)
-            const result = await axios.get(url("/api/tags/all?type=PATCH"))
+            const result = await axios.get(url("/api/tags/all?type=ARTEFACT"))
             if (result.status === 200) {
                 setAllTags(result.data.body);
                 setLoading(false)
@@ -102,7 +100,6 @@ export const PatchCreator: React.FC<Props> = props => {
             name: form.name,
             description: form.description,
             tags: form.tags.map((t: ITag) => t.id),
-            creators: form.creators,
         } as any;
 
         if (form.date.length !== 0) body.date = form.date;
@@ -115,19 +112,19 @@ export const PatchCreator: React.FC<Props> = props => {
 
         let createPatchResult;
         try {
-            createPatchResult = await axios.post(url("/api/patches/create"), body, config)
+            createPatchResult = await axios.post(url("/api/artefacts/create"), body, config)
             if (createPatchResult.status !== 200) {
             }
 
             const imageFormData = new FormData();
             imageFormData.append("image", image as File);
     
-            const uploadImageResult = await axios.post(url("/api/files/upload/patch-image"), imageFormData, config)
+            const uploadImageResult = await axios.post(url("/api/files/upload/artefact-image"), imageFormData, config)
     
             await axios.post(url("/api/files/attach/img-to"), {
                 id: createPatchResult.data.body.id,
                 images: uploadImageResult.data.body.map((b: any) => b.Location),
-                type: "patch",
+                type: "artefact",
             }, config)
             
         } catch (err) {
@@ -140,7 +137,7 @@ export const PatchCreator: React.FC<Props> = props => {
         if (files.length !== 0) {
 
             try {
-                await uploadFiles(createPatchResult.data.body.id, files[0]);
+                await uploadFiles(createPatchResult.data.body.id, files[0], "artefact");
             } catch (err) {
                 scrollTop();
                 setLoading(false);
@@ -172,7 +169,7 @@ export const PatchCreator: React.FC<Props> = props => {
 
     return (
         <>
-            <Header title="Skapa märke" />
+            <Header title="Skapa föremål" />
             <Helmet>
                 <title>{title("Skapa märke")}</title>
             </Helmet>
@@ -183,7 +180,7 @@ export const PatchCreator: React.FC<Props> = props => {
                 <Content>
                     {success &&
                         <Alert type="success">
-                            Märket skapades
+                            Föremålet skapades
                         </Alert>
                     }
                     {error &&
@@ -191,16 +188,16 @@ export const PatchCreator: React.FC<Props> = props => {
                             {error}
                         </Alert>
                     }
-                    <p>Skapa ett märke till märkesarkivet</p>
+                    <p>Skapa ett föremål till museet</p>
                     <H3>Bild <Required /></H3>
-                    <H4>Ladda upp en högupplöst bild på märket. En komprimerad version genereras av servern och visas som tumnagel i arkivet. Inte förrän man klickar på märket syns den högupplösta versionen</H4>
+                    <H4>Ladda upp en högupplöst bild på föremålet. En komprimerad version genereras av servern och visas som tumnagel i arkivet. Inte förrän man klickar på föremålet syns den högupplösta versionen</H4>
                     {image &&
                         <Row>
                             <ImagePreview src={patchPreview} draggable={false} />
                         </Row>
                     }
                     <FileUploader
-                        label="Ladda upp en bild på märket"
+                        label="Ladda upp en bild på föremålet"
                         files={image ? [image] : []}
                         onAddFile={onAddImage}
                         onFileRemove={onClearImage}
@@ -208,7 +205,7 @@ export const PatchCreator: React.FC<Props> = props => {
                         disabled={loading}
                     />
                     <H3>Namn <Required /></H3>
-                    <H4>Ange ett namn på märket</H4>
+                    <H4>Ange ett namn på föremålet</H4>
                     <Field
                         name="name"
                         placeholder="Namn"
@@ -217,7 +214,7 @@ export const PatchCreator: React.FC<Props> = props => {
                         disabled={loading}
                     />
                     <H3>Beskrivning</H3>
-                    <H4>Beskriv märkets bakgrund, historia eller något annat roligt</H4>
+                    <H4>Beskriv föremålets bakgrund, historia eller något annat roligt (föremålets "lore" med andra ord)</H4>
                     <TextArea
                         name="description"
                         placeholder="Beskrivning"
@@ -226,7 +223,7 @@ export const PatchCreator: React.FC<Props> = props => {
                         disabled={loading}
                     />
                     <H3>Datum</H3>
-                    <H4>Datum som märket släpptes, lämna tomt om okänt</H4>
+                    <H4>Datum som föremålet släpptes, lämna tomt om okänt</H4>
                     <Field
                         name="date"
                         type="date"
@@ -244,22 +241,13 @@ export const PatchCreator: React.FC<Props> = props => {
                         query=""
                     />
                     <H3>Filer</H3>
-                    <H4>Lägg upp tillhörande filer, exempelvis käll-filer</H4>
+                    <H4>Lägg upp tillhörande filer</H4>
                     <FileUploader
                         files={files}
                         onAddFile={(file: File) => setFiles([file])}
                         onFileRemove={(file: File) => setFiles([])}
                         multiple={true}
                         label="Går bara att ladda upp en i taget. Lägg upp fler i redigeringsvyn."
-                    />
-                    <H3>Upphovsmän</H3>
-                    <H4>Personer som skapade detta märke</H4>
-                    <CreatorHandler 
-                        creator={creator}
-                        setCreator={(name: string) => setCreator(name)}
-                        creators={form.creators}
-                        setCreators={(next: string[]) => setForm({ ...form, creators: next })}
-                        disabled={loading}
                     />
                     <BRow>
                         <Button

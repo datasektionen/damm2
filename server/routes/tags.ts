@@ -4,9 +4,11 @@ import { body, param } from 'express-validator';
 import { StatusCodes } from 'http-status-codes';
 const router = express.Router();
 import { getAll, create, update, deleteTag } from '../functions/api/tags';
+import { TAG_TYPES } from '../common/patterns';
 
 router.get("/all", async (req, res) => {
-    const tags = await getAll();
+    const { type } = req.query;
+    const tags = await getAll(type as string);
 
     return res.status(StatusCodes.OK).json(tags);
 });
@@ -23,11 +25,12 @@ router.post("/create",
     authorizePls,
     adminPrylisAuth,
     body("parent").optional().isInt().not().isString().withMessage("should be an integer"),
+    body("type").isString().trim().matches(TAG_TYPES).withMessage("should be either 'PATCH' or 'ARTEFACT'"),
     ...tagValidators,
 async (req, res) => {
-    const { name, description, color, backgroundColor, parent } = req.body;
+    const { name, description, color, backgroundColor, parent, type } = req.body;
 
-    const patch = await create(name, description, color, backgroundColor, parent);
+    const patch = await create(name, description, color, backgroundColor, parent, type);
     return res.status(patch.statusCode).json(patch);
 });
 
