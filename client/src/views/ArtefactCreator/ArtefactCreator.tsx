@@ -119,7 +119,7 @@ export const ArtefactCreator: React.FC<Props> = props => {
             const imageFormData = new FormData();
             imageFormData.append("image", image as File);
     
-            const uploadImageResult = await axios.post(url("/api/files/upload/artefact-image"), imageFormData, config)
+            const uploadImageResult = await axios.post(url("/api/files/upload/image?path=artefacts"), imageFormData, config)
     
             await axios.post(url("/api/files/attach/img-to"), {
                 id: createPatchResult.data.body.id,
@@ -137,7 +137,7 @@ export const ArtefactCreator: React.FC<Props> = props => {
         if (files.length !== 0) {
 
             try {
-                await uploadFiles(createPatchResult.data.body.id, files[0], "artefact");
+                await uploadFiles(createPatchResult.data.body.id, files[0], "artefact-files", "artefact");
             } catch (err) {
                 scrollTop();
                 setLoading(false);

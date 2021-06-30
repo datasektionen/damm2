@@ -122,7 +122,7 @@ export const PatchCreator: React.FC<Props> = props => {
             const imageFormData = new FormData();
             imageFormData.append("image", image as File);
     
-            const uploadImageResult = await axios.post(url("/api/files/upload/patch-image"), imageFormData, config)
+            const uploadImageResult = await axios.post(url("/api/files/upload/image?path=patches"), imageFormData, config)
     
             await axios.post(url("/api/files/attach/img-to"), {
                 id: createPatchResult.data.body.id,
@@ -140,7 +140,7 @@ export const PatchCreator: React.FC<Props> = props => {
         if (files.length !== 0) {
 
             try {
-                await uploadFiles(createPatchResult.data.body.id, files[0]);
+                await uploadFiles(createPatchResult.data.body.id, files[0], "patch-files", "patch");
             } catch (err) {
                 scrollTop();
                 setLoading(false);

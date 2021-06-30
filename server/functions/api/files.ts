@@ -29,14 +29,12 @@ const uploadToS3 = ({ Bucket, Key, Body, ContentType }: { Bucket: string, Key: s
         Key,
         Body,
         ContentType,
-        CacheControl: "max-age: 86400",
-        // Metadata: {
-        //     "Cache-Control": "max-age: 86400"
-        // }
+        // 2 days hours (48 hours)
+        CacheControl: "max-age: 172800",
     });
 };
 
-export const uploadImage = async (file: Express.Multer.File, type: "patches" | "artefacts"): Promise<ApiResponse> => {
+export const uploadImage = async (file: Express.Multer.File, folder: string): Promise<ApiResponse> => {
 
     const fileName = uuidv4();
     const extension = path.extname(file.originalname);
@@ -47,7 +45,7 @@ export const uploadImage = async (file: Express.Multer.File, type: "patches" | "
     try {
         const result = await uploadToS3({
             Bucket: configuration.AWS_S3_BUCKET,
-            Key: `${type}/${fullFileName}`,
+            Key: `${folder}/${fullFileName}`,
             Body: Buffer.from(file.buffer),
             ContentType: file.mimetype,
         }).promise();
@@ -67,7 +65,7 @@ export const uploadImage = async (file: Express.Multer.File, type: "patches" | "
 
         const result = await uploadToS3({
             Bucket: configuration.AWS_S3_BUCKET,
-            Key: `${type}/${fileName}-compressed${extension}`,
+            Key: `${folder}/${fileName}-compressed${extension}`,
             Body: compressedImage,
             ContentType: file.mimetype,
         }).promise();
@@ -124,13 +122,13 @@ export const attachImageTo = async (id: number, images: string[], type: "patch" 
 };
 
 // Patch files require auth to GET
-export const uploadFile = async (file: Express.Multer.File, path: "patch-files" | "artefact-files"): Promise<ApiResponse> => {
+export const uploadFile = async (file: Express.Multer.File, folder: string): Promise<ApiResponse> => {
     const fileName = Date.now() + "-" + file.originalname;
 
     try {
         const result = await uploadToS3({
             Bucket: configuration.AWS_S3_BUCKET,
-            Key: `${path}/${fileName}`,
+            Key: `${folder}/${fileName}`,
             Body: Buffer.from(file.buffer),
             ContentType: file.mimetype,
         }).promise();

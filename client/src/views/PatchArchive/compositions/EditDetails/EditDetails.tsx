@@ -19,9 +19,10 @@ interface Props {
     fetchPatches: () => Promise<void>;
     tags: ITag[];
     editApiPath: string;
+    type: "patch" | "artefact"
 }
 
-export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatches, editApiPath}) => {
+export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatches, editApiPath, type }) => {
 
     const [editState, setEditState] = useState<IPatch>(patch);
     const [creator, setCreator] = useState("");
@@ -63,7 +64,7 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
         .then(
             async res => {
                 if (files.length !== 0) {
-                    await uploadFiles(editState.id, files[0]);
+                    await uploadFiles(editState.id, files[0], type === "patch" ? "patch-files" : "artefact-files", type);
                 }
                 await fetchPatches();
                 onCancel();

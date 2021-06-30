@@ -6,6 +6,7 @@ import { StatusCodes } from 'http-status-codes';
 const router = express.Router();
 import multer from 'multer';
 import { uploadImage, attachImageTo, uploadFile, attachFileTo, getFile, deleteFileFrom, deleteFile } from '../functions/api/files';
+import { FOLDER_PATH } from '../common/patterns';
 
 const imageUpload = multer({
     fileFilter: (req, file, callback) => {
@@ -49,27 +50,20 @@ const hasFile = (req: express.Request, res: express.Response, next: express.Next
     next();
 };
 
-// Uploads images (image for a patch)
-router.post("/upload/patch-image",
+
+// Uploads images (image for a patch or artefact)
+router.post("/upload/image",
     authorizePls,
     adminPrylisAuth,
     imageUpload.single("image"),
+    // Should not end with /
+    query("path").matches(FOLDER_PATH),
+    validationCheck,
     hasImage,
 async (req, res) => {
-    
-    const result = await uploadImage(req.file, "patches");
-    return res.status(result.statusCode).json(result);
-});
+    const { path } = req.query;
 
-// Uploads images (image for an artefact)
-router.post("/upload/artefact-image",
-    authorizePls,
-    adminAuth,
-    imageUpload.single("image"),
-    hasImage,
-async (req, res) => {
-    
-    const result = await uploadImage(req.file, "artefacts");
+    const result = await uploadImage(req.file, path as string);
     return res.status(result.statusCode).json(result);
 });
 
@@ -89,25 +83,19 @@ async (req, res) => {
     return res.status(result.statusCode).json(result);
 });
 
-// Uploads files (for a patch)
-router.post("/upload/patch-file",
+// Uploads files
+router.post("/upload/file",
     authorizePls,
     adminPrylisAuth,
     fileUpload.single("file"),
+    // Should not end with /
+    query("path").matches(FOLDER_PATH),
+    validationCheck,
     hasFile,
 async (req, res) => {
-    const result = await uploadFile(req.file, "patch-files");
-    return res.status(result.statusCode).json(result);
-});
-
-// Uploads files (for an artefact)
-router.post("/upload/artefact-file",
-    authorizePls,
-    adminAuth,
-    fileUpload.single("file"),
-    hasFile,
-async (req, res) => {
-    const result = await uploadFile(req.file, "artefact-files");
+    const { path } = req.query;
+    
+    const result = await uploadFile(req.file, path as string);
     return res.status(result.statusCode).json(result);
 });
 

@@ -12,8 +12,8 @@ router.get("/all", async (req, res) => {
 });
 
 router.post("/create",
-    // authorizePls,
-    // adminAuth,
+    authorizePls,
+    adminAuth,
     body("name").isString().trim().notEmpty().withMessage("should be a non-empty string"),
     body("description").isString().trim().optional().withMessage("should be a string"),
     body("date").matches(DATE_FORMAT).optional().withMessage("should be a date with format YYYY-MM-DD"),
@@ -29,8 +29,8 @@ async (req, res) => {
 });
 
 router.put("/update",
-    // authorizePls,
-    // adminAuth,
+    authorizePls,
+    adminAuth,
     body("id").isInt().not().isString().withMessage("should be an integer"),
     body("name").isString().trim().notEmpty().optional().withMessage("should be a non-empty string"),
     body("description").isString().trim().optional().withMessage("should be a string"),

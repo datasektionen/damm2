@@ -36,6 +36,7 @@ export const PatchDetails: React.FC<Props> = ({ patch, onClose, allTags, fetchPa
                     tags={allTags}
                     fetchPatches={fetchPatches}
                     editApiPath={editApiPath}
+                    type={type}
                 />
                 :
                 <DetailsView
