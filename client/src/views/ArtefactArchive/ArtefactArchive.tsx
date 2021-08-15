@@ -104,6 +104,7 @@ export const ArtefactArchive: React.FC = props => {
             pathname: ROUTES.MUSEUM,
             state: { from: ROUTES.MUSEUM }
         });
+        setEdit(false);
     }
 
     const selectedTagsIncludesTag = (tag: ITag) => {
@@ -161,6 +162,20 @@ export const ArtefactArchive: React.FC = props => {
     const resultingArtefacts = useMemo(() => {
         return sortArtefacts.filter((a: IArtefact) => matchesSearch(a) && artefactTagsMatchesSelected(a))
     }, [sortOption, artefactQuery, selectedTags, artefacts])
+
+    const deleteArtefact = async (id: number) => {
+        if (window.confirm("Är du säker på att du vill radera föremålet? All data om föremålet kommer tas bort, inklusive filer tillhörande föremålet")) {
+            const result = await axios.delete(url(`/api/artefacts/${id}`), {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                }
+            })
+            if (result.status === 200) {
+                setArtefacts(artefacts.filter((a: IArtefact) => a.id !== id))
+                artefactClose()
+            }
+        }
+    }
 
     return (
         <div style={{ backgroundColor: "#eee" }} ref={pageRef}>
@@ -221,7 +236,7 @@ export const ArtefactArchive: React.FC = props => {
                                 fetchPatches={fetchArtefacts}
                                 edit={edit}
                                 setEdit={setEdit}
-                                onDeleteClick={() => {}}
+                                onDeleteClick={deleteArtefact}
                             />
                         </StyledFlipMoveDetails>
                     </Right>

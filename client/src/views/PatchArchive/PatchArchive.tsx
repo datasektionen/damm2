@@ -109,6 +109,7 @@ export const PatchArchive: React.FC = props => {
             pathname: ROUTES.PATCH_ARCHIVE,
             state: { from: ROUTES.PATCH_ARCHIVE }
         });
+        setEdit(false)
     }
 
     const selectedTagsIncludesTag = (tag: ITag) => {
@@ -168,10 +169,12 @@ export const PatchArchive: React.FC = props => {
     }, [sortOption, patchQuery, selectedTags, patches])
 
     const deletePatch = async (id: number) => {
-        console.log(id)
-
         if (window.confirm("Är du säker på att du vill radera märket? All data om märket kommer tas bort, inklusive filer tillhörande märket")) {
-            const result = await axios.delete(url(`/api/patches/${id}`))
+            const result = await axios.delete(url(`/api/patches/${id}`), {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                }
+            })
             if (result.status === 200) {
                 setPatches(patches.filter((p: IPatch) => p.id !== id))
                 patchClose()
