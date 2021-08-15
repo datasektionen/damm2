@@ -22,7 +22,7 @@ export const DetailsView: React.FC<Props> = ({ patch, onEditClick, onClose, fetc
     const isAdmin = admin.includes("admin") || admin.includes("prylis");
 
     const [loading, setLoading] = useState(false);
-    
+
     const deleteFile = (name: string) => {
         setLoading(true)
         axios.delete(url(`/api/files/file/?name=${encodeURIComponent(name)}&id=${patch.id}&type=${type}`), {
@@ -44,14 +44,14 @@ export const DetailsView: React.FC<Props> = ({ patch, onEditClick, onClose, fetc
                 <a href={patch.images[0]} target="_blank" rel="noopener noreferrer" title="Öppna i ny flik">
                     <PatchImage src={patch.images[0] ?? ""} draggable={false} />
                 </a>
-                {isAdmin && <Button label="Redigera" onClick={onEditClick} disabled={loading} /> }
+                {isAdmin && <Button label="Redigera" onClick={onEditClick} disabled={loading} />}
                 {isAdmin && type === "patch" && patch.files && patch.files.length !== 0 &&
                     <Files>
                         <h4>Filer</h4>
                         {patch.files.map((f: string) => {
                             const completeUrl = url(`/api/files/get/${encodeURIComponent(f)}?token=${localStorage.getItem("token")}`)
                             return (
-                                <div key={"patch-file-"+f}>
+                                <div key={"patch-file-" + f}>
                                     <a target="_blank" rel="noopener noreferrer" href={completeUrl}>{f}</a>
                                     <Thrash onClick={() => {
                                         if (loading) return;
@@ -66,32 +66,32 @@ export const DetailsView: React.FC<Props> = ({ patch, onEditClick, onClose, fetc
                 }
                 {type === "artefact" && patch.files.length !== 0 &&
                     <Files>
-                    <h4>Filer</h4>
-                    {patch.files.map((f: string) => {
-                        return (
-                            <div key={"patch-file-"+f}>
-                                <a target="_blank" rel="noopener noreferrer" href={`https://${Configuration.s3Bucket}.s3.eu-north-1.amazonaws.com/${encodeURIComponent(f)}`}>{f}</a>
-                                {isAdmin &&
-                                    <Thrash onClick={() => {
-                                        if (loading) return;
-                                        if (window.confirm("Är du säker? Filen tas bort permanent från AWS S3.")) deleteFile(f)
-                                    }}>
-                                        <i className="fas fa-trash" />
-                                    </Thrash>
-                                }
-                            </div>
-                        );
-                    })}
-                </Files>
+                        <h4>Filer</h4>
+                        {patch.files.map((f: string) => {
+                            return (
+                                <div key={"patch-file-" + f}>
+                                    <a target="_blank" rel="noopener noreferrer" href={`https://${Configuration.s3Bucket}.s3.eu-north-1.amazonaws.com/${encodeURIComponent(f)}`}>{f}</a>
+                                    {isAdmin &&
+                                        <Thrash onClick={() => {
+                                            if (loading) return;
+                                            if (window.confirm("Är du säker? Filen tas bort permanent från AWS S3.")) deleteFile(f)
+                                        }}>
+                                            <i className="fas fa-trash" />
+                                        </Thrash>
+                                    }
+                                </div>
+                            );
+                        })}
+                    </Files>
                 }
             </Left>
             <Right>
                 <H1>{patch.name}</H1>
                 <Meta>
-                <span title="Id">
-                    <i className="fas fa-fingerprint"></i>
-                    {patch.id}
-                </span>
+                    <span title="Id">
+                        <i className="fas fa-fingerprint"></i>
+                        {patch.id}
+                    </span>
                     <span title="Datum">
                         <i className="far fa-clock" />
                         {patch.date.length === 0 ?
@@ -111,7 +111,7 @@ export const DetailsView: React.FC<Props> = ({ patch, onEditClick, onClose, fetc
                     <span title="Senast redigerad">
                         <i className="fas fa-edit"></i>
                         <Moment format="Do MMMM YYYY HH:mm:ss" locale="sv">
-                                {patch.updatedAt}
+                            {patch.updatedAt}
                         </Moment>
                     </span>
                     {patch.creators.length !== 0 &&
