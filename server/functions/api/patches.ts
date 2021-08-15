@@ -125,7 +125,9 @@ export const deletePatch = async (id: number): Promise<ApiResponse> => {
 
     if (!patch) return {
         statusCode: StatusCodes.NOT_FOUND
-    }
+    };
+
+    const errors = [];
 
     // Delete images
     for (const img of patch?.images) {
@@ -133,16 +135,25 @@ export const deletePatch = async (id: number): Promise<ApiResponse> => {
         // Skip first '/'
         const name = url.pathname.substring(1);
         try {
-            await deleteFile(name)
+            await deleteFile(name);
         } catch (err) {
-            return {
-                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-                error: `Something went wrong when deleting image ${name}`
-            };
+            errors.push({
+                "error": `Something went wrong when deleting image ${name}`
+            });
         }
     }
-    // Delete files
 
+    // Delete files
+    for (const file of patch.files) {
+        const name = file;
+        try {
+            await deleteFile(name);
+        } catch (err) {
+            errors.push({
+                "error": `Something went wrong when deleting file ${name}`
+            });
+        }
+    }
 
     // Delete from database
     try {
@@ -150,13 +161,19 @@ export const deletePatch = async (id: number): Promise<ApiResponse> => {
             where: {
                 id,
             }
-        })
+        });
     } catch (err) {
-
+        return {
+            statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+            error: [
+                "Failed to delete Patch from database",
+                ...errors,
+            ]
+        };
     }
-
 
     return {
-        statusCode: StatusCodes.OK
-    }
-}
+        statusCode: StatusCodes.OK,
+        error: errors,
+    };
+};

@@ -59,7 +59,7 @@ router.delete("/:id",
 async (req, res) => {
     const id = Number(req.params.id);
     const result = await deletePatch(id);
-    return res.status(result.statusCode).json(result)
-})
+    return res.status(result.statusCode).json(result);
+});
 
 export default router;

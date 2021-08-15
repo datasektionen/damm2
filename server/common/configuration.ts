@@ -15,4 +15,9 @@ const configuration = {
     PLS_API_URL: process.env.PLS_API_URL ?? "https://pls.datasektionen.se/api",
 };
 
+if (configuration.NODE_ENV === "development" && configuration.AWS_S3_BUCKET === "dsekt-damm") {
+    console.log("ERROR: NODE_ENV=development && AWS_S3_BUCKET=dsekt-damm-prod, vill du verkligen jobba med produktionsdatabasen? Stänger ned...");
+    process.exit(1);
+}
+
 export default configuration;

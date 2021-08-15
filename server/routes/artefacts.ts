@@ -3,7 +3,7 @@ import express from 'express';
 import { body, check } from 'express-validator';
 import { StatusCodes } from 'http-status-codes';
 const router = express.Router();
-import { getAll, create, update } from '../functions/api/artefacts';
+import { getAll, create, update, deleteArtefact } from '../functions/api/artefacts';
 import { DATE_FORMAT } from '../common/patterns';
 
 router.get("/all", async (req, res) => {
@@ -46,6 +46,13 @@ async (req, res) => {
     return res.status(patch.statusCode).json(patch);
 });
 
-
+router.delete("/:id",
+    authorizePls,
+    adminAuth,
+async (req, res) => {
+    const id = Number(req.params.id);
+    const result = await deleteArtefact(id);
+    return res.status(result.statusCode).json(result);
+});
 
 export default router;

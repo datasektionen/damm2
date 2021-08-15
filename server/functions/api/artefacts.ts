@@ -1,6 +1,7 @@
 import ApiResponse from '../../common/ApiResponse';
 import { StatusCodes } from 'http-status-codes';
 import prisma from '../../common/client';
+import { deleteFile } from './files';
 
 export const getAll = async (): Promise<ApiResponse> => {
     const result = await prisma.artefact.findMany({
@@ -93,4 +94,67 @@ export const update = async (id: number, name: string, description: string, date
             error: err,
         };
     }
+};
+
+export const deleteArtefact = async (id: number): Promise<ApiResponse> => {
+
+    const artefact = await prisma.artefact.findUnique({
+        where: {
+            id,
+        }
+    });
+
+    if (!artefact) return {
+        statusCode: StatusCodes.NOT_FOUND
+    };
+
+    const errors = [];
+
+    // Delete images
+    for (const img of artefact?.images) {
+        const url = new URL(img);
+        // Skip first '/'
+        const name = url.pathname.substring(1);
+        try {
+            await deleteFile(name);
+        } catch (err) {
+            errors.push({
+                "error": `Something went wrong when deleting image ${name}`
+            });
+        }
+    }
+
+    // Delete files
+    for (const file of artefact.files) {
+        const name = file;
+        try {
+            await deleteFile(name);
+        } catch (err) {
+            errors.push({
+                "error": `Something went wrong when deleting file ${name}`
+            });
+        }
+    }
+
+    // Delete from database
+    try {
+        await prisma.artefact.delete({
+            where: {
+                id,
+            }
+        });
+    } catch (err) {
+        return {
+            statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+            error: [
+                "Failed to delete Artefact from database",
+                ...errors,
+            ]
+        };
+    }
+
+    return {
+        statusCode: StatusCodes.OK,
+        error: errors,
+    };
 };
