@@ -2,6 +2,8 @@ import ApiResponse from '../../common/ApiResponse';
 import { StatusCodes } from 'http-status-codes';
 import prisma from '../../common/client';
 import { IUserRequest } from '../../common/requests';
+import { URL } from 'url';
+import { deleteFile } from './files';
 
 export const getAllPatches = async (user: IUserRequest["user"]): Promise<ApiResponse> => {
 
@@ -112,3 +114,49 @@ export const update = async (patchId: number, {name, date, description, tags, cr
         body: result
     };
 };
+
+export const deletePatch = async (id: number): Promise<ApiResponse> => {
+
+    const patch = await prisma.patch.findUnique({
+        where: {
+            id,
+        }
+    });
+
+    if (!patch) return {
+        statusCode: StatusCodes.NOT_FOUND
+    }
+
+    // Delete images
+    for (const img of patch?.images) {
+        const url = new URL(img);
+        // Skip first '/'
+        const name = url.pathname.substring(1);
+        try {
+            await deleteFile(name)
+        } catch (err) {
+            return {
+                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+                error: `Something went wrong when deleting image ${name}`
+            };
+        }
+    }
+    // Delete files
+
+
+    // Delete from database
+    try {
+        await prisma.patch.delete({
+            where: {
+                id,
+            }
+        })
+    } catch (err) {
+
+    }
+
+
+    return {
+        statusCode: StatusCodes.OK
+    }
+}

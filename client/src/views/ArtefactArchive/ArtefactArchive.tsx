@@ -221,6 +221,7 @@ export const ArtefactArchive: React.FC = props => {
                                 fetchPatches={fetchArtefacts}
                                 edit={edit}
                                 setEdit={setEdit}
+                                onDeleteClick={() => {}}
                             />
                         </StyledFlipMoveDetails>
                     </Right>

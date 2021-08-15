@@ -16,6 +16,7 @@ export const CardHead: React.FC<Props> = ({ id, title, type, index, date, onEdit
 
     const { admin } = useContext(AdminContext);
     const isAdmin = admin.includes("prylis") || admin.includes("admin");
+    console.log(isAdmin)
 
     return (
         <StyledCardHead index={index}>

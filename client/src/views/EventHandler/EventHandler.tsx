@@ -226,7 +226,7 @@ export const EventHandler: React.FC = props => {
                         />
                     }
                     <div>
-                        {loading ?
+                        {loading && !edit ?
                             <div style={{textAlign: "center"}}>
                                 <Spinner />
                             </div>

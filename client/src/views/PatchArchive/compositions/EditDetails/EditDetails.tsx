@@ -12,6 +12,7 @@ import { CreatorHandler } from '../../../../components/CreatorHandler/CreatorHan
 import { SpinnerCover } from '../../../../components/SpinnerCover/SpinnerCover';
 import { uploadFiles } from '../../../../functions/fileUploading';
 import { Alert } from '../../../../components/Alert/Alert';
+import Theme from '../../../../common/Theme';
 
 interface Props {
     onCancel: () => void;
@@ -19,10 +20,11 @@ interface Props {
     fetchPatches: () => Promise<void>;
     tags: ITag[];
     editApiPath: string;
-    type: "patch" | "artefact"
+    type: "patch" | "artefact";
+    onDeleteClick: (id: number) => any;
 }
 
-export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatches, editApiPath, type }) => {
+export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatches, editApiPath, type, onDeleteClick }) => {
 
     const [editState, setEditState] = useState<IPatch>(patch);
     const [creator, setCreator] = useState("");
@@ -166,6 +168,14 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
                     onClick={put}
                     disabled={loading || (patch === editState && files.length === 0)}
                     isLoading={loading}
+                />
+            </BRow>
+            <BRow>
+                <Button
+                    label="Radera"
+                    onClick={() => onDeleteClick(patch.id)}
+                    color="white"
+                    backgroundColor={Theme.palette.red}
                 />
             </BRow>
         </StyledEditDetails>

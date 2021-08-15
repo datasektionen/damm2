@@ -17,9 +17,10 @@ interface Props {
     setEdit: (state: boolean) => void;
     editApiPath: string;
     type: "patch" | "artefact";
+    onDeleteClick: (id: number) => any;
 }
 
-export const PatchDetails: React.FC<Props> = ({ patch, onClose, allTags, fetchPatches, edit, setEdit, editApiPath, type }) => {
+export const PatchDetails: React.FC<Props> = ({ patch, onClose, allTags, fetchPatches, edit, setEdit, editApiPath, type, onDeleteClick }) => {
 
     const ref = useRef(document.createElement("div"));
     
@@ -37,6 +38,7 @@ export const PatchDetails: React.FC<Props> = ({ patch, onClose, allTags, fetchPa
                     fetchPatches={fetchPatches}
                     editApiPath={editApiPath}
                     type={type}
+                    onDeleteClick={(id: number) => onDeleteClick(id)}
                 />
                 :
                 <DetailsView

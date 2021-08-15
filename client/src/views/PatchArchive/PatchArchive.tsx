@@ -53,6 +53,7 @@ export const PatchArchive: React.FC = props => {
         }
     }
 
+    // Fetch patches on mount
     useEffect(() => {
 
         (async () => {
@@ -60,6 +61,7 @@ export const PatchArchive: React.FC = props => {
         })()
     }, [])
 
+    // Fetch tags on mount
     useEffect(() => {
         (async () => {
             const response = await axios.get(url("/api/tags/all?type=PATCH"));
@@ -72,6 +74,8 @@ export const PatchArchive: React.FC = props => {
         })()
     }, []);
 
+
+    // Set selected patch when location string or patches array is changed
     useEffect(() => {
         const { search } = location;
         const { patch } = queryString.parse(search);
@@ -91,6 +95,7 @@ export const PatchArchive: React.FC = props => {
         setSelectedPatch(patch);
         history.push({
             search: `?patch=${patch.id}`,
+            // from is used in ScrollToTop.tsx. It makes us not scroll to top
             state: { from: ROUTES.PATCH_ARCHIVE }
         })
         if (isSmallScreen) {
@@ -162,6 +167,18 @@ export const PatchArchive: React.FC = props => {
         return sortPatches.filter((p: IPatch) => matchesSearch(p) && patchTagsMatchesSelected(p))
     }, [sortOption, patchQuery, selectedTags, patches])
 
+    const deletePatch = async (id: number) => {
+        console.log(id)
+
+        if (window.confirm("Är du säker på att du vill radera märket? All data om märket kommer tas bort, inklusive filer tillhörande märket")) {
+            const result = await axios.delete(url(`/api/patches/${id}`))
+            if (result.status === 200) {
+                setPatches(patches.filter((p: IPatch) => p.id !== id))
+                patchClose()
+            }
+        }
+    }
+
     return (
         <div style={{ backgroundColor: "#eee" }} ref={pageRef}>
             <FancyHeader title="Märkesarkiv">
@@ -223,6 +240,7 @@ export const PatchArchive: React.FC = props => {
                                 edit={edit}
                                 setEdit={setEdit}
                                 type="patch"
+                                onDeleteClick={deletePatch}
                             />
                         </StyledFlipMoveDetails>
                     </Right>

@@ -4,7 +4,7 @@ import { IUserRequest } from '../common/requests';
 import { body, check } from 'express-validator';
 import { StatusCodes } from 'http-status-codes';
 const router = express.Router();
-import { getAllPatches, create, update } from '../functions/api/patches';
+import { getAllPatches, create, update, deletePatch } from '../functions/api/patches';
 import { DATE_FORMAT } from '../common/patterns';
 
 router.get("/all",
@@ -52,5 +52,14 @@ async (req, res) => {
     const result = await update(id, { name, date, description, tags, creators, files });
     return res.status(result.statusCode).json(result);
 });
+
+router.delete("/:id",
+    authorizePls,
+    adminPrylisAuth,
+async (req, res) => {
+    const id = Number(req.params.id);
+    const result = await deletePatch(id);
+    return res.status(result.statusCode).json(result)
+})
 
 export default router;
