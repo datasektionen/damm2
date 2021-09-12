@@ -16,7 +16,7 @@ const configuration = {
 };
 
 if (configuration.NODE_ENV === "development" && configuration.AWS_S3_BUCKET === "dsekt-damm") {
-    console.log("ERROR: NODE_ENV=development && AWS_S3_BUCKET=dsekt-damm-prod, vill du verkligen jobba med produktionsdatabasen? Stänger ned...");
+    console.log("ERROR: NODE_ENV=development && AWS_S3_BUCKET=dsekt-damm-prod, vill du verkligen jobba med produktions-bucket:en? Stänger ned...");
     process.exit(1);
 }
 

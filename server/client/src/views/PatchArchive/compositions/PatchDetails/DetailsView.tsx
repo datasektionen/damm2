@@ -68,9 +68,10 @@ export const DetailsView: React.FC<Props> = ({ patch, onEditClick, onClose, fetc
                     <Files>
                         <h4>Filer</h4>
                         {patch.files.map((f: string) => {
+                            const completeUrl = url(`/api/files/get/unprotected/${encodeURIComponent(f)}`)
                             return (
                                 <div key={"patch-file-" + f}>
-                                    <a target="_blank" rel="noopener noreferrer" href={`https://${Configuration.s3Bucket}.s3.eu-north-1.amazonaws.com/${encodeURIComponent(f)}`}>{f}</a>
+                                    <a target="_blank" rel="noopener noreferrer" href={completeUrl}>{f}</a>
                                     {isAdmin &&
                                         <Thrash onClick={() => {
                                             if (loading) return;

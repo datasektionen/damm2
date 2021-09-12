@@ -114,12 +114,34 @@ async (req, res) => {
     return res.status(result.statusCode).json(result);
 });
 
+// Get protected files (patch-files for example)
 router.get("/get/:name",
     authorizePls,
     adminPrylisAuth,
 async (req, res) => {
 
     const { name } = req.params;
+
+    getFile(name)
+    .then((result: any) => {
+        res.status(200).send(result);
+    })
+    .catch(() => {
+        return res.status(StatusCodes.NOT_FOUND).json({
+            statusCode: StatusCodes.NOT_FOUND,
+        });
+    });
+});
+
+// Get artefact files
+router.get("/get/unprotected/:name", async (req, res) => {
+
+    const { name } = req.params;
+
+    if (!name.startsWith("artefact")) return res.status(StatusCodes.BAD_REQUEST).json({
+        statusCode: StatusCodes.BAD_REQUEST,
+        message: "Can only fetch unprotected artefact files."
+    });
 
     getFile(name)
     .then((result: any) => {

@@ -10,12 +10,14 @@
     },
     "scripts": {
         "install": "cd server && npm install && cd client && npm install",
-        "postinstall": "cd server && npm run build && cd client && npm run build",
+        "postinstall": "cd server && npm run build && npx prisma migrate deploy && cd client && npm run build",
         "build": "cd server && npm run build && cd client && npm run build",
         "build:client": "cd server/client && npm run build",
         "build:server": "cd server && npm run build",
         "dev:client": "cd server/client && npm start",
         "dev:server": "cd server && npm run dev",
+        "lint": "cd server && npm run lint",
+        "lint:fix": "cd server && npm run lint:fix",
         "start": "cd server && npm start"
     }
 }
