@@ -8,6 +8,9 @@
     "prisma": {
         "schema": "server/prisma/schema.prisma"
     },
+    "engines": {
+        "node": "^12.20.0 || ^14.13.1 || >=16.0.0"
+    },
     "scripts": {
         "install": "cd server && npm install && cd client && npm install",
         "postinstall": "cd server && npm run build && npx prisma migrate deploy && cd client && npm run build",
