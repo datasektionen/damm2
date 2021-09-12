@@ -17,13 +17,7 @@ app.use(cors());
 if (configuration.NODE_ENV === "development") {
     app.use(morgan("dev"));
 } else if (configuration.NODE_ENV === "production") {
-    app.use(morgan("common", {
-        //https://stackoverflow.com/a/53412745
-        // Save logs to file. "a" flag mean append to file, create if not exists.
-        stream: fs.createWriteStream(path.join(__dirname, "server.log"), { flags: "a"}),
-        // Don't log requests that went OK.
-        skip: (req, res) => { return res.statusCode < 400; }
-    }));
+    app.use(morgan("common"));
 }
 
 app.use("/api", apiRouter);
