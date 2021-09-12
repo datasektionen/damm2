@@ -26,9 +26,8 @@ const fuzzyfile = fs.readFileSync("./fuzzyfile.json");
 app.get("/fuzzyfile", (req, res) => res.send(fuzzyfile));
 
 // Serve React app
-// Fungerar om du kör från /, men inte om du kör från /server
-app.use(express.static(path.join(__dirname, "..", "client", "build")));
-app.get("*", (req, res) => res.sendFile(path.join(__dirname, "..", "client", "build", "index.html")));
+app.use(express.static(path.join(__dirname, "client", "build")));
+app.get("*", (req, res) => res.sendFile(path.join(__dirname, "client", "build", "index.html")));
 
 const PORT = configuration.PORT;
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
