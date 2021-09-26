@@ -8,6 +8,9 @@
       "types": [
           "node"
       ],
+      "typeRoots": [
+        "./node_modules/@types"
+      ],
       "esModuleInterop": true,
       "inlineSourceMap": true
     },
