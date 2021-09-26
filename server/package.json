@@ -2,7 +2,7 @@
   "name": "damm-server",
   "version": "1.0.0",
   "scripts": {
-    "build": "tsc && npm run copy-files",
+    "build": "npx tsc && npm run copy-files",
     "copy-files": "cp -r fuzzyfile.json prisma ./dist/",
     "start": "node dist/app.js",
     "test": "NODE_ENV=testing mocha -r ts-node/register test/*.ts --exit",
