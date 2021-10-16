@@ -2,13 +2,9 @@ name: Build and lint
 
 on:
   push:
-    paths:
-      - 'server/**'
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    paths:
-      - 'server/**'
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   test:
@@ -27,11 +23,10 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
+    # Installs both client and server, builds client
     - name: Install packages
       run: npm ci
     - name: Lint backend
       run: npm run lint
-    - name: Build React
-      run: npm run build:client
     - name: Build backend
       run: npm run build:server

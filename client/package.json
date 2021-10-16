@@ -25,6 +25,7 @@
     "web-vitals": "^1.1.0"
   },
   "scripts": {
+    "postinstall": "npm run build",
     "start": "react-scripts start",
     "build": "react-scripts build && npm run postbuild",
     "postbuild": "mkdir -p ../dist/client && rsync -a build ../dist/client/",
