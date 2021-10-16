@@ -7,11 +7,6 @@
       "strict": true,
       "baseUrl": "./",
       "moduleResolution": "node",
-      "paths": {
-        "*": [
-          "node_modules/*"
-        ]
-      },
       "typeRoots": [
         "./node_modules/@types/"
       ],
@@ -19,7 +14,7 @@
       "inlineSourceMap": true
     },
     "exclude": [
-      "node_modules",
+      // "node_modules",
       "dist",
       "client"
     ]
