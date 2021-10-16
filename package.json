@@ -4,7 +4,7 @@
   "scripts": {
     "build": "tsc && npm run copy-files",
     "copy-files": "cp -r fuzzyfile.json prisma ./dist/",
-    "postinstall": "cd client && npm install",
+    "postinstall": "npx prisma migrate deploy && cd client && npm install",
     "start": "node dist/app.js",
     "dev": "nodemon",
     "test": "NODE_ENV=testing mocha -r ts-node/register test/*.ts --exit",
