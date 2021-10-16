@@ -6,6 +6,9 @@
       "outDir": "./dist",
       "strict": true,
       "baseUrl": "./",
+      "paths": {
+        "*":  ["node_modules/*"]
+      },
       // "types": [
       //     "node"
       // ],
