@@ -6,12 +6,12 @@
       "outDir": "./dist",
       "strict": true,
       "baseUrl": "./",
-      "types": [
-          "node"
-      ],
-      "typeRoots": [
-        "./node_modules/@types"
-      ],
+      // "types": [
+      //     "node"
+      // ],
+      // "typeRoots": [
+      //   "./node_modules/@types"
+      // ],
       "esModuleInterop": true,
       "inlineSourceMap": true
     },

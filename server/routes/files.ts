@@ -63,7 +63,7 @@ router.post("/upload/image",
 async (req, res) => {
     const { path } = req.query;
 
-    const result = await uploadImage(req.file, path as string);
+    const result = await uploadImage(req.file as any, path as string);
     return res.status(result.statusCode).json(result);
 });
 
@@ -95,7 +95,7 @@ router.post("/upload/file",
 async (req, res) => {
     const { path } = req.query;
     
-    const result = await uploadFile(req.file, path as string);
+    const result = await uploadFile(req.file as any, path as string);
     return res.status(result.statusCode).json(result);
 });
 
