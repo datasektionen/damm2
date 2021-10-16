@@ -130,7 +130,7 @@ export const PatchCreator: React.FC<Props> = props => {
                 type: "patch",
             }, config)
             
-        } catch (err) {
+        } catch (err: any) {
             scrollTop();
             setLoading(false);
             setError(err.toString());

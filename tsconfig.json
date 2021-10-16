@@ -1,22 +1,24 @@
 {
     "compilerOptions": {
       "target": "es2017",
+      "allowJs": false,
       "module": "commonjs",
       "outDir": "./dist",
       "strict": true,
       "baseUrl": "./",
-      "typeRoots": [
-          "node_modules/@types"
-      ],
+      "moduleResolution": "node",
       "types": [
-          "node"
+        "node"
+      ],
+      "typeRoots": [
+        "./node_modules/@types/"
       ],
       "esModuleInterop": true,
       "inlineSourceMap": true
     },
     "exclude": [
-      "node_modules",
+      // "node_modules",
       "dist",
       "client"
     ]
-  }
+}

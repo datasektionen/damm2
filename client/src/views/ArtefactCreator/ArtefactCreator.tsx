@@ -127,7 +127,7 @@ export const ArtefactCreator: React.FC<Props> = props => {
                 type: "artefact",
             }, config)
             
-        } catch (err) {
+        } catch (err: any) {
             scrollTop();
             setLoading(false);
             setError(err.toString());

@@ -9,7 +9,7 @@ import filesRouter from './files';
 import eventsRouter from './events';
 import artefactsRouter from './artefacts';
 import { silentAuthorization } from '../common/middlewares';
-import { IUserRequest } from 'common/requests';
+import { IUserRequest } from '../common/requests';
 
 router.use("/patches", patchesRouter);
 router.use("/tags", tagsRouter);
