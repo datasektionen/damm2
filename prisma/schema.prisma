@@ -59,6 +59,7 @@ model Event {
   date     String
   type     EventType @default(SM_DM)
   protocol String?
+  createdBy String @default("axelelm")
 }
 
 model Artefact {

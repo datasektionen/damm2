@@ -15,7 +15,7 @@ import { ProtectedRoute } from './components/ProtectedRoute/ProtectedRoute';
 import { ArtefactArchive } from './views/ArtefactArchive/ArtefactArchive';
 import { ArtefactCreator } from './views/ArtefactCreator/ArtefactCreator';
 
-export const AdminContext = React.createContext<{ loading: boolean; admin: string[]; }>({ loading: true, admin: [] })
+export const AdminContext = React.createContext<{ loading: boolean; admin: string[]; user: string; }>({ loading: true, admin: [], user: "" })
 
 const defaultLinks = [
     <Link to={ROUTES.PATCH_ARCHIVE} key={"methonel-parchive"}>Märkesarkiv</Link>,
@@ -26,14 +26,18 @@ const defaultLinks = [
 export const App: React.FC = props => {
     const [methoneLinks, setMethoneLinks] = useState<React.ReactNode[]>(defaultLinks);
 
-    const { admin, loading, hasToken } = useAuthorization();
+    const { admin, loading, hasToken, user } = useAuthorization();
 
     useEffect(() => {
         if (admin.includes("admin")) {
             setMethoneLinks([...defaultLinks].concat(
                 <Link to={ROUTES.PATCH_CREATOR} key={"methonel-pcreator"}>Skapa märke</Link>,
-                <Link to={ROUTES.ARTEFACT_CREATOR} key={"methonel-pcreator"}>Skapa föremål</Link>,
+                <Link to={ROUTES.ARTEFACT_CREATOR} key={"methonel-acreator"}>Skapa föremål</Link>,
                 <Link to={ROUTES.TAGS_MANAGER} key={"methonel-tmanager"}>Hantera taggar</Link>,
+                <Link to={ROUTES.EVENT_HANDLER} key={"methonel-ehandler"}>Hantera händelser</Link>,
+            ))
+        } else if (admin.includes("post")) {
+            setMethoneLinks([...defaultLinks].concat(
                 <Link to={ROUTES.EVENT_HANDLER} key={"methonel-ehandler"}>Hantera händelser</Link>,
             ))
         } else if (admin.includes("prylis")) {
@@ -46,7 +50,7 @@ export const App: React.FC = props => {
 
     return (
         <div id="application" className="cerise">
-            <AdminContext.Provider value={{ loading, admin }}>
+            <AdminContext.Provider value={{ loading, admin, user }}>
                 <ScrollToTop />
                 <Methone
                     config={{
@@ -71,22 +75,22 @@ export const App: React.FC = props => {
                         <ArtefactArchive />
                     </Route>
                     <Route exact path={ROUTES.PATCH_CREATOR}>
-                        <ProtectedRoute allowed="prylis">
+                        <ProtectedRoute allowed={["prylis"]}>
                             <PatchCreator />
                         </ProtectedRoute>
                     </Route>
                     <Route exact path={ROUTES.ARTEFACT_CREATOR}>
-                        <ProtectedRoute allowed="admin">
+                        <ProtectedRoute allowed={["admin"]}>
                             <ArtefactCreator />
                         </ProtectedRoute>
                     </Route>
                     <Route exact path={ROUTES.TAGS_MANAGER}>
-                        <ProtectedRoute allowed="prylis">
+                        <ProtectedRoute allowed={["prylis"]}>
                             <TagsManager />
                         </ProtectedRoute>
                     </Route>
                     <Route exact path={ROUTES.EVENT_HANDLER}>
-                        <ProtectedRoute allowed="admin">
+                        <ProtectedRoute allowed={["admin", "post"]}>
                             <EventHandler />
                         </ProtectedRoute>
                     </Route>

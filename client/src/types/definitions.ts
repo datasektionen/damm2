@@ -33,7 +33,8 @@ export interface IEvent {
     date: string;
     type: "SM_DM" | "ANNIVERSARY" | "GENERAL" | "DFUNKT";
     protocol?: string;
-    mandates?: { date: moment.Moment; role: IRole; user: IUser}[]
+    mandates?: { date: moment.Moment; role: IRole; user: IUser}[];
+    createdBy: string;
 }
 
 export interface IEventsPerYear {

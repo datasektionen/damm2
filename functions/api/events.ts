@@ -11,7 +11,7 @@ export const getAll = async (): Promise<ApiResponse> => {
     };
 };
 
-export const createEvent = async (title: string, content: string, date: string, type: string, protocol: string): Promise<ApiResponse> => {
+export const createEvent = async (title: string, content: string, date: string, type: string, protocol: string, createdBy: string): Promise<ApiResponse> => {
     
     try {
         const result = await prisma.event.create({
@@ -22,6 +22,7 @@ export const createEvent = async (title: string, content: string, date: string, 
                 // Convert from string to enum
                 type: (<any>EventType)[type],
                 protocol,
+                createdBy,
             },
         });
 

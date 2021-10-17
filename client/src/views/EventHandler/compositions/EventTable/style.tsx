@@ -7,7 +7,7 @@ export const StyledEventTable = styled.div({
 
 export const ListHead = styled.div({
     display: "grid",
-    gridTemplateColumns: "50px 1fr 1fr 1fr auto",
+    gridTemplateColumns: "50px 1fr 1fr 1fr 1fr auto",
     width: "100%",
     borderBottom: "solid 2px #ddd",
     padding: "0px 10px",
@@ -52,7 +52,7 @@ export const ListContent = styled.div({
 
 export const ListEntry = styled.div({
     display: "grid",
-    gridTemplateColumns: "50px 1fr 1fr 1fr auto",
+    gridTemplateColumns: "50px 1fr 1fr 1fr 1fr auto",
     width: "100%",
     padding: "6px 10px",
 },
