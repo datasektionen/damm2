@@ -187,7 +187,7 @@ export const PatchArchive: React.FC = props => {
             <FancyHeader title="Märkesarkiv">
                 <br />
                 <p>Har du ett märke som inte finns i arkivet? Är märket inte påsytt? Donera märket till arkivet. Mejla <a href="mailto:historiker@d.kth.se" target="_blank" rel="noopener noreferrer" style={{color: "white"}}>historiker@d.kth.se</a>.</p>
-                <p>För att se efterlysta märken, <a href="https://docs.google.com/document/d/1cqZVPaPqYPTMgjhl9T-CGxPSR4LRykVZ0uh3T0G6dMA/edit" target="_blank" rel="noopener noreferrer" style={{color: "white"}}>klicka här</a></p>
+                <p>För att se efterlysta märken, <a href="https://docs.google.com/document/d/e/2PACX-1vRW7-2RSdsnFRINgOViVs-R8gFoQYaCdpEHAkASgYfpKODpnFZCXzn1_KVF_41-AvP6QsJiVsf2SC0I/pub" target="_blank" rel="noopener noreferrer" style={{color: "white"}}>klicka här</a></p>
                 <br />
             </FancyHeader>
             <Helmet>
