@@ -8,8 +8,9 @@ Available [here](https://duckumentation.datasektionen.se/damm)
 There are two pls permissions:
 - `admin`
 - `prylis`
+- `post`
 
-`admin` gives access to everything. `prylis` only gives access to managing patches and tags (including artefact tags 🙃).
+`admin` gives access to everything. `prylis` only gives access to managing patches and tags (including artefact tags 🙃). `post` can create events and edit their own events.
 
 # Dependencies (Sektionens system)
 Damm uses the following systems:
