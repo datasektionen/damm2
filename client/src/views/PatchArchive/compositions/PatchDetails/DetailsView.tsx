@@ -8,6 +8,7 @@ import { url } from '../../../../common/api';
 import { AdminContext } from '../../../../App';
 import axios from 'axios';
 import { Configuration } from '../../../../common/configuration';
+import ReactMarkdown from 'react-markdown';
 
 interface Props {
     patch: IPatch;
@@ -123,7 +124,9 @@ export const DetailsView: React.FC<Props> = ({ patch, onEditClick, onClose, fetc
                 </Meta>
                 <Content>
                     <Description>
-                        {patch.description === "" ? "Ingen beskrivning finns" : patch.description}
+                        <ReactMarkdown>
+                            {patch.description === "" ? "Ingen beskrivning finns" : patch.description}
+                        </ReactMarkdown>
                     </Description>
                     <Tags>
                         {patch.tags.length === 0 && "Märket har inga taggar"}
