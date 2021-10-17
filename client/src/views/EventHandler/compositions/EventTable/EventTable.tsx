@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { ListContent, ListHead, ListEntry, HeadItem, ListItem, EditButton, StyledEventTable, TrashButton } from './style';
 import { IEvent } from '../../../../types/definitions';
+import { AdminContext } from '../../../../App';
 
 interface Props {
     items: IEvent[];
@@ -15,6 +16,7 @@ interface Props {
 export const EventTable: React.FC<Props> = ({ items, requestSort, sortConfig, collapse, onEditClick, onDelete, deleting }) => {
 
     const getAscDesc = (name: string) => sortConfig.key === name ? sortConfig.direction : "asc";
+    const { admin, user } = useContext(AdminContext)
 
     return (
         <StyledEventTable>
@@ -37,6 +39,10 @@ export const EventTable: React.FC<Props> = ({ items, requestSort, sortConfig, co
                             Typ
                             <i className="fas fa-chevron-down" onClick={() => requestSort("type")} />
                         </HeadItem>
+                        <HeadItem direction={getAscDesc("createdBy")}>
+                            Skapad av
+                            <i className="fas fa-chevron-down" onClick={() => requestSort("createdBy")} />
+                        </HeadItem>
                         <HeadItem></HeadItem>
                     </ListHead>
                     {items.length === 0 &&
@@ -49,19 +55,24 @@ export const EventTable: React.FC<Props> = ({ items, requestSort, sortConfig, co
                                 <ListItem>{e.title}</ListItem>
                                 <ListItem>{e.date}</ListItem>
                                 <ListItem type={e.type}>{e.type}</ListItem>
+                                <ListItem type={e.createdBy}>{e.createdBy}</ListItem>
                                 <ListItem>
-                                    <EditButton
-                                        className="fas fa-edit"
-                                        onClick={() => onEditClick(e)}
-                                        title="Redigera"
-                                        disabled={deleting}
-                                    />
-                                    <TrashButton
-                                        className="fas fa-trash-alt"
-                                        onClick={() => onDelete(e.id)}
-                                        title="Radera"
-                                        disabled={deleting}
-                                    />
+                                    {(admin.includes("admin") || e.createdBy === user) &&
+                                        <EditButton
+                                            className="fas fa-edit"
+                                            onClick={() => onEditClick(e)}
+                                            title="Redigera"
+                                            disabled={deleting}
+                                        />
+                                    }
+                                    {admin.includes("admin") &&
+                                        <TrashButton
+                                            className="fas fa-trash-alt"
+                                            onClick={() => onDelete(e.id)}
+                                            title="Radera"
+                                            disabled={deleting}
+                                        />
+                                    }
                                 </ListItem>
                             </ListEntry>  
                         )}

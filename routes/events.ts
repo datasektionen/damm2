@@ -9,6 +9,9 @@ import moment from 'moment';
 import { DATE_FORMAT, EVENT_TYPE } from '../common/patterns';
 import { EventType } from '.prisma/client';
 import { getAll, createEvent, updateEvent, deleteEvent } from '../functions/api/events';
+import { IUserRequest } from '../common/requests';
+import { unauthorizedResponse } from '../common/ApiResponse';
+import prisma from '../common/client';
 
 const init = () => generator(dfunkt);
 
@@ -29,27 +32,33 @@ router.get("/all", async (req, res) => {
 
 router.post("/create",
     authorizePls,
-    adminAuth,
+    // adminAuth,
     body("title").isString().trim().notEmpty().withMessage("should be a non empty string"),
     body("content").isString().trim().optional().withMessage("should be a string"),
     body("date").matches(DATE_FORMAT).withMessage("should be a date with format YYYY-MM-DD"),
     body("type").matches(EVENT_TYPE).withMessage("should be one of 'GENERAL', 'ANNIVERSARY' or 'SM_DM'"),
     body("protocol").trim().isURL().optional().withMessage("should be a valid URL"),
     validationCheck,
-async (req, res) => {
+async (req: IUserRequest, res) => {
+
+    if (!req.user?.admin.includes("post") && !req.user?.admin.includes("admin")) {
+        unauthorizedResponse(res);
+        return;
+    }
+
     const { title, content, date, type, protocol } = req.body;
     if (type === EventType.SM_DM && !protocol) return res.status(StatusCodes.BAD_REQUEST).json({
         statusCode: StatusCodes.BAD_REQUEST,
         error: "No url to protocol provided."
     });
 
-    const result = await createEvent(title, content ?? "", date, type, protocol ?? "");
+    const result = await createEvent(title, content ?? "", date, type, protocol ?? "", req.user.user);
     return res.status(result.statusCode).json(result);
 });
 
 router.put("/update",
     authorizePls,
-    adminAuth,
+    // adminAuth,
     body("id").isInt().not().isString().withMessage("should be an integer"),
     body("title").isString().trim().notEmpty().optional().withMessage("should be a non empty string"),
     body("content").isString().trim().optional().withMessage("should be a string"),
@@ -57,8 +66,16 @@ router.put("/update",
     body("type").matches(EVENT_TYPE).optional().withMessage("should be one of 'GENERAL', 'ANNIVERSARY' or 'SM_DM'"),
     body("protocol").trim().isURL().optional().withMessage("should be a valid URL"),
     validationCheck,
-async (req, res) => {
+async (req: IUserRequest, res) => {
     const { id, title, content, date, type, protocol } = req.body;
+
+    const exists = await prisma.event.findUnique({ where: { id } });
+    if (!exists) return res.status(StatusCodes.NOT_FOUND).json({error: "Not found"});
+    if (exists.createdBy !== req.user?.user && !req.user?.admin.includes("admin")) {
+        unauthorizedResponse(res);
+        return;
+    }
+
     if (type === EventType.SM_DM && !protocol) return res.status(StatusCodes.BAD_REQUEST).json({
         statusCode: StatusCodes.BAD_REQUEST,
         error: "No url to protocol provided."
@@ -70,7 +87,7 @@ async (req, res) => {
         content,
         date,
         type,
-        protocol
+        protocol,
     });
     return res.status(result.statusCode).json(result);
 });
@@ -80,7 +97,7 @@ router.delete("/:id",
     adminAuth,
     param("id").isInt().withMessage("should be an integer"),
     validationCheck,
-async (req, res) => {
+async (req: IUserRequest, res) => {
     const id = Number(req.params.id);
 
     const result = await deleteEvent(id);
