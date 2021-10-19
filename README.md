@@ -26,7 +26,7 @@ Zfinger - to fetch images of users (timeline)
 
 ## Migrate database
 1. Make changes
-2. Run `npx prisma migrate dev --name <name_of_migration>
+2. Run `npx prisma migrate dev --name <name_of_migration>`
 3. Commit and push
 
 # Environment variables
