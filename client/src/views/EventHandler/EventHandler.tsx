@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { title } from '../../common/strings';
 import { StyledEventHandler, Content } from './style';
@@ -15,6 +15,7 @@ import { Spinner } from '../../components/Spinner/Spinner';
 import { Alert } from '../../components/Alert/Alert';
 import { useHistory, useLocation } from 'react-router';
 import queryString from 'query-string';
+import { AdminContext } from '../../App';
 
 export interface Form {
     title: string;
@@ -34,6 +35,8 @@ const defaultForm: Form = {
 }
 
 export const EventHandler: React.FC = props => {
+
+    const { admin, user } = useContext(AdminContext);
 
     const [events, setEvents] = useState<IEvent[]>([]);
     const [form, setForm] = useState(defaultForm);
@@ -67,7 +70,16 @@ export const EventHandler: React.FC = props => {
             if (events.length === 0) return;
             
             const event = events.filter(e => e.id === Number(edit_id))[0]
-            if (!event) return
+            // No event exists, don't render edit view
+            if (!event) {
+                history.push({ search: "" })
+                return
+            }
+            // Not owner of event and not admin, don't render edit view
+            if (!admin.includes("admin") && user !== event.createdBy) {
+                history.push({ search: "" })
+                return
+            }
 
             setEdit(true)
             setOriginal(event)

@@ -11,12 +11,13 @@ interface Props {
     title: string;
     date: string;
     onEditClick: () => void;
+    createdBy: string;
 }
 
-export const General: React.FC<Props> = ({ id, index, content, title, date, children, onEditClick }) => {
+export const General: React.FC<Props> = ({ id, index, content, title, date, children, onEditClick, createdBy }) => {
     return (
         <StyledGeneral>
-            <CardHead id={id} title={title} type="GENERAL" date={date} index={index} onEditClick={onEditClick} />
+            <CardHead id={id} title={title} type="GENERAL" date={date} index={index} onEditClick={onEditClick} createdBy={createdBy} />
             {children}
             { content ? <ReactMarkdown>{content}</ReactMarkdown> : null }
         </StyledGeneral>   

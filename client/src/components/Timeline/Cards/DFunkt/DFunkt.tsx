@@ -14,7 +14,7 @@ interface Props {
 export const DFunkt: React.FC<Props> = ({ date, index, mandates }) => {
     return (
         <StyledGeneral>
-            <CardHead id={-1} date={date} type="DFUNKT" title="Nya funktionärer" index={index} onEditClick={() => {}}/>
+            <CardHead id={-1} date={date} type="DFUNKT" title="Nya funktionärer" index={index} onEditClick={() => {}} createdBy="damm" />
             <Users>
                 {mandates.map((x: any) => (
                     <User

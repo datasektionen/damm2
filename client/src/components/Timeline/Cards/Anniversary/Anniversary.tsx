@@ -13,11 +13,12 @@ interface Props {
     date: string;
     content: string;
     onEditClick: (id: number) => void;
+    createdBy: string;
 }
 
-export const Anniversary: React.FC<Props> = ({ id, index, title, date, content, onEditClick }) => {
+export const Anniversary: React.FC<Props> = ({ id, index, title, date, content, onEditClick, createdBy }) => {
 
-    const { admin } = useContext(AdminContext);
+    const { admin, user } = useContext(AdminContext);
     const isAdmin = admin.includes("prylis") || admin.includes("admin");
 
     return (
@@ -26,7 +27,7 @@ export const Anniversary: React.FC<Props> = ({ id, index, title, date, content, 
             <HeadArrow index={index} />
             <Head index={index}>
                 <h2>{title}</h2>
-                {isAdmin &&
+                {(isAdmin || (user === createdBy && admin.includes("post"))) &&
                     <i className="fas fa-edit" onClick={() => onEditClick(id)} title="Redigera" />
                 }
             </Head>
