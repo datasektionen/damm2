@@ -112,13 +112,13 @@ export const EventEditor: React.FC<Props> = ({ onReset, form, onChange, onCancel
                     <Line />
                     <CardWrapper index={0}>                            
                         {form.type === "GENERAL" &&
-                            <General {...form} id={form.id ?? -1} index={0} onEditClick={() => {}}/>
+                            <General {...form} id={form.id ?? -1} index={0} onEditClick={() => {}} createdBy="" />
                         }
                         {form.type === "SM_DM" &&
-                            <SM {...form} id={form.id ?? -1} index={0} protocol={form.protocol as string} onEditClick={() => {}} />
+                            <SM {...form} id={form.id ?? -1} index={0} protocol={form.protocol as string} onEditClick={() => {}} createdBy="" />
                         }
                         {form.type === "ANNIVERSARY" &&
-                            <Anniversary {...form} id={form.id ?? -1} index={0} onEditClick={() => {}}/>
+                            <Anniversary {...form} id={form.id ?? -1} index={0} onEditClick={() => {}} createdBy="" />
                         }
                     </CardWrapper>
                 </Cards>

@@ -10,11 +10,12 @@ interface Props {
     date: string;
     type: string;
     onEditClick: (id: number) => void;
+    createdBy: string;
 }
 
-export const CardHead: React.FC<Props> = ({ id, title, type, index, date, onEditClick }) => {
+export const CardHead: React.FC<Props> = ({ id, title, type, index, date, onEditClick, createdBy }) => {
 
-    const { admin } = useContext(AdminContext);
+    const { admin, user } = useContext(AdminContext);
     const isAdmin = admin.includes("prylis") || admin.includes("admin");
     console.log(isAdmin)
 
@@ -29,7 +30,7 @@ export const CardHead: React.FC<Props> = ({ id, title, type, index, date, onEdit
                 </Month>
             </Date>
             <H2>{title}</H2>
-            {type !== "DFUNKT" && isAdmin &&
+            {type !== "DFUNKT" && (isAdmin || (user === createdBy && admin.includes("post"))) &&
                 <i className="fas fa-edit" onClick={() => onEditClick(id)} title="Redigera" />
             }
             <Arrow index={index} />

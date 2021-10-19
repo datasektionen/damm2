@@ -9,9 +9,10 @@ interface Props {
     date: string;
     protocol: string;
     onEditClick: () => void;
+    createdBy: string;
 }
 
-export const SM: React.FC<Props> = ({ id, index, content, title, date, protocol, onEditClick }) => {
+export const SM: React.FC<Props> = ({ id, index, content, title, date, protocol, onEditClick, createdBy }) => {
     return (
         <General
             id={id}
@@ -20,6 +21,7 @@ export const SM: React.FC<Props> = ({ id, index, content, title, date, protocol,
             index={index}
             title={title}
             onEditClick={onEditClick}
+            createdBy={createdBy}
         >
             <p>Protokollet finns tillgängligt <a href={protocol} target="_blank" rel="noopener noreferrer">här</a></p>
         </General>
