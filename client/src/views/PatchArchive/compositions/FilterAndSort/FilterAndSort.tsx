@@ -65,7 +65,7 @@ export const FilterAndSort: React.FC<Props> = props => {
             </Row>
             <Expander onClick={toggleExpander} expanded={tagsExpanded}>
                 Taggar
-                <i className="fas fa-arrow-down" />
+                <i className="fas fa-chevron-down" />
             </Expander>
             <Tags expanded={tagsExpanded}>
                 <Search
