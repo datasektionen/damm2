@@ -24,6 +24,11 @@ Zfinger - to fetch images of users (timeline)
 - npm
 - PostgreSQL
 
+## Migrate database
+1. Make changes
+2. Run `npx prisma migrate dev --name <name_of_migration>`
+3. Commit and push
+
 # Environment variables
 
 To get a login API-key or access to the `dsekt-damm-dev` bucket, contact <a href="mailto:d-sys@d.kth.se">d-sys</a>. Alternatively, login can be run locally and a different AWS account could be used. In that case, make sure to configure the bucket correctly, see [bucket configuration](bucket_configuration.md).
