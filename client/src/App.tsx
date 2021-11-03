@@ -14,10 +14,12 @@ import useAuthorization from './hooks/useAuthorization';
 import { ProtectedRoute } from './components/ProtectedRoute/ProtectedRoute';
 import { ArtefactArchive } from './views/ArtefactArchive/ArtefactArchive';
 import { ArtefactCreator } from './views/ArtefactCreator/ArtefactCreator';
+import { Landing } from './views/Landing/Landing';
 
 export const AdminContext = React.createContext<{ loading: boolean; admin: string[]; user: string; }>({ loading: true, admin: [], user: "" })
 
 const defaultLinks = [
+    <Link to={ROUTES.HOME} key={"methonel-home"}>Hem</Link>,
     <Link to={ROUTES.PATCH_ARCHIVE} key={"methonel-parchive"}>Märkesarkiv</Link>,
     <Link to={ROUTES.MUSEUM} key={"methonel-museum"}>Museum</Link>,
     <Link to={ROUTES.TIMELINE} key={"methonel-timeline"}>Tidslinje</Link>,
@@ -66,7 +68,8 @@ export const App: React.FC = props => {
                         <Timeline />
                     </Route>
                     <Route exact path={ROUTES.HOME}>
-                        <Redirect to={ROUTES.PATCH_ARCHIVE} />
+                        {/* <Redirect to={ROUTES.PATCH_ARCHIVE} /> */}
+                        <Landing />
                     </Route>
                     <Route exact path={ROUTES.PATCH_ARCHIVE}>
                         <PatchArchive />
