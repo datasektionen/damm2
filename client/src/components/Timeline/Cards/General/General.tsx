@@ -19,7 +19,7 @@ export const General: React.FC<Props> = ({ id, index, content, title, date, chil
         <StyledGeneral>
             <CardHead id={id} title={title} type="GENERAL" date={date} index={index} onEditClick={onEditClick} createdBy={createdBy} />
             {children}
-            { content ? <ReactMarkdown>{content}</ReactMarkdown> : null }
+            { content ? <ReactMarkdown linkTarget="_blank">{content}</ReactMarkdown> : null }
         </StyledGeneral>   
     )
 }
