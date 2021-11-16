@@ -35,6 +35,6 @@ export const User = styled.div({
     },
 },
     (props: any) => ({
-        backgroundImage: `url(https://zfinger.datasektionen.se/user/${props.user}/image/200)`
+        backgroundImage: `url(https://zfinger.datasektionen.se/user/${props.user}/image/100)`
     })
 )
