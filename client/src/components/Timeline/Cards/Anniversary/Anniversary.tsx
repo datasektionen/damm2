@@ -35,7 +35,7 @@ export const Anniversary: React.FC<Props> = ({ id, index, title, date, content, 
                 {date}
             </Moment>
             <i className="fa fa-star" />
-            { content ? <ReactMarkdown>{content}</ReactMarkdown> : null }
+            { content ? <ReactMarkdown linkTarget="_blank">{content}</ReactMarkdown> : null }
         </StyledAnniversary>   
     )
 }

@@ -124,7 +124,7 @@ export const DetailsView: React.FC<Props> = ({ patch, onEditClick, onClose, fetc
                 </Meta>
                 <Content>
                     <Description>
-                        <ReactMarkdown>
+                        <ReactMarkdown linkTarget="_blank">
                             {patch.description === "" ? "Ingen beskrivning finns" : patch.description}
                         </ReactMarkdown>
                     </Description>
