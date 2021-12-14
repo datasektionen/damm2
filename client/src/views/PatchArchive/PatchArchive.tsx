@@ -171,9 +171,20 @@ export const PatchArchive: React.FC = props => {
         return (pname.match(query) !== null) || matchesCreators;
     }
 
-    const resultingPatches = useMemo(() => {
-        return sortPatches.filter((p: IPatch) => matchesSearch(p) && patchTagsMatchesSelected(p))
-    }, [sortOption, patchQuery, selectedTags, patches])
+    const [resultingPatches, setResultingPatches] = useState<IPatch[]>(sortPatches);
+    const [isSorting, setIsSorting] = useState<boolean>(true);
+
+    const filterPatches = () => {
+        setResultingPatches(sortPatches.filter((p: IPatch) => matchesSearch(p) && patchTagsMatchesSelected(p)));
+        setIsSorting(false)
+    }
+
+    // Delay filter of patches until you have stopped typing/stopped clicking tags/stopped applying sort filters for 1 second
+    useEffect(() => {
+        setIsSorting(true)
+        const delay = setTimeout(filterPatches, 1000);
+        return () => clearTimeout(delay);
+    }, [patchQuery, sortOption, selectedTags, patches])
 
     const deletePatch = async (id: number) => {
         if (window.confirm("Är du säker på att du vill radera märket? All data om märket kommer tas bort, inklusive filer tillhörande märket")) {
@@ -213,15 +224,15 @@ export const PatchArchive: React.FC = props => {
                         tags={tags}
                     />
                     <StyledPatchArchive>
-                        {fetchingPatches &&
+                        {fetchingPatches || isSorting &&
                             <SpinnerCover />
                         }
-                        {!fetchingPatches && resultingPatches.length === 0 &&
+                        {!fetchingPatches && resultingPatches.length === 0 && !isSorting &&
                             <div style={{textAlign: "center", width: "100%", margin: "auto"}}>
                                 Inga märken hittades
                             </div>
                         }
-                        {!fetchingPatches && resultingPatches.length !== 0 &&
+                        {!fetchingPatches && resultingPatches.length !== 0 && !isSorting &&
                             <StyledFlipMove duration={150} appearAnimation="fade" enterAnimation="fade" leaveAnimation="fade">
                                 {
                                     resultingPatches
