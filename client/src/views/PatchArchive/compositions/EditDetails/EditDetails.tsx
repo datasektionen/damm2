@@ -3,7 +3,7 @@ import { Field } from '../../../../components/Field/Field';
 import { Button } from '../../../../components/Button/Button';
 import { TextArea } from '../../../../components/TextArea/TextArea';
 import { IPatch, ITag } from '../../../../types/definitions';
-import { StyledEditDetails, Image, BRow, H1, H4 } from './style';
+import { StyledEditDetails, Image, BRow, H1, H4, DeleteBox, DeleteCenter } from './style';
 import axios from 'axios';
 import { url } from '../../../../common/api';
 import { FileUploader } from '../../../../components/FileUploader/FileUploader';
@@ -31,6 +31,7 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
     const [loading, setLoading] = useState(false);
     const [files, setFiles] = useState<File[]>([]);
     const [requestError, setRequestError] = useState("");
+    const [deleteConfirmation, setDeleteConfirmation] = useState<string>("");
 
     const ref = useRef(document.createElement("div"));
 
@@ -170,14 +171,25 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
                     isLoading={loading}
                 />
             </BRow>
-            <BRow>
-                <Button
-                    label="Radera"
-                    onClick={() => onDeleteClick(patch.id)}
-                    color="white"
-                    backgroundColor={Theme.palette.red}
+            <h4>Farliga grejer</h4>
+            <DeleteBox>
+                <h4 style={{color: Theme.palette.red}}><b>Radera märket</b></h4>
+                <p>Detta kan inte ångras. Skriv "<b>Radera permanent</b>" nedan för att bekräfta borttagning.</p>
+                <Field
+                    value={deleteConfirmation}
+                    placeholder="Radera permanent"
+                    onChange={e => setDeleteConfirmation(e.target.value)}
                 />
-            </BRow>
+                <DeleteCenter>
+                    <Button
+                        label="Radera"
+                        onClick={() => onDeleteClick(patch.id)}
+                        color="white"
+                        backgroundColor={Theme.palette.red}
+                        disabled={deleteConfirmation !== "Radera permanent"}
+                    />
+                </DeleteCenter>
+            </DeleteBox>
         </StyledEditDetails>
     )
 }

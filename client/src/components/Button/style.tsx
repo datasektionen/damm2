@@ -8,6 +8,12 @@ export const StyledButton = styled.button({
     (props: any) => ({
         backgroundColor: props.isLoading ? ("") : (props.backgroundColor ?? Theme.palette.yellow),
         color: props.color ?? Theme.palette.blackgrey,
+
+        "&:disabled": {
+            cursor: "not-allowed",
+            backgroundColor: Theme.palette.taggrey,
+            color: Theme.palette.blackgrey
+        }
     })
 )
 
