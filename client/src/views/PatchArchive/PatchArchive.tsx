@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyledPatchArchive, StyledFlipMove, StyledPatchArchiveDivider, Left, Right, StyledFlipMoveDetails } from './style';
 import { FancyHeader } from '../../components/FancyHeader/FancyHeader';
 import axios from 'axios';
@@ -46,6 +46,8 @@ export const PATCH_SORT_MODES: { label: string; key: string; sort: (a: IPatch, b
     { label: "Fallande", key: "id-desc", sort: (a: IPatch, b: IPatch) => a.id < b.id ? 1 : -1, groupLabel: "ID" },
 ]
 
+const ITEMS_PER_PAGE = 30;
+
 export const PatchArchive: React.FC = props => {
 
     const [patches, setPatches] = useState([]);
@@ -60,6 +62,35 @@ export const PatchArchive: React.FC = props => {
     const history = useHistory();
     const location = useLocation();
     const isSmallScreen = useScreenSizeChecker(1100);
+    const [page, setPage] = useState(1);
+    const minPage = 1
+    const numPages = Math.ceil(patches.length / ITEMS_PER_PAGE)
+    const [itemsOnCurrentPage, setItemsOnCurrentPage] = useState<IPatch[]>([]);
+
+    const nextPage = () => {
+        if (page === numPages) return;
+        setPage(page + 1);
+    }
+
+    const previousPage = () => {
+        if (page === minPage) return;
+        setPage(page - 1);
+    }
+
+    const firstPage = () => {
+        if (page === minPage) return;
+        setPage(minPage);
+    }
+    const lastPage = () => {
+        if (page === numPages) return;
+        setPage(numPages);
+    }
+
+    useEffect(() => {
+        const low = (page - 1) * ITEMS_PER_PAGE;
+        const high = low + ITEMS_PER_PAGE;
+        setItemsOnCurrentPage(patches.slice(low, high))
+    }, [page, patches])
 
     const fetchPatches = async () => {
         const response = await axios.get(url("/api/patches/all"), {
@@ -232,7 +263,7 @@ export const PatchArchive: React.FC = props => {
                         {!fetchingPatches && resultingPatches.length !== 0 && !isSorting &&
                             <StyledFlipMove duration={150} appearAnimation="fade" enterAnimation="fade" leaveAnimation="fade">
                                 {
-                                    resultingPatches
+                                    itemsOnCurrentPage
                                     .map((x: IPatch, i: number) =>
                                         <Patch
                                             key={`patch-${i}-${x.id}`}
@@ -243,6 +274,17 @@ export const PatchArchive: React.FC = props => {
                                     )
                                 }
                             </StyledFlipMove>
+                        }
+                        {!fetchingPatches && resultingPatches.length !== 0 && !isSorting &&
+                            <Pagination
+                                page={page}
+                                minPage={minPage}
+                                numPages={numPages}
+                                firstPage={firstPage}
+                                lastPage={lastPage}
+                                nextPage={nextPage}
+                                previousPage={previousPage}
+                            />
                         }
                     </StyledPatchArchive>
                 </Left>
@@ -267,3 +309,27 @@ export const PatchArchive: React.FC = props => {
         </div>
     );
 };
+
+interface PaginationProps {
+    page: number;
+    minPage: number;
+    numPages: number;
+    firstPage: () => void;
+    lastPage: () => void;
+    nextPage: () => void;
+    previousPage: () => void;
+}
+
+const Pagination: React.FC<PaginationProps> = ({ firstPage, lastPage, minPage, nextPage, numPages, page, previousPage }) => {
+    return (
+        <div style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center", userSelect: "none" }}>
+            <ul className="pagination">
+                <li className={page === minPage ? "disabled" : ""} onClick={firstPage}><span>«</span></li>
+                <li className={page === minPage ? "disabled" : ""} onClick={previousPage}><span>‹</span></li>
+                <li className="disabled"><span>Sida {page} av {numPages}</span></li>
+                <li className={page === numPages ? "disabled" : ""} onClick={nextPage}><span>›</span></li>
+                <li className={page === numPages ? "disabled" : ""} onClick={lastPage}><span>»</span></li>
+            </ul>
+        </div>
+    )
+}
