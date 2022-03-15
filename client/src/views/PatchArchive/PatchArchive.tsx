@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyledPatchArchive, StyledFlipMove, StyledPatchArchiveDivider, Left, Right, StyledFlipMoveDetails } from './style';
 import { FancyHeader } from '../../components/FancyHeader/FancyHeader';
 import axios from 'axios';
@@ -15,14 +15,38 @@ import useScreenSizeChecker from '../../hooks/useScreenSizeChecker';
 import Helmet from 'react-helmet';
 import { title } from '../../common/strings';
 
-export const PATCH_SORT_MODES = {
-    AÖ: "a-ö",
-    ÖA: "ö-a",
-    "1983nu": "1983-nu",
-    nu1983: "nu-1983",
-    newold: "ny-äldst",
-    oldnew: "äldst-new",
+const nameSort = (a: IPatch, b: IPatch) => {
+    const A = a.name.toLowerCase();
+    const B = b.name.toLowerCase();
+    if (A < B) return -1;
+    if (A > B) return 1;
+    else return 0;
 }
+
+const dateSort = (a: IPatch, b: IPatch) => {
+    return (a.date === "" ? 0 : new Date(a.date).getTime()) - (b.date === "" ? 0 : new Date(b.date).getTime())
+}
+
+const releaseSort = (a: IPatch, b: IPatch) => {
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+}
+
+export const PATCH_SORT_MODES: { label: string; key: string; sort: (a: IPatch, b: IPatch) => number; default?: boolean; groupLabel: string }[] = [
+
+    { label: "A-Ö", key: "AÖ", sort: (a: IPatch, b: IPatch) => nameSort(a, b), groupLabel: "Namn" },
+    { label: "Ö-A", key: "ÖA", sort: (a: IPatch, b: IPatch) => nameSort(b, a), groupLabel: "Namn" },
+
+    { label: "Äldst-Nyast", key: "oldnew-upload", sort: (a: IPatch, b: IPatch) => dateSort(a, b), groupLabel: "Datum", },
+    { label: "Nyast-Äldst", key: "newold-upload", sort: (a: IPatch, b: IPatch) => dateSort(b, a), default: true, groupLabel: "Datum", },
+
+    { label: "Nyast-Äldst", key: "newold-release", sort: (a: IPatch, b: IPatch) => releaseSort(a, b), groupLabel: "Uppladdningsdatum" },
+    { label: "Äldst-Nyast", key: "oldnew-release", sort: (a: IPatch, b: IPatch) => releaseSort(b, a), groupLabel: "Uppladdningsdatum" },
+
+    { label: "Stigande", key: "id-asc", sort: (a: IPatch, b: IPatch) => a.id > b.id ? 1 : -1, groupLabel: "ID" },
+    { label: "Fallande", key: "id-desc", sort: (a: IPatch, b: IPatch) => a.id < b.id ? 1 : -1, groupLabel: "ID" },
+]
+
+const ITEMS_PER_PAGE = 30;
 
 export const PatchArchive: React.FC = props => {
 
@@ -31,13 +55,49 @@ export const PatchArchive: React.FC = props => {
     const [edit, setEdit] = useState(false);
     const [tags, setTags] = useState([]);
     const [patchQuery, setPatchQuery] = useState("");
-    const [sortOption, setSortOption] = useState(PATCH_SORT_MODES.nu1983);
+    const [sortOption, setSortOption] = useState(PATCH_SORT_MODES.find(x => x.default)?.key!);
     const [selectedTags, setSelectedTags] = useState([]);
     const [selectedPatch, setSelectedPatch] = useState<IPatch | null>(null);
     const pageRef = useRef(document.createElement("div"));
     const history = useHistory();
     const location = useLocation();
     const isSmallScreen = useScreenSizeChecker(1100);
+    // Sorted patches
+    const sortPatches = useMemo(() => {
+        return patches.sort(PATCH_SORT_MODES.find(x => x.key === sortOption)?.sort);
+    }, [patches, sortOption])
+    const [resultingPatches, setResultingPatches] = useState<IPatch[]>(sortPatches);
+    const [isSorting, setIsSorting] = useState<boolean>(true);
+    // Pagination
+    const [page, setPage] = useState(1);
+    const minPage = 1
+    const numPages = Math.ceil(resultingPatches.length / ITEMS_PER_PAGE)
+    const [itemsOnCurrentPage, setItemsOnCurrentPage] = useState<IPatch[]>([]);
+
+    const nextPage = () => {
+        if (page === numPages) return;
+        setPage(page + 1);
+    }
+
+    const previousPage = () => {
+        if (page === minPage) return;
+        setPage(page - 1);
+    }
+
+    const firstPage = () => {
+        if (page === minPage) return;
+        setPage(minPage);
+    }
+    const lastPage = () => {
+        if (page === numPages) return;
+        setPage(numPages);
+    }
+
+    useEffect(() => {
+        const low = (page - 1) * ITEMS_PER_PAGE;
+        const high = low + ITEMS_PER_PAGE;
+        setItemsOnCurrentPage(resultingPatches.slice(low, high))
+    }, [page, resultingPatches])
 
     const fetchPatches = async () => {
         const response = await axios.get(url("/api/patches/all"), {
@@ -138,28 +198,6 @@ export const PatchArchive: React.FC = props => {
         return tagMatches === selectedTags.length
     }
 
-    const sortPatches = useMemo(() => {
-        if (sortOption === PATCH_SORT_MODES.AÖ) return patches.sort((a: IPatch, b: IPatch) => {
-            const A = a.name.toLowerCase();
-            const B = b.name.toLowerCase();
-            if (A < B) return -1;
-            if (A > B) return 1;
-            else return 0;
-        })
-        if (sortOption === PATCH_SORT_MODES.ÖA) return patches.sort((a: IPatch, b: IPatch) => {
-            const A = a.name.toLowerCase();
-            const B = b.name.toLowerCase();
-            if (A > B) return -1;
-            if (A < B) return 1;
-            else return 0;
-        })
-        if (sortOption === PATCH_SORT_MODES.nu1983) return patches.sort((a: IPatch, b: IPatch) => (b.date === "" ? 0 : new Date(b.date).getTime()) - (a.date === "" ? 0 : new Date(a.date).getTime()));
-        if (sortOption === PATCH_SORT_MODES['1983nu']) return patches.sort((a: IPatch, b: IPatch) => (a.date === "" ? 0 : new Date(a.date).getTime()) - (b.date === "" ? 0 : new Date(b.date).getTime()));
-        if (sortOption === PATCH_SORT_MODES.newold) return patches.sort((a: IPatch, b: IPatch) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        if (sortOption === PATCH_SORT_MODES.oldnew) return patches.sort((a: IPatch, b: IPatch) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-        return patches;
-    }, [patches, sortOption])
-
     const matchesSearch = (patch: IPatch): boolean => {
         const pname = patch.name.toLowerCase();
         const query = new RegExp(patchQuery.toLowerCase(), "g");
@@ -170,9 +208,6 @@ export const PatchArchive: React.FC = props => {
 
         return (pname.match(query) !== null) || matchesCreators;
     }
-
-    const [resultingPatches, setResultingPatches] = useState<IPatch[]>(sortPatches);
-    const [isSorting, setIsSorting] = useState<boolean>(true);
 
     const filterPatches = () => {
         setResultingPatches(sortPatches.filter((p: IPatch) => matchesSearch(p) && patchTagsMatchesSelected(p)));
@@ -214,6 +249,7 @@ export const PatchArchive: React.FC = props => {
             <StyledPatchArchiveDivider>
                 <Left>
                     <FilterAndSort
+                        gotoFirstPage={firstPage}
                         label={"Sök bland " + patches.length + " märken"}
                         patchQuery={patchQuery}
                         setPatchQuery={setPatchQuery}
@@ -235,7 +271,7 @@ export const PatchArchive: React.FC = props => {
                         {!fetchingPatches && resultingPatches.length !== 0 && !isSorting &&
                             <StyledFlipMove duration={150} appearAnimation="fade" enterAnimation="fade" leaveAnimation="fade">
                                 {
-                                    resultingPatches
+                                    itemsOnCurrentPage
                                     .map((x: IPatch, i: number) =>
                                         <Patch
                                             key={`patch-${i}-${x.id}`}
@@ -246,6 +282,17 @@ export const PatchArchive: React.FC = props => {
                                     )
                                 }
                             </StyledFlipMove>
+                        }
+                        {!fetchingPatches && resultingPatches.length !== 0 && !isSorting &&
+                            <Pagination
+                                page={page}
+                                minPage={minPage}
+                                numPages={numPages}
+                                firstPage={firstPage}
+                                lastPage={lastPage}
+                                nextPage={nextPage}
+                                previousPage={previousPage}
+                            />
                         }
                     </StyledPatchArchive>
                 </Left>
@@ -270,3 +317,27 @@ export const PatchArchive: React.FC = props => {
         </div>
     );
 };
+
+interface PaginationProps {
+    page: number;
+    minPage: number;
+    numPages: number;
+    firstPage: () => void;
+    lastPage: () => void;
+    nextPage: () => void;
+    previousPage: () => void;
+}
+
+const Pagination: React.FC<PaginationProps> = ({ firstPage, lastPage, minPage, nextPage, numPages, page, previousPage }) => {
+    return (
+        <div style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center", userSelect: "none" }}>
+            <ul className="pagination">
+                <li className={page === minPage ? "disabled" : ""} onClick={firstPage}><span>«</span></li>
+                <li className={page === minPage ? "disabled" : ""} onClick={previousPage}><span>‹</span></li>
+                <li className="disabled"><span>Sida {page} av {numPages}</span></li>
+                <li className={page === numPages ? "disabled" : ""} onClick={nextPage}><span>›</span></li>
+                <li className={page === numPages ? "disabled" : ""} onClick={lastPage}><span>»</span></li>
+            </ul>
+        </div>
+    )
+}

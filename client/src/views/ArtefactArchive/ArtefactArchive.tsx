@@ -189,6 +189,7 @@ export const ArtefactArchive: React.FC = props => {
             <StyledPatchArchiveDivider>
                 <Left>
                     <FilterAndSort
+                        gotoFirstPage={() => {}}
                         label={"Sök bland " + artefacts.length + " föremål"}
                         patchQuery={artefactQuery}
                         setPatchQuery={setArtefactQuery}
