@@ -36,10 +36,10 @@ export const PATCH_SORT_MODES: { label: string; key: string; sort: (a: IPatch, b
     { label: "A-Ö", key: "AÖ", sort: (a: IPatch, b: IPatch) => nameSort(a, b), groupLabel: "Namn" },
     { label: "Ö-A", key: "ÖA", sort: (a: IPatch, b: IPatch) => nameSort(b, a), groupLabel: "Namn" },
 
-    { label: "Äldst-Nyast", key: "newold-upload", sort: (a: IPatch, b: IPatch) => dateSort(a, b), groupLabel: "Datum", },
-    { label: "Nyast-Äldst", key: "oldnew-upload", sort: (a: IPatch, b: IPatch) => dateSort(b, a), groupLabel: "Datum", },
+    { label: "Äldst-Nyast", key: "oldnew-upload", sort: (a: IPatch, b: IPatch) => dateSort(a, b), groupLabel: "Datum", },
+    { label: "Nyast-Äldst", key: "newold-upload", sort: (a: IPatch, b: IPatch) => dateSort(b, a), default: true, groupLabel: "Datum", },
 
-    { label: "Nyast-Äldst", key: "newold-release", sort: (a: IPatch, b: IPatch) => releaseSort(a, b), default: true, groupLabel: "Uppladdningsdatum" },
+    { label: "Nyast-Äldst", key: "newold-release", sort: (a: IPatch, b: IPatch) => releaseSort(a, b), groupLabel: "Uppladdningsdatum" },
     { label: "Äldst-Nyast", key: "oldnew-release", sort: (a: IPatch, b: IPatch) => releaseSort(b, a), groupLabel: "Uppladdningsdatum" },
 
     { label: "Stigande", key: "id-asc", sort: (a: IPatch, b: IPatch) => a.id > b.id ? 1 : -1, groupLabel: "ID" },
@@ -62,9 +62,16 @@ export const PatchArchive: React.FC = props => {
     const history = useHistory();
     const location = useLocation();
     const isSmallScreen = useScreenSizeChecker(1100);
+    // Sorted patches
+    const sortPatches = useMemo(() => {
+        return patches.sort(PATCH_SORT_MODES.find(x => x.key === sortOption)?.sort);
+    }, [patches, sortOption])
+    const [resultingPatches, setResultingPatches] = useState<IPatch[]>(sortPatches);
+    const [isSorting, setIsSorting] = useState<boolean>(true);
+    // Pagination
     const [page, setPage] = useState(1);
     const minPage = 1
-    const numPages = Math.ceil(patches.length / ITEMS_PER_PAGE)
+    const numPages = Math.ceil(resultingPatches.length / ITEMS_PER_PAGE)
     const [itemsOnCurrentPage, setItemsOnCurrentPage] = useState<IPatch[]>([]);
 
     const nextPage = () => {
@@ -89,8 +96,8 @@ export const PatchArchive: React.FC = props => {
     useEffect(() => {
         const low = (page - 1) * ITEMS_PER_PAGE;
         const high = low + ITEMS_PER_PAGE;
-        setItemsOnCurrentPage(patches.slice(low, high))
-    }, [page, patches])
+        setItemsOnCurrentPage(resultingPatches.slice(low, high))
+    }, [page, resultingPatches])
 
     const fetchPatches = async () => {
         const response = await axios.get(url("/api/patches/all"), {
@@ -191,10 +198,6 @@ export const PatchArchive: React.FC = props => {
         return tagMatches === selectedTags.length
     }
 
-    const sortPatches = useMemo(() => {
-        return patches.sort(PATCH_SORT_MODES.find(x => x.key === sortOption)?.sort);
-    }, [patches, sortOption])
-
     const matchesSearch = (patch: IPatch): boolean => {
         const pname = patch.name.toLowerCase();
         const query = new RegExp(patchQuery.toLowerCase(), "g");
@@ -205,9 +208,6 @@ export const PatchArchive: React.FC = props => {
 
         return (pname.match(query) !== null) || matchesCreators;
     }
-
-    const [resultingPatches, setResultingPatches] = useState<IPatch[]>(sortPatches);
-    const [isSorting, setIsSorting] = useState<boolean>(true);
 
     const filterPatches = () => {
         setResultingPatches(sortPatches.filter((p: IPatch) => matchesSearch(p) && patchTagsMatchesSelected(p)));
@@ -249,6 +249,7 @@ export const PatchArchive: React.FC = props => {
             <StyledPatchArchiveDivider>
                 <Left>
                     <FilterAndSort
+                        gotoFirstPage={firstPage}
                         label={"Sök bland " + patches.length + " märken"}
                         patchQuery={patchQuery}
                         setPatchQuery={setPatchQuery}

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ITag } from '../../../../types/definitions';
 import { StyledFilterAndSort, Row, ButtonRow, Expander, Tags } from './style';
 import { Button } from '../../../../components/Button/Button';
@@ -15,12 +15,13 @@ interface Props {
     selectedTags: ITag[];
     setSelectedTags: (next: any) => void;
     tags: ITag[];
-    label: string
+    label: string;
+    gotoFirstPage: () => void;
 }
 
 export const FilterAndSort: React.FC<Props> = props => {
 
-    const { patchQuery, setPatchQuery, sortOption, setSortOption, selectedTags, setSelectedTags, tags, label } = props;
+    const { patchQuery, setPatchQuery, sortOption, setSortOption, selectedTags, setSelectedTags, tags, label, gotoFirstPage } = props;
 
     const [tagsExpanded, setTagsExpanded] = useState(true);
     const [tagFilter, setTagFilter] = useState("");
@@ -48,6 +49,21 @@ export const FilterAndSort: React.FC<Props> = props => {
         setTagFilter("");
     }
 
+    const onSearch = useCallback((e: any) => {
+        gotoFirstPage();
+        setPatchQuery(e.target.value)
+    }, [setPatchQuery, gotoFirstPage])
+
+    const onSearchClear = useCallback(() => {
+        gotoFirstPage();
+        setPatchQuery("")
+    }, [setPatchQuery, gotoFirstPage])
+
+    const onSortOptionChange = useCallback((e: any) => {
+        gotoFirstPage();
+        setSortOption(e.target.value)
+    }, [setSortOption, gotoFirstPage])
+
     return (
         <StyledFilterAndSort>
             <h3>{label}</h3>
@@ -59,12 +75,12 @@ export const FilterAndSort: React.FC<Props> = props => {
                 <Search
                     placeholder="Sök på märken eller skapare"
                     value={patchQuery}
-                    onClear={() => setPatchQuery("")}
-                    onChange={(e: any) => setPatchQuery(e.target.value)}
+                    onClear={onSearchClear}
+                    onChange={onSearch}
                 />
                 <Selector
                     values={sortOptions}
-                    onChange={(e: any) => setSortOption(e.target.value)}
+                    onChange={onSortOptionChange}
                     value={sortOption}
                 />
             </Row>
