@@ -15,14 +15,36 @@ import useScreenSizeChecker from '../../hooks/useScreenSizeChecker';
 import Helmet from 'react-helmet';
 import { title } from '../../common/strings';
 
-export const PATCH_SORT_MODES = {
-    AÖ: "a-ö",
-    ÖA: "ö-a",
-    "1983nu": "1983-nu",
-    nu1983: "nu-1983",
-    newold: "ny-äldst",
-    oldnew: "äldst-new",
+const nameSort = (a: IPatch, b: IPatch) => {
+    const A = a.name.toLowerCase();
+    const B = b.name.toLowerCase();
+    if (A < B) return -1;
+    if (A > B) return 1;
+    else return 0;
 }
+
+const dateSort = (a: IPatch, b: IPatch) => {
+    return (a.date === "" ? 0 : new Date(a.date).getTime()) - (b.date === "" ? 0 : new Date(b.date).getTime())
+}
+
+const releaseSort = (a: IPatch, b: IPatch) => {
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+}
+
+export const PATCH_SORT_MODES: { label: string; key: string; sort: (a: IPatch, b: IPatch) => number; default?: boolean; groupLabel: string }[] = [
+
+    { label: "A-Ö", key: "AÖ", sort: (a: IPatch, b: IPatch) => nameSort(a, b), groupLabel: "Namn" },
+    { label: "Ö-A", key: "ÖA", sort: (a: IPatch, b: IPatch) => nameSort(b, a), groupLabel: "Namn" },
+
+    { label: "Äldst-Nyast", key: "newold-upload", sort: (a: IPatch, b: IPatch) => dateSort(a, b), groupLabel: "Datum", },
+    { label: "Nyast-Äldst", key: "oldnew-upload", sort: (a: IPatch, b: IPatch) => dateSort(b, a), groupLabel: "Datum", },
+
+    { label: "Nyast-Äldst", key: "newold-release", sort: (a: IPatch, b: IPatch) => releaseSort(a, b), default: true, groupLabel: "Uppladdningsdatum" },
+    { label: "Äldst-Nyast", key: "oldnew-release", sort: (a: IPatch, b: IPatch) => releaseSort(b, a), groupLabel: "Uppladdningsdatum" },
+
+    { label: "Stigande", key: "id-asc", sort: (a: IPatch, b: IPatch) => a.id > b.id ? 1 : -1, groupLabel: "ID" },
+    { label: "Fallande", key: "id-desc", sort: (a: IPatch, b: IPatch) => a.id < b.id ? 1 : -1, groupLabel: "ID" },
+]
 
 export const PatchArchive: React.FC = props => {
 
@@ -31,7 +53,7 @@ export const PatchArchive: React.FC = props => {
     const [edit, setEdit] = useState(false);
     const [tags, setTags] = useState([]);
     const [patchQuery, setPatchQuery] = useState("");
-    const [sortOption, setSortOption] = useState(PATCH_SORT_MODES.nu1983);
+    const [sortOption, setSortOption] = useState(PATCH_SORT_MODES.find(x => x.default)?.key!);
     const [selectedTags, setSelectedTags] = useState([]);
     const [selectedPatch, setSelectedPatch] = useState<IPatch | null>(null);
     const pageRef = useRef(document.createElement("div"));
@@ -139,25 +161,7 @@ export const PatchArchive: React.FC = props => {
     }
 
     const sortPatches = useMemo(() => {
-        if (sortOption === PATCH_SORT_MODES.AÖ) return patches.sort((a: IPatch, b: IPatch) => {
-            const A = a.name.toLowerCase();
-            const B = b.name.toLowerCase();
-            if (A < B) return -1;
-            if (A > B) return 1;
-            else return 0;
-        })
-        if (sortOption === PATCH_SORT_MODES.ÖA) return patches.sort((a: IPatch, b: IPatch) => {
-            const A = a.name.toLowerCase();
-            const B = b.name.toLowerCase();
-            if (A > B) return -1;
-            if (A < B) return 1;
-            else return 0;
-        })
-        if (sortOption === PATCH_SORT_MODES.nu1983) return patches.sort((a: IPatch, b: IPatch) => (b.date === "" ? 0 : new Date(b.date).getTime()) - (a.date === "" ? 0 : new Date(a.date).getTime()));
-        if (sortOption === PATCH_SORT_MODES['1983nu']) return patches.sort((a: IPatch, b: IPatch) => (a.date === "" ? 0 : new Date(a.date).getTime()) - (b.date === "" ? 0 : new Date(b.date).getTime()));
-        if (sortOption === PATCH_SORT_MODES.newold) return patches.sort((a: IPatch, b: IPatch) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        if (sortOption === PATCH_SORT_MODES.oldnew) return patches.sort((a: IPatch, b: IPatch) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-        return patches;
+        return patches.sort(PATCH_SORT_MODES.find(x => x.key === sortOption)?.sort);
     }, [patches, sortOption])
 
     const matchesSearch = (patch: IPatch): boolean => {

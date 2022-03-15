@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ITag } from '../../../../types/definitions';
 import { StyledFilterAndSort, Row, ButtonRow, Expander, Tags } from './style';
 import { Button } from '../../../../components/Button/Button';
@@ -25,17 +25,22 @@ export const FilterAndSort: React.FC<Props> = props => {
     const [tagsExpanded, setTagsExpanded] = useState(true);
     const [tagFilter, setTagFilter] = useState("");
 
-    const sortOptions = [
-        { groupLabel: "Namn", values: [{key: PATCH_SORT_MODES.AÖ, label: "A-Ö"}, {key: PATCH_SORT_MODES.ÖA, label: "Ö-A"}] },
-        { groupLabel: "Datum", values: [{key: PATCH_SORT_MODES['1983nu'], label: "1983-nu"}, {key: PATCH_SORT_MODES.nu1983, label: "Nu-1983"}] },
-        { groupLabel: "Uppladdningsdatum", values: [{key: PATCH_SORT_MODES.oldnew, label: "Äldst-nyast"}, {key: PATCH_SORT_MODES.newold, label: "Nyast-äldst"}] },
-    ]
+    const sortOptions = useMemo(() => {
+        const groupLabels = Array.from(new Set(PATCH_SORT_MODES.map(x => x.groupLabel)));
+
+        return groupLabels.map(l => {
+            return {
+                groupLabel: l,
+                values: PATCH_SORT_MODES.filter(x => x.groupLabel === l).map(x => { return { key: x.key, label: x.label } })
+            }
+        })
+    }, []);
 
     const clearAll = () => {
         setSelectedTags([]);
         setPatchQuery("");
         setTagFilter("");
-        setSortOption(PATCH_SORT_MODES.nu1983)
+        setSortOption(PATCH_SORT_MODES.find(x => x.default)?.key!)
     }
 
     const toggleExpander = () => {
