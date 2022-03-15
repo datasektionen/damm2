@@ -196,7 +196,14 @@ export const PatchArchive: React.FC = props => {
     }, [patches, sortOption])
 
     const matchesSearch = (patch: IPatch): boolean => {
-        return patch.name.toLowerCase().match(new RegExp(patchQuery.toLowerCase(), "g")) !== null;
+        const pname = patch.name.toLowerCase();
+        const query = new RegExp(patchQuery.toLowerCase(), "g");
+        
+        const matchesCreators = patch.creators.reduce((acc, val) => {
+            return (val.toLowerCase().match(query) !== null) || acc;
+        }, false)
+
+        return (pname.match(query) !== null) || matchesCreators;
     }
 
     const [resultingPatches, setResultingPatches] = useState<IPatch[]>(sortPatches);
