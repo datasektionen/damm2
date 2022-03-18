@@ -98,7 +98,10 @@ export const FilterAndSort: React.FC<Props> = props => {
                 <TagSelector
                     tags={tags}
                     selectedTags={selectedTags}
-                    setSelectedTags={setSelectedTags}
+                    setSelectedTags={next => {
+                        gotoFirstPage();
+                        setSelectedTags(next);
+                    }}
                     query={tagFilter}
                 />
             </Tags>
