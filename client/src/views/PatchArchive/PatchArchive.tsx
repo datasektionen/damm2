@@ -46,7 +46,7 @@ export const PATCH_SORT_MODES: { label: string; key: string; sort: (a: IPatch, b
     { label: "Fallande", key: "id-desc", sort: (a: IPatch, b: IPatch) => a.id < b.id ? 1 : -1, groupLabel: "ID" },
 ]
 
-const ITEMS_PER_PAGE = 30;
+const ITEMS_PER_PAGE = 35;
 
 export const PatchArchive: React.FC = props => {
 
