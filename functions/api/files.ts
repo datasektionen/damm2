@@ -19,7 +19,7 @@ AWS.config.getCredentials((err) => {
 const compressImage = async (file: Express.Multer.File): Promise<Buffer> => {
     const image = await Jimp.read(file.buffer);
     return await image.resize(200, Jimp.AUTO)
-        .quality(35)
+        .quality(100)
         .getBufferAsync(image.getMIME());
 };
 
