@@ -12,17 +12,23 @@ import { getAll, createEvent, updateEvent, deleteEvent } from '../functions/api/
 import { IUserRequest } from '../common/requests';
 import { unauthorizedResponse } from '../common/ApiResponse';
 import prisma from '../common/client';
+import { CronJob } from "cron";
 
 const init = () => generator(dfunkt);
 
 let cachedData = init()();
-let lastCached = moment();
 
-setInterval(() => {
-    console.log("Performing automatic refresh");
-    cachedData = init()();
-    lastCached = moment();
-}, 1000*3600*24);
+new CronJob(
+    // Run every hour
+    // seconds, minutes, hours, day of month, month, day of week
+    "0 0 * * * *", 
+    () => {
+        console.log("Performing automatic refresh");
+        cachedData = init()();
+    }, // onTick
+    null, // onComplete
+    true, // start now
+);
 
 router.get("/all", async (req, res) => {
     const events = await getAll();
