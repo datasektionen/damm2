@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Field } from '../../../../components/Field/Field';
 import { Button } from '../../../../components/Button/Button';
 import { TextArea } from '../../../../components/TextArea/TextArea';
@@ -33,6 +33,8 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
     const [requestError, setRequestError] = useState("");
     const [deleteConfirmation, setDeleteConfirmation] = useState<string>("");
 
+    const [image, setImage] = useState<File | null>(null);
+
     const ref = useRef(document.createElement("div"));
 
     useEffect(() => {
@@ -44,7 +46,7 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
         setEditState({...editState, [e.target.name]: e.target.value})
     }
 
-    const put = () => {
+    const put = async () => {
         setLoading(true);
         setRequestError("");
         const body = {
@@ -55,6 +57,10 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
             tags: editState.tags.map((x: ITag) => x.id),
             creators: editState.creators,
         } as any
+
+        if (image) {
+            await replaceImage();
+        }
 
         if (editState.date.length === 0) delete body.date
         axios.put(url(editApiPath), body,
@@ -83,6 +89,38 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
         })
     }
 
+    // Replace images on a patch
+    // Uploads the new image, attaches the returned images to the Patch, and deletes the old images from S3.
+    const replaceImage = useCallback(async () => {
+        if (type !== "patch") return;
+        if (image === null) return;
+        const imageFormData = new FormData();
+        imageFormData.append("image", image as File);
+
+        const config = {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`
+            }
+        };
+        // Upload new image
+        const uploadImageResult = await axios.post(url("/api/files/upload/image?path=patches"), imageFormData, config);
+        // Attach the returned image and the compressed image to the Patch
+        const result = await axios.post(url("/api/files/attach/img-to"), {
+            id: editState.id,
+            images: uploadImageResult.data.body.map((b: any) => b.Location),
+            type: "patch",
+        }, config);
+
+        if (result.status !== 200) return;
+        // Delete old images from S3
+        editState.images.map(async i => {
+            // i is a complete url, we need the key which is extracted from the pathname
+            // Remove the first "/" from the pathname: what remains is the key of the object
+            const u = new URL(i).pathname.substring(1); 
+            await axios.delete(url(`/api/files/image?key=${u}`), config);
+        });
+    }, [image, editState.id])
+
     return (
         <StyledEditDetails ref={ref}>
             {loading &&
@@ -100,6 +138,15 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
                     <a href={i} target="_blank" rel="noopener noreferrer">{i}</a>
                 </div>
             )}
+            {type === "patch" &&
+                <FileUploader
+                    files={image ? [image] : []}
+                    onAddFile={(file: File) => setImage(file)}
+                    onFileRemove={() => setImage(null)}
+                    label="Ersätt bild"
+                    accept={["png", "jpg"]}
+                />
+            }
             <H4>Namn</H4>
             <Field
                 name="name"
@@ -167,7 +214,7 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
                 <Button
                     label="Spara"
                     onClick={put}
-                    disabled={loading || (patch === editState && files.length === 0)}
+                    disabled={loading || (patch === editState && files.length === 0 && image === null)}
                     isLoading={loading}
                 />
             </BRow>

@@ -154,6 +154,30 @@ router.get("/get/unprotected/:name", async (req, res) => {
     });
 });
 
+// Delete an image from S3
+// Does not delete the image from anywhere else
+router.delete("/image",
+    authorizePls,
+    adminPrylisAuth,
+    query("key").isString().trim().notEmpty().withMessage("should be a string"),
+    validationCheck,
+async (req, res) => {
+    const { key } = req.query;
+
+    deleteFile(key as string)
+    .then(() => {
+        res.status(StatusCodes.OK).json({
+            statusCode: StatusCodes.OK,
+        });
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(StatusCodes.NOT_FOUND).json({
+            statusCode: StatusCodes.NOT_FOUND,
+        });
+    }); 
+});
+
 router.delete("/file",
     authorizePls,
     adminPrylisAuth,
