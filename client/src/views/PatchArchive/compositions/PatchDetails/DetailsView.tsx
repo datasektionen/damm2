@@ -1,13 +1,12 @@
 import React, { useContext, useState } from 'react';
 import { IPatch, ITag } from '../../../../types/definitions';
 import Moment from 'react-moment';
-import { PatchImage, Left, Right, Description, Tags, Meta, CloseButton, Content, Files, Creators, Thrash, H1 } from './style';
+import { PatchImage, Left, Right, Description, Tags, Meta, CloseButton, Content, Files, Creators, Thrash, H1, Storage, StorageItem, StorageItems } from './style';
 import { Button } from '../../../../components/Button/Button';
 import { Tag } from '../../../../components/Tag/Tag';
 import { url } from '../../../../common/api';
 import { AdminContext } from '../../../../App';
 import axios from 'axios';
-import { Configuration } from '../../../../common/configuration';
 import ReactMarkdown from 'react-markdown';
 
 interface Props {
@@ -135,6 +134,24 @@ export const DetailsView: React.FC<Props> = ({ patch, onEditClick, onClose, fetc
                         )}
                     </Tags>
                 </Content>
+                {isAdmin &&
+                    <Storage>
+                        <StorageItems>
+                            <StorageItem title="Låda">
+                                <i className="fa-solid fa-box"></i>
+                                <span>
+                                    {patch.bag?.box.name ?? "?"}
+                                </span>
+                            </StorageItem>
+                            <StorageItem title="Påse">
+                                <i className="fa-solid fa-bag-shopping"></i>
+                                <span>
+                                    {patch.bag?.name ?? "?"}
+                                </span>
+                            </StorageItem>
+                        </StorageItems>
+                    </Storage>
+                }
             </Right>
             <CloseButton onClick={onClose} title="Stäng">
                 <i className="fas fa-times" />

@@ -99,6 +99,32 @@ export const Description = styled.div({
     borderBottom: "solid 1px #afafaf4f",
 })
 
+export const Storage = styled.div({
+    margin: "25px 0",
+    padding: "50px 0",
+    borderTop: "solid 1px #afafaf4f",
+    display: "flex",
+    flexDirection: "column",
+})
+
+export const StorageItems = styled.span({
+    display: "flex",
+    justifyContent: "space-around",
+})
+
+export const StorageItem = styled.span({
+    display: "flex",
+    alignItems: "center",
+    "i": {
+        fontSize: "40px",
+        marginRight: "10px",
+    },
+    "span": {
+        fontSize: "18px",
+        fontWeight: "bold",
+    }
+})
+
 export const Tags = styled.div({
     display: "flex",
     flexWrap: "wrap",

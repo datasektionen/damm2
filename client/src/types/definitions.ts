@@ -1,5 +1,16 @@
 import moment from "moment";
 
+export interface Box {
+    id: number;
+    name: string;
+}
+
+export interface Bag {
+    id: number;
+    name: string;
+    boxId: number;
+    box: Box;
+}
 export interface IPatch {
     id: number;
     name: string;
@@ -11,6 +22,8 @@ export interface IPatch {
     tags: ITag[];
     images: string[];
     files: string[];
+    bag?: Bag;
+    bagId?: number;
 }
 
 export interface ITag {
