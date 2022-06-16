@@ -21,6 +21,22 @@ model Patch {
   tags        Tag[]
   images      String[]
   files       String[]
+  bag         Bag?      @relation(fields: [bagId], references: [id])
+  bagId       Int?
+}
+
+model Box {
+  id   Int    @id @default(autoincrement())
+  name String
+  bags Bag[]
+}
+
+model Bag {
+  id      Int     @id @default(autoincrement())
+  name    String
+  box     Box     @relation(fields: [boxId], references: [id])
+  boxId   Int
+  patches Patch[]
 }
 
 model Tag {
