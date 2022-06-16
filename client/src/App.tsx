@@ -14,7 +14,9 @@ import useAuthorization from './hooks/useAuthorization';
 import { ProtectedRoute } from './components/ProtectedRoute/ProtectedRoute';
 import { ArtefactArchive } from './views/ArtefactArchive/ArtefactArchive';
 import { ArtefactCreator } from './views/ArtefactCreator/ArtefactCreator';
+import { StorageHandler } from './views/StorageHandler/StorageHandler';
 import { Landing } from './views/Landing/Landing';
+import { Admin } from './views/Admin/Admin';
 
 export const AdminContext = React.createContext<{ loading: boolean; admin: string[]; user: string; }>({ loading: true, admin: [], user: "" })
 
@@ -31,22 +33,9 @@ export const App: React.FC = props => {
     const { admin, loading, hasToken, user } = useAuthorization();
 
     useEffect(() => {
-        if (admin.includes("admin")) {
+        if (admin.includes("admin") || admin.includes("post") || admin.includes("prylis")) {
             setMethoneLinks([...defaultLinks].concat(
-                <Link to={ROUTES.PATCH_CREATOR} key={"methonel-pcreator"}>Skapa märke</Link>,
-                <Link to={ROUTES.ARTEFACT_CREATOR} key={"methonel-acreator"}>Skapa föremål</Link>,
-                <Link to={ROUTES.TAGS_MANAGER} key={"methonel-tmanager"}>Hantera taggar</Link>,
-                <Link to={ROUTES.EVENT_HANDLER} key={"methonel-ehandler"}>Hantera händelser</Link>,
-                <Link to={ROUTES.STORAGE} key={"methonel-pstorage"}>Hantera märkesarkiv</Link>,
-            ))
-        } else if (admin.includes("post")) {
-            setMethoneLinks([...defaultLinks].concat(
-                <Link to={ROUTES.EVENT_HANDLER} key={"methonel-ehandler"}>Hantera händelser</Link>,
-            ))
-        } else if (admin.includes("prylis")) {
-            setMethoneLinks([...defaultLinks].concat(
-                <Link to={ROUTES.PATCH_CREATOR} key={"methonel-pcreator"}>Skapa märke</Link>,
-                <Link to={ROUTES.TAGS_MANAGER} key={"methonel-tmanager"}>Hantera taggar</Link>,
+                <Link to={ROUTES.ADMIN}>Administrera</Link>
             ))
         }
     }, [admin, loading])
@@ -75,35 +64,44 @@ export const App: React.FC = props => {
                     />
                     <Route path={ROUTES.PATCH_ARCHIVE} element={<PatchArchive />} />
                     <Route path={ROUTES.MUSEUM} element={<ArtefactArchive />} />
-                    <Route
-                        path={ROUTES.PATCH_CREATOR}
-                        element={
-                            <ProtectedRoute allowed={["prylis"]}>
-                                <PatchCreator />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route path={ROUTES.ARTEFACT_CREATOR}
-                        element={
-                            <ProtectedRoute allowed={["admin"]}>
-                                <ArtefactCreator />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route path={ROUTES.TAGS_MANAGER}
-                        element={
-                            <ProtectedRoute allowed={["prylis"]}>
-                                <TagsManager />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route path={ROUTES.EVENT_HANDLER}
-                        element={
-                            <ProtectedRoute allowed={["admin", "post"]}>
-                                <EventHandler />
-                            </ProtectedRoute>
-                        }
-                    />
+                    <Route path={ROUTES.ADMIN} element={<Admin />}>
+                        <Route
+                            path={ROUTES.PATCH_CREATOR}
+                            element={
+                                <ProtectedRoute allowed={["prylis"]}>
+                                    <PatchCreator />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route path={ROUTES.ARTEFACT_CREATOR}
+                            element={
+                                <ProtectedRoute allowed={["admin"]}>
+                                    <ArtefactCreator />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route path={ROUTES.TAGS_MANAGER}
+                            element={
+                                <ProtectedRoute allowed={["prylis"]}>
+                                    <TagsManager />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route path={ROUTES.EVENT_HANDLER}
+                            element={
+                                <ProtectedRoute allowed={["admin", "post"]}>
+                                    <EventHandler />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route path={ROUTES.STORAGE}
+                            element={
+                                <ProtectedRoute allowed={["prylis"]}>
+                                    <StorageHandler />
+                                </ProtectedRoute>
+                            }
+                        />
+                    </Route>
                     <Route path={ROUTES.LOGIN} element={<Login />} />
                     <Route path={ROUTES.LOGOUT} element={<Logout />} />
                     <Route path="/token/:token" element={<Token />} />

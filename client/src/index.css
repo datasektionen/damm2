@@ -1,3 +1,5 @@
+@import url(https://use.fontawesome.com/releases/v6.1.0/css/all.css);
+
 a[href="/login"] {
     color: white;
 }
@@ -19,4 +21,13 @@ body {
     body {
         font-size: 14px;
     }
+}
+
+#content h2 {
+    font-size: initial;
+    font-weight: initial;
+    color: initial;
+    margin: initial;
+    padding: initial;
+    border-bottom: initial;
 }

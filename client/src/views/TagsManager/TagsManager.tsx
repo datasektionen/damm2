@@ -114,9 +114,8 @@ export const TagsManager: React.FC<Props> = ({}) => {
 
     return (
         <div ref={ref}>
-            <Header title="Hantera märkestaggar" />
             <Helmet>
-                <title>{title("Hantera märkestaggar")}</title>
+                <title>{title("Hantera taggar")}</title>
             </Helmet>
             <StyledTagManager>
                 {loading && <SpinnerCover />}

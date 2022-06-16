@@ -98,14 +98,14 @@ export const TagEditor: React.FC<Props> = ({ tags, selectedTags, setSelectedTags
 
     return (
         <StyledTagEditor>
-            <h2>Tagtyp</h2>
+            <h3>Taggtyp</h3>
             <BiSwitch
                 left={{label: "Märke", key:"PATCH"}}
                 right={{label: "Artefakt", key:"ARTEFACT"}}
                 value={value.type}
                 setValue={changeType}
             />
-            <h2>Huvudtaggar</h2>
+            <h3>Huvudtaggar</h3>
             <HeadTags>
                 {tags.filter((t: any) => t.tagId === null).filter(t => t.type === value.type).map((t: ITag) =>
                     <TagClickable
@@ -117,7 +117,7 @@ export const TagEditor: React.FC<Props> = ({ tags, selectedTags, setSelectedTags
                 )}
                 <Button label="Skapa ny" onClick={() => onClickCreateNew("head")}/>
             </HeadTags>
-            <h2>Undertaggar</h2>
+            <h3>Undertaggar</h3>
             <SubTags>
                 {selectedTags[0]?.children.length !== 0 &&
                     selectedTags[0]?.children.map((t: ITag) =>
@@ -135,24 +135,24 @@ export const TagEditor: React.FC<Props> = ({ tags, selectedTags, setSelectedTags
             </SubTags>
             {selectedTags.length !== 0 &&
                 <Editor>
-                    <h3>Förhandsgranskning</h3>
+                    <h4>Förhandsgranskning</h4>
                     <TagClickable tag={value as ITag} clicked={true} onClick={() => {}} />
-                    <h2>{titleString()}</h2>
-                    <h3>Namn</h3>
+                    <h3>{titleString()}</h3>
+                    <h4>Namn</h4>
                     <Field
                         placeholder="Namn"
                         value={value.name}
                         onChange={(e: any) => setValue({...value, name: e.target.value})}
                         disabled={loading}
                     />
-                    <h3>Beskrivning</h3>
+                    <h4>Beskrivning</h4>
                     <Field
                         placeholder="Beskrivning"
                         value={value.description}
                         onChange={(e: any) => setValue({...value, description: e.target.value})}
                         disabled={loading}
                     />
-                    <h3>Textfärg</h3>
+                    <h4>Textfärg</h4>
                     <Color>
                         <input
                             type="color"
@@ -168,7 +168,7 @@ export const TagEditor: React.FC<Props> = ({ tags, selectedTags, setSelectedTags
                             disabled={loading}
                         />
                     </Color>
-                    <h3>Bakgrundsfärg</h3>
+                    <h4>Bakgrundsfärg</h4>
                     <Color>
                         <input
                             type="color"

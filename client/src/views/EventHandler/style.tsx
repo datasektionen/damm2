@@ -10,11 +10,12 @@ export const StyledEventHandler = styled.div({
 })
 
 export const Content = styled.div({
-    boxShadow: "0 2px 5px rgb(0 0 0 / 20%)",
-    maxWidth: px(Theme.sizes.maxContainerWidth),
-    minWidth: "70%",
+    // boxShadow: "0 2px 5px rgb(0 0 0 / 20%)",
+    // maxWidth: px(Theme.sizes.maxContainerWidth),
+    // minWidth: "70%",
     backgroundColor: "#fff",
     padding: "50px",
+    width: "100%",
 
     [maxWidth(1000)]: {
         minWidth: "100%",

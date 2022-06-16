@@ -212,7 +212,7 @@ export const EventHandler: React.FC = props => {
             <Helmet>
                 <title>{title("Hantera händelser")}</title>
             </Helmet>
-            <Header title={edit ? (form.title.length === 0 ? "Titel" : form.title) : "Hantera händelser"} />
+            {/* <Header title={edit ? (form.title.length === 0 ? "Titel" : form.title) : "Hantera händelser"} /> */}
             <StyledEventHandler>
                 <Content>
                     {success.length !== 0 &&

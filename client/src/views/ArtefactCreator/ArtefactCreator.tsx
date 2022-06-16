@@ -169,7 +169,6 @@ export const ArtefactCreator: React.FC<Props> = props => {
 
     return (
         <>
-            <Header title="Skapa föremål" />
             <Helmet>
                 <title>{title("Skapa märke")}</title>
             </Helmet>

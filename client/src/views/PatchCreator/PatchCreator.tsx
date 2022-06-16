@@ -172,7 +172,7 @@ export const PatchCreator: React.FC<Props> = props => {
 
     return (
         <>
-            <Header title="Skapa märke" />
+            {/* <Header title="Skapa märke" /> */}
             <Helmet>
                 <title>{title("Skapa märke")}</title>
             </Helmet>
