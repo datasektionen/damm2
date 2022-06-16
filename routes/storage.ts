@@ -94,7 +94,7 @@ router.put("/bag/box",
 
 // Assign patch to bag
 router.put("/bag/patch",
-    body("bagId").isInt().notEmpty().withMessage("should be an integer"),
+    // If bagId is null, we unassign the patch from a bag, hence it is allowed
     body("patchId").isInt().notEmpty().withMessage("should be an integer"),
     validationCheck,
     async (req, res) => {

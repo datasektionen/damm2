@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Field } from '../../../../components/Field/Field';
 import { Button } from '../../../../components/Button/Button';
 import { TextArea } from '../../../../components/TextArea/TextArea';
-import { IPatch, ITag } from '../../../../types/definitions';
+import { Bag, IPatch, ITag } from '../../../../types/definitions';
 import { StyledEditDetails, Image, BRow, H1, H4, DeleteBox, DeleteCenter } from './style';
 import axios from 'axios';
 import { url } from '../../../../common/api';
@@ -13,6 +13,8 @@ import { SpinnerCover } from '../../../../components/SpinnerCover/SpinnerCover';
 import { uploadFiles } from '../../../../functions/fileUploading';
 import { Alert } from '../../../../components/Alert/Alert';
 import Theme from '../../../../common/Theme';
+import { Link } from 'react-router-dom';
+import { ROUTES } from '../../../../common/routes';
 
 interface Props {
     onCancel: () => void;
@@ -22,9 +24,10 @@ interface Props {
     editApiPath: string;
     type: "patch" | "artefact";
     onDeleteClick: (id: number) => any;
+    bags: Bag[];
 }
 
-export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatches, editApiPath, type, onDeleteClick }) => {
+export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatches, editApiPath, type, onDeleteClick, bags }) => {
 
     const [editState, setEditState] = useState<IPatch>(patch);
     const [creator, setCreator] = useState("");
@@ -32,6 +35,8 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
     const [files, setFiles] = useState<File[]>([]);
     const [requestError, setRequestError] = useState("");
     const [deleteConfirmation, setDeleteConfirmation] = useState<string>("");
+    const [bagSelection, setBagSelection] = useState<string>(`${patch.bag?.id}`);
+    const [bagSelectionFetching, setBagSelectionFetching] = useState(false);
 
     const [image, setImage] = useState<File | null>(null);
 
@@ -43,7 +48,7 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
     }, [patch])
 
     const onChange = (e: any) => {
-        setEditState({...editState, [e.target.name]: e.target.value})
+        setEditState({ ...editState, [e.target.name]: e.target.value })
     }
 
     const put = async () => {
@@ -85,7 +90,7 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
         })
         .finally(() => {
             setLoading(false)
-            ref?.current?.scrollIntoView({behavior: "smooth"})
+            ref?.current?.scrollIntoView({ behavior: "smooth" })
         })
     }
 
@@ -116,10 +121,30 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
         editState.images.map(async i => {
             // i is a complete url, we need the key which is extracted from the pathname
             // Remove the first "/" from the pathname: what remains is the key of the object
-            const u = new URL(i).pathname.substring(1); 
+            const u = new URL(i).pathname.substring(1);
             await axios.delete(url(`/api/files/image?key=${u}`), config);
         });
     }, [image, editState.id])
+
+    const saveBagPlacement = useCallback(async () => {
+        console.log(bagSelection)
+        const bagId = bagSelection === undefined ? null : parseInt(bagSelection);
+        setBagSelectionFetching(true);
+        axios.put(url("/api/storage/bag/patch"), { bagId, patchId: patch.id }, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`
+            }
+        })
+            .then(async () => {
+                await fetchPatches();
+                onCancel();
+            })
+            .finally(() => {
+                setBagSelectionFetching(false);
+            })
+    }, [bagSelection, patch])
+
+    console.log(bagSelection)
 
     return (
         <StyledEditDetails ref={ref}>
@@ -134,7 +159,7 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
             <H1>Redigera "{patch.name}"</H1>
             <Image src={editState.images[1]} alt="Bild på märket" draggable={false} />
             {patch.images.map((i: string) =>
-                <div key={"imagelink"+i}>
+                <div key={"imagelink" + i}>
                     <a href={i} target="_blank" rel="noopener noreferrer">{i}</a>
                 </div>
             )}
@@ -218,9 +243,33 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
                     isLoading={loading}
                 />
             </BRow>
+            <div style={{ borderBottom: "solid 1px #afafaf4f" }}></div>
+            <h4>Förvaringsplats</h4>
+            <p>Hantera var märket är förvarat</p>
+            <div style={{ display: "flex", padding: "10px 0 20px" }}>
+                <select
+                    onChange={e => setBagSelection(e.target.value)}
+                    value={bagSelection}
+                    disabled={bagSelectionFetching}
+                    defaultValue={`${patch.bag?.id}`}
+                >
+                    <option value="">Ingen påse</option>
+                    {bags.map((b, i) =>
+                        <option
+                            value={b.id}
+                            key={"bag-option-" + i}
+                        >
+                            {b.name} ({b.box?.name})
+                        </option>
+                    )}
+                </select>
+                <Button label="Spara" onClick={saveBagPlacement} disabled={bagSelectionFetching} />
+            </div>
+            <p>Vill du flytta en påse? Gör det i <Link to={ROUTES.STORAGE}><b>administratörsvyn</b></Link></p>
+            <div style={{ borderBottom: "solid 1px #afafaf4f" }}></div>
             <h4>Farliga grejer</h4>
             <DeleteBox>
-                <h4 style={{color: Theme.palette.red}}><b>Radera märket</b></h4>
+                <h4 style={{ color: Theme.palette.red }}><b>Radera märket</b></h4>
                 <p>Detta kan inte ångras. Skriv "<b>Radera permanent</b>" nedan för att bekräfta borttagning.</p>
                 <Field
                     value={deleteConfirmation}

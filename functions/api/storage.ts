@@ -45,7 +45,7 @@ export const getAllBags = async ({
             box: true,
         },
         orderBy: {
-            id: "asc"
+            name: "asc"
         }
     });
 

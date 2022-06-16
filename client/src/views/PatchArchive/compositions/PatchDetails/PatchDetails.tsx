@@ -1,12 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { IPatch, ITag } from '../../../../types/definitions';
-import { StyledPatchDetails, PatchImage, Left, Right, Description, Tags, Meta, CloseButton, Content } from './style';
-import { Tag } from '../../../../components/Tag/Tag';
-import Moment from 'react-moment';
+import { Bag, IPatch, ITag } from '../../../../types/definitions';
+import { StyledPatchDetails } from './style';
 import 'moment/locale/sv';
-import { Button } from '../../../../components/Button/Button';
 import { DetailsView } from './DetailsView'
 import { EditDetails } from '../EditDetails/EditDetails'
+import axios from 'axios'
+import { url } from '../../../../common/api';
 
 interface Props {
     patch: IPatch;
@@ -28,6 +27,19 @@ export const PatchDetails: React.FC<Props> = ({ patch, onClose, allTags, fetchPa
         ref.current.scrollTo(0, 0)
     }, [patch])
 
+    const [bags, setBags] = useState<Bag[]>([]);
+
+    useEffect(() => {
+        axios.get(url("/api/storage/bag/all?includePatches=false"), {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token") ?? ""}`,
+            }
+        })
+        .then(res => {
+            setBags(res.data.body)
+        })
+    }, [])
+
     return (
         <StyledPatchDetails ref={ref}>
             {edit ?
@@ -39,6 +51,7 @@ export const PatchDetails: React.FC<Props> = ({ patch, onClose, allTags, fetchPa
                     editApiPath={editApiPath}
                     type={type}
                     onDeleteClick={(id: number) => onDeleteClick(id)}
+                    bags={bags}
                 />
                 :
                 <DetailsView

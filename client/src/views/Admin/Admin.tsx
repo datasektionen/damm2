@@ -8,7 +8,8 @@ const linkToTitle = {
     "/admin/create-patch": "Skapa märke",
     "/admin/manage-tags": "Hantera taggar",
     "/admin/manage-events": "Hantera händelser",
-    "/admin/create-artefact": "Skapa artefakt"
+    "/admin/create-artefact": "Skapa artefakt",
+    "/admin/manage-storage": "Hantera förvaring"
 }
 
 export const Admin = () => {
