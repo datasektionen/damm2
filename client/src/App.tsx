@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Methone from 'methone';
-import { Link, Route, Switch, Redirect } from 'react-router-dom';
+import { Link, Route, Routes, useParams, Navigate } from 'react-router-dom';
 import { PatchArchive } from './views/PatchArchive/PatchArchive';
 import { TagsManager } from './views/TagsManager/TagsManager';
 import './index.css';
@@ -37,6 +37,7 @@ export const App: React.FC = props => {
                 <Link to={ROUTES.ARTEFACT_CREATOR} key={"methonel-acreator"}>Skapa föremål</Link>,
                 <Link to={ROUTES.TAGS_MANAGER} key={"methonel-tmanager"}>Hantera taggar</Link>,
                 <Link to={ROUTES.EVENT_HANDLER} key={"methonel-ehandler"}>Hantera händelser</Link>,
+                <Link to={ROUTES.STORAGE} key={"methonel-pstorage"}>Hantera märkesarkiv</Link>,
             ))
         } else if (admin.includes("post")) {
             setMethoneLinks([...defaultLinks].concat(
@@ -63,59 +64,88 @@ export const App: React.FC = props => {
                         login_text: hasToken ? 'Logga ut' : 'Logga in',
                     }}
                 />
-                <Switch>
-                    <Route exact path={ROUTES.TIMELINE}>
-                        <Timeline />
-                    </Route>
-                    <Route exact path={ROUTES.HOME}>
-                        {/* <Redirect to={ROUTES.PATCH_ARCHIVE} /> */}
-                        <Landing />
-                    </Route>
-                    <Route exact path={ROUTES.PATCH_ARCHIVE}>
-                        <PatchArchive />
-                    </Route>
-                    <Route exact path={ROUTES.MUSEUM}>
-                        <ArtefactArchive />
-                    </Route>
-                    <Route exact path={ROUTES.PATCH_CREATOR}>
-                        <ProtectedRoute allowed={["prylis"]}>
-                            <PatchCreator />
-                        </ProtectedRoute>
-                    </Route>
-                    <Route exact path={ROUTES.ARTEFACT_CREATOR}>
-                        <ProtectedRoute allowed={["admin"]}>
-                            <ArtefactCreator />
-                        </ProtectedRoute>
-                    </Route>
-                    <Route exact path={ROUTES.TAGS_MANAGER}>
-                        <ProtectedRoute allowed={["prylis"]}>
-                            <TagsManager />
-                        </ProtectedRoute>
-                    </Route>
-                    <Route exact path={ROUTES.EVENT_HANDLER}>
-                        <ProtectedRoute allowed={["admin", "post"]}>
-                            <EventHandler />
-                        </ProtectedRoute>
-                    </Route>
-
-                    <Route exact path={ROUTES.LOGIN} render={match => {
-                        window.location = `https://login.datasektionen.se/login?callback=${encodeURIComponent(window.location.origin)}/token/` as any;
-                        return <div></div>
-                    }} />
-                    <Route exact path={ROUTES.LOGOUT} render={({ match }) => {
-                        localStorage.removeItem('token')
-                        window.location = ROUTES.HOME as any;
-                        return <div></div>
-                    }} />
-                    <Route exact path="/token/:token" render={({ match, history }) => {
-                        localStorage.setItem('token', match.params.token);
-                        return <Redirect to={ROUTES.HOME} />
-                    }} />
-                    <Route>
-                        <NotFound />
-                    </Route>
-                </Switch>
+                <Routes>
+                    <Route
+                        path={ROUTES.TIMELINE}
+                        element={<Timeline />}
+                    />
+                    <Route
+                        path={ROUTES.HOME}
+                        element={<Landing />}
+                    />
+                    <Route path={ROUTES.PATCH_ARCHIVE} element={<PatchArchive />} />
+                    <Route path={ROUTES.MUSEUM} element={<ArtefactArchive />} />
+                    <Route
+                        path={ROUTES.PATCH_CREATOR}
+                        element={
+                            <ProtectedRoute allowed={["prylis"]}>
+                                <PatchCreator />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route path={ROUTES.ARTEFACT_CREATOR}
+                        element={
+                            <ProtectedRoute allowed={["admin"]}>
+                                <ArtefactCreator />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route path={ROUTES.TAGS_MANAGER}
+                        element={
+                            <ProtectedRoute allowed={["prylis"]}>
+                                <TagsManager />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route path={ROUTES.EVENT_HANDLER}
+                        element={
+                            <ProtectedRoute allowed={["admin", "post"]}>
+                                <EventHandler />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route path={ROUTES.LOGIN} element={<Login />} />
+                    <Route path={ROUTES.LOGOUT} element={<Logout />} />
+                    <Route path="/token/:token" element={<Token />} />
+                    <Route
+                        element={
+                            <NotFound />
+                        }
+                    />
+                </Routes>
             </AdminContext.Provider>
         </div>
     );
 };
+
+const Token = () => {
+    const { token } = useParams();
+    // const navigate = useNavigate();
+    useEffect(() => {
+        localStorage.setItem('token', token as string);
+    }, [])
+
+    return (
+        <Navigate to={ROUTES.HOME} />
+    )
+}
+
+const Login = () => {
+    useEffect(() => {
+        window.location = `https://login.datasektionen.se/login?callback=${encodeURIComponent(window.location.origin)}/token/` as any;
+    })
+
+    return (
+        <></>
+    )
+}
+
+const Logout = () => {
+    useEffect(() => {
+        localStorage.removeItem('token');
+    })
+
+    return (
+        <Navigate to={ROUTES.HOME} />
+    )
+}

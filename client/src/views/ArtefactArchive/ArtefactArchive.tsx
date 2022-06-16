@@ -7,7 +7,7 @@ import { Patch } from '../../components/Patch/Patch';
 import { IArtefact, ITag } from '../../types/definitions';
 import { FilterAndSort } from '../PatchArchive/compositions/FilterAndSort/FilterAndSort';
 import { WrappedPatchDetails } from '../PatchArchive/compositions/PatchDetails/PatchDetails';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ROUTES } from '../../common/routes';
 import { SpinnerCover } from '../../components/SpinnerCover/SpinnerCover';
 import queryString from 'query-string';
@@ -35,7 +35,8 @@ export const ArtefactArchive: React.FC = props => {
     const [selectedTags, setSelectedTags] = useState([]);
     const [selectedArtefact, setSelectedArtefact] = useState<IArtefact | null>(null);
     const pageRef = useRef(document.createElement("div"));
-    const history = useHistory();
+    // const history = useHistory();
+    const navigate = useNavigate();
     const location = useLocation();
     const isSmallScreen = useScreenSizeChecker(1100);
 
@@ -89,10 +90,18 @@ export const ArtefactArchive: React.FC = props => {
     const clickArtefact = (artefact: IArtefact) => {
         if (edit) return;
         setSelectedArtefact(artefact);
-        history.push({
-            search: `?artefact=${artefact.id}`,
-            state: { from: ROUTES.MUSEUM }
-        })
+        // history.push({
+        //     search: `?artefact=${artefact.id}`,
+        //     state: { from: ROUTES.MUSEUM }
+        // })
+        navigate(
+            {
+                search: `?artefact=${artefact.id}`,
+            },
+            {
+                state: { from: ROUTES.MUSEUM }
+            }
+        )
         if (isSmallScreen) {
             pageRef.current.scrollTo({ behavior: "smooth", top: 0 })
         }
@@ -100,10 +109,18 @@ export const ArtefactArchive: React.FC = props => {
 
     const artefactClose = () => {
         setSelectedArtefact(null);
-        history.push({
-            pathname: ROUTES.MUSEUM,
-            state: { from: ROUTES.MUSEUM }
-        });
+        // history.push({
+        //     pathname: ROUTES.MUSEUM,
+        //     state: { from: ROUTES.MUSEUM }
+        // });
+        navigate(
+            {
+                pathname: ROUTES.MUSEUM,
+            },
+            {
+                state: { from: ROUTES.MUSEUM }
+            }
+        )
         setEdit(false);
     }
 
