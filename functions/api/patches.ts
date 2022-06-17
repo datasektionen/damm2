@@ -46,6 +46,7 @@ export const create = async (
     date = "",
     creators: string[] = [],
     tags: number[] = [],
+    amount = 0,
 ): Promise<ApiResponse> => {
 
     try {
@@ -60,6 +61,7 @@ export const create = async (
                     connect: tags.map(x => {return { id: x };}),
                 },
                 images: [],
+                amount,
             },
             include: {
                 tags: {
@@ -84,7 +86,7 @@ export const create = async (
     }
 };
 
-export const update = async (patchId: number, {name, date, description, tags, creators, files}: {name?: string, date?: string, description?: string, tags?: number[], creators: string[], files?: string[]}): Promise<ApiResponse> => {
+export const update = async (patchId: number, {name, date, description, tags, creators, files, amount}: {name?: string, date?: string, description?: string, tags?: number[], creators: string[], files?: string[], amount?: number }): Promise<ApiResponse> => {
     const data: any = { };
 
     if (name) {
@@ -111,6 +113,7 @@ export const update = async (patchId: number, {name, date, description, tags, cr
             set: files,
         };
     }
+    if (amount) data.amount = amount;
 
     const result = await prisma.patch.update({
         where: {

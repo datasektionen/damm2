@@ -232,7 +232,7 @@ export const ArtefactArchive: React.FC = props => {
                                     .map((x: IArtefact, i: number) =>
                                         <Patch
                                             key={`artefact-${i}-${x.id}`}
-                                            patch={{...x, creators: []}}
+                                            patch={{...x, creators: [], amount: 0 }}
                                             onClick={(artefact: IArtefact) => clickArtefact(artefact)}
                                             disabled={edit}
                                         />
@@ -248,7 +248,7 @@ export const ArtefactArchive: React.FC = props => {
                             <WrappedPatchDetails
                                 editApiPath="/api/artefacts/update"
                                 type="artefact"
-                                patch={{...selectedArtefact, creators: []}}
+                                patch={{...selectedArtefact, creators: [], amount: 0}}
                                 onClose={artefactClose}
                                 allTags={tags}
                                 fetchPatches={fetchArtefacts}

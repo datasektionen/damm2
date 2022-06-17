@@ -30,12 +30,12 @@ export const DetailsView: React.FC<Props> = ({ patch, onEditClick, onClose, fetc
                 Authorization: `Bearer ${localStorage.getItem("token")}`
             }
         })
-        .then(async res => {
-            await fetchPatches();
-        })
-        .finally(() => {
-            setLoading(false)
-        })
+            .then(async res => {
+                await fetchPatches();
+            })
+            .finally(() => {
+                setLoading(false)
+            })
     }
 
     return (
@@ -147,6 +147,14 @@ export const DetailsView: React.FC<Props> = ({ patch, onEditClick, onClose, fetc
                                 <i className="fa-solid fa-bag-shopping"></i>
                                 <span>
                                     {patch.bag?.name ?? "?"}
+                                </span>
+                            </StorageItem>
+                        </StorageItems>
+                        <StorageItems>
+                            <StorageItem title="Antal i arkivet">
+                                <i className="fa-solid fa-hashtag"></i>
+                                <span>
+                                    {patch.amount}
                                 </span>
                             </StorageItem>
                         </StorageItems>
