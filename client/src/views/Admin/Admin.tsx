@@ -69,7 +69,7 @@ export const Admin = () => {
                         </div>
                     } */}
                 </div>
-                <div style={{ width: "75%", "padding": "0 15px" }}>
+                <div style={{ width: "75%", "padding": "0 15px", position: "relative" }}>
                     <Outlet />
                 </div>
             </div>
