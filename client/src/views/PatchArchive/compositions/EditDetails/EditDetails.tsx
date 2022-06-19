@@ -61,6 +61,7 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
             date: editState.date,
             tags: editState.tags.map((x: ITag) => x.id),
             creators: editState.creators,
+            amount: parseInt(`${editState.amount}`),
         } as any
 
         if (image) {
@@ -212,6 +213,14 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
                 setCreator={(value: string) => setCreator(value)}
                 creators={editState.creators}
                 setCreators={(next: string[]) => setEditState({ ...editState, creators: next })}
+                disabled={loading}
+            />
+            <H4>Antal i arkivet</H4>
+            <input
+                type="number"
+                name="amount"
+                value={editState.amount}
+                onChange={onChange}
                 disabled={loading}
             />
             <H4>Ladda upp filer</H4>

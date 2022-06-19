@@ -7,8 +7,8 @@ import { body } from "express-validator";
 const router = express.Router();
 
 // All routes here require admin access
-router.use(authorizePls);
-router.use(adminPrylisAuth);
+// router.use(authorizePls);
+// router.use(adminPrylisAuth);
 
 // Get all boxes
 router.get("/box/all",

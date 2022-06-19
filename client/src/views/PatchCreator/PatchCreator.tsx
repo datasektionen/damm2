@@ -31,6 +31,7 @@ interface Form {
     date: string;
     tags: ITag[];
     creators: string[];
+    amount: number;
 }
 
 const defaultForm: Form = {
@@ -39,6 +40,7 @@ const defaultForm: Form = {
     date: "",
     tags: [],
     creators: [],
+    amount: 0,
 }
 
 export const PatchCreator: React.FC<Props> = props => {
@@ -103,6 +105,7 @@ export const PatchCreator: React.FC<Props> = props => {
             description: form.description,
             tags: form.tags.map((t: ITag) => t.id),
             creators: form.creators,
+            amount: form.amount,
         } as any;
 
         if (form.date.length !== 0) body.date = form.date;
@@ -261,6 +264,17 @@ export const PatchCreator: React.FC<Props> = props => {
                         setCreators={(next: string[]) => setForm({ ...form, creators: next })}
                         disabled={loading}
                     />
+                    <H3>Antal i fysiska arkivet</H3>
+                    <H4>Hur många märken innehåller det fysiska arkivet? Sätt 0 om okänt, detta kan ändras senare.</H4>
+                    <input
+                        type="number"
+                        value={form.amount}
+                        name="amount"
+                        onChange={onChange}
+                        disabled={loading}
+                        min={0}
+                    />
+                    <div style={{ margin: "0 0 20px" }}></div>
                     <BRow>
                         <Button
                             label="Återställ"

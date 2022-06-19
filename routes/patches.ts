@@ -25,11 +25,12 @@ router.post("/create",
     check("tags.*").isInt().not().isString().withMessage("should be an integer"),
     body("creators").isArray().optional().withMessage("should be an array"),
     check("creators.*").isString().trim().notEmpty().withMessage("should be a string"),
+    body("amount").isInt({ min: 0 }).optional().withMessage("should be an integer"),
     validationCheck,
 async (req, res) => {
-    const { name, description, date, tags, creators } = req.body;
+    const { name, description, date, tags, creators, amount } = req.body;
 
-    const patch = await create(name, description, date, creators, tags);
+    const patch = await create(name, description, date, creators, tags, amount);
     return res.status(patch.statusCode).json(patch);
 });
 
@@ -45,11 +46,12 @@ router.put("/update",
     check("tags.*").isInt().not().isString().withMessage("should be an integer"),
     body("creators").isArray().optional().withMessage("should be an array"),
     check("creators.*").isString().trim().notEmpty().withMessage("should be a string"),
+    body("amount").isInt({ min: 0 }).optional().withMessage("should be an integer"),
     validationCheck,
 async (req, res) => {
-    const { id, name, date, description, tags, creators, files } = req.body;
+    const { id, name, date, description, tags, creators, files, amount } = req.body;
 
-    const result = await update(id, { name, date, description, tags, creators, files });
+    const result = await update(id, { name, date, description, tags, creators, files, amount });
     return res.status(result.statusCode).json(result);
 });
 

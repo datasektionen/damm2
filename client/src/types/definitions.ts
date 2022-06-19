@@ -24,6 +24,7 @@ export interface IPatch {
     files: string[];
     bag?: Bag;
     bagId?: number;
+    amount: number;
 }
 
 export interface ITag {

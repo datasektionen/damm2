@@ -88,7 +88,7 @@ export const Meta = styled.div({
 
 export const Content = styled.div({
     display: "flex",
-    height: "100%",
+    // height: "100%",
     flexDirection: "column",
 })
 
@@ -100,8 +100,8 @@ export const Description = styled.div({
 })
 
 export const Storage = styled.div({
-    margin: "25px 0",
-    padding: "50px 0",
+    margin: "25px 0 0",
+    padding: "50px 0 0",
     borderTop: "solid 1px #afafaf4f",
     display: "flex",
     flexDirection: "column",
@@ -110,6 +110,7 @@ export const Storage = styled.div({
 export const StorageItems = styled.span({
     display: "flex",
     justifyContent: "space-around",
+    padding: "20px 0",
 })
 
 export const StorageItem = styled.span({
