@@ -14,7 +14,6 @@ import useAuthorization from './hooks/useAuthorization';
 import { ProtectedRoute } from './components/ProtectedRoute/ProtectedRoute';
 import { ArtefactArchive } from './views/ArtefactArchive/ArtefactArchive';
 import { ArtefactCreator } from './views/ArtefactCreator/ArtefactCreator';
-import { StorageHandler } from './views/StorageHandler/StorageHandler';
 import { Landing } from './views/Landing/Landing';
 import { Admin } from './views/Admin/Admin';
 import { PatchList } from './views/PatchList/PatchList';
