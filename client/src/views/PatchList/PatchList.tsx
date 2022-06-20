@@ -118,7 +118,7 @@ export const PatchList = () => {
 
     const assignAmountToPatches = useCallback(() => {
         if (selectedRows.size === 0) return;
-        setIsAssigningPatches(true);
+        setIsSavingAmount(true);
 
         axios.put("/api/storage/patches/amount", {
             patches: Array.from(selectedRows),
@@ -137,7 +137,7 @@ export const PatchList = () => {
 
                 setPatches(next);
             })
-            .finally(() => setIsAssigningPatches(false))
+            .finally(() => setIsSavingAmount(false))
 
     }, [amount, selectedRows])
 
