@@ -9,7 +9,10 @@ const linkToTitle = {
     "/admin/manage-tags": "Hantera taggar",
     "/admin/manage-events": "Hantera händelser",
     "/admin/create-artefact": "Skapa artefakt",
-    "/admin/manage-storage": "Hantera förvaring"
+    "/admin/patch-list": "Lista märken",
+    "/admin/manage-boxes": "Hantera lådor",
+    "/admin/manage-bags": "Hantera påsar",
+    "/admin/export-patches": "Exportera data",
 }
 
 export const Admin = () => {
@@ -37,10 +40,16 @@ export const Admin = () => {
                                     <Link to={ROUTES.TAGS_MANAGER}>Hantera taggar</Link>
                                 </li>
                                 <li>
-                                    <Link to={ROUTES.STORAGE}>Hantera förvaring</Link>
+                                    <Link to={ROUTES.MANAGE_BOXES}>Hantera lådor</Link>
                                 </li>
                                 <li>
-                                    <Link to={ROUTES.PATCH_ARCHIVE}>Lista märken</Link>
+                                    <Link to={ROUTES.MANAGE_BAGS}>Hantera påsar</Link>
+                                </li>
+                                <li>
+                                    <Link to={ROUTES.PATCH_LIST}>Lista märken</Link>
+                                </li>
+                                <li>
+                                    <Link to={ROUTES.EXPORT_PATCHES}>Exportera data</Link>
                                 </li>
                             </ul>
                         </div>

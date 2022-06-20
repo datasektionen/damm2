@@ -1,14 +1,16 @@
 import express from "express";
-import { changeBagLocation, changeBagName, createBag, createBox, getAllBags, getAllBoxes, putPatchInBag, changeBoxName, deleteBag, deleteBox } from "../functions/api/storage";
+import { changeBagLocation, changeBagName, createBag, createBox, getAllBags, getAllBoxes, putPatchInBag, changeBoxName, deleteBag, deleteBox, deleteBags, deleteBoxes, changeMultipleBagsLocation, updateManyPatches } from "../functions/api/storage";
 import { StatusCodes } from "http-status-codes";
 import { adminPrylisAuth, authorizePls, validationCheck } from "../common/middlewares";
-import { body } from "express-validator";
+import { body, check } from "express-validator";
+import { parse as json2csv } from "json2csv";
+import prisma from "../common/client";
 
 const router = express.Router();
 
 // All routes here require admin access
-// router.use(authorizePls);
-// router.use(adminPrylisAuth);
+router.use(authorizePls);
+router.use(adminPrylisAuth);
 
 // Get all boxes
 router.get("/box/all",
@@ -123,5 +125,72 @@ router.delete("/box/:boxId",
         return res.status(result.statusCode).json(result);
     },
 );
+
+router.post("/bags/delete",
+    body("bags").isArray({ min: 1 }).withMessage("should be an array"),
+    check("bags.*").isInt().withMessage("array should contain integers"),
+    validationCheck,
+    async (req, res) => {
+        const { bags } = req.body;
+        const result = await deleteBags(bags);
+        return res.status(result.statusCode).json(result);
+    }
+);
+
+router.post("/boxes/delete",
+    body("boxes").isArray({ min: 1 }).withMessage("should be an array"),
+    check("boxes.*").isInt().withMessage("array should contain integers"),
+    validationCheck,
+    async (req, res) => {
+        const { boxes } = req.body;
+        const result = await deleteBoxes(boxes);
+        return res.status(result.statusCode).json(result);
+    }
+);
+
+router.put("/bags/box",
+    body("boxId").isInt().withMessage("should be an integer"),
+    body("bags").isArray({ min: 1 }).withMessage("should be an array"),
+    check("bags.*").isInt().withMessage("array should contain integers"),
+    validationCheck,
+    async (req, res) => {
+        const { bags, boxId } = req.body;
+        const result = await changeMultipleBagsLocation(bags, boxId);
+        return res.status(result.statusCode).json(result);
+    }
+);
+
+router.put("/patches/bag",
+    body("bagId").isInt().withMessage("should be an integer"),
+    body("patches").isArray({ min: 1 }).withMessage("should be an array"),
+    check("patches.*").isInt().withMessage("array should contain integers"),
+    validationCheck,
+    async (req, res) => {
+        const { bagId, patches } = req.body;
+        const result = await updateManyPatches({ patchIds: patches, bagId });
+        return res.status(result.statusCode).json(result);
+    }
+);
+
+router.put("/patches/amount",
+    body("amount").isInt({ min: 0 }).withMessage("should be an integer"),
+    body("patches").isArray({ min: 1 }).withMessage("should be an array"),
+    check("patches.*").isInt().withMessage("array should contain integers"),
+    validationCheck,
+    async (req, res) => {
+        const { amount, patches } = req.body;
+        const result = await updateManyPatches({ patchIds: patches, amount });
+        return res.status(result.statusCode).json(result);
+    }
+);
+
+router.get("/export", async (req, res) => {
+    const fields = ["id", "name", "description", "date", "createdAt", "updatedAt", "creators", "images", "bagId", "bagName", "amount", "tags"];
+    const patches = await prisma.patch.findMany({ include: { bag: true, tags: true }});
+    const data = json2csv(patches.map(p => ({ ...p, bagName: p.bag?.name ?? "Ingen påse", tags: p.tags.map(t => t.name) })), { fields });
+
+    res.setHeader("Content-Type", "text/csv");
+    res.send(data);
+});
 
 export default router;

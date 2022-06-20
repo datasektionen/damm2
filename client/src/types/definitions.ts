@@ -3,13 +3,28 @@ import moment from "moment";
 export interface Box {
     id: number;
     name: string;
+    "#patches": number;
+    "#uniquePatches": number;
+    bags?: {
+        id: number;
+        name: string;
+        boxId: number;
+        "#patches": number;
+        "#uniquePatches": number;
+    }[]
 }
 
 export interface Bag {
     id: number;
     name: string;
     boxId: number;
-    box: Box;
+    box: {
+        id: number;
+        name: string;
+    };
+    patches?: IPatch[];
+    "#patches": number;
+    "#uniquePatches": number;
 }
 export interface IPatch {
     id: number;

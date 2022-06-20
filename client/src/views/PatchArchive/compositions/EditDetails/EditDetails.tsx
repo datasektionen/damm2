@@ -35,8 +35,6 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
     const [files, setFiles] = useState<File[]>([]);
     const [requestError, setRequestError] = useState("");
     const [deleteConfirmation, setDeleteConfirmation] = useState<string>("");
-    const [bagSelection, setBagSelection] = useState<string>(`${patch.bag?.id}`);
-    const [bagSelectionFetching, setBagSelectionFetching] = useState(false);
 
     const [image, setImage] = useState<File | null>(null);
 
@@ -127,26 +125,6 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
         });
     }, [image, editState.id])
 
-    const saveBagPlacement = useCallback(async () => {
-        console.log(bagSelection)
-        const bagId = bagSelection === undefined ? null : parseInt(bagSelection);
-        setBagSelectionFetching(true);
-        axios.put(url("/api/storage/bag/patch"), { bagId, patchId: patch.id }, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`
-            }
-        })
-            .then(async () => {
-                await fetchPatches();
-                onCancel();
-            })
-            .finally(() => {
-                setBagSelectionFetching(false);
-            })
-    }, [bagSelection, patch])
-
-    console.log(bagSelection)
-
     return (
         <StyledEditDetails ref={ref}>
             {loading &&
@@ -215,14 +193,6 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
                 setCreators={(next: string[]) => setEditState({ ...editState, creators: next })}
                 disabled={loading}
             />
-            <H4>Antal i arkivet</H4>
-            <input
-                type="number"
-                name="amount"
-                value={editState.amount}
-                onChange={onChange}
-                disabled={loading}
-            />
             <H4>Ladda upp filer</H4>
             <FileUploader
                 files={files}
@@ -252,30 +222,6 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
                     isLoading={loading}
                 />
             </BRow>
-            <div style={{ borderBottom: "solid 1px #afafaf4f" }}></div>
-            <h4>Förvaringsplats</h4>
-            <p>Hantera var märket är förvarat</p>
-            <div style={{ display: "flex", padding: "10px 0 20px" }}>
-                <select
-                    onChange={e => setBagSelection(e.target.value)}
-                    value={bagSelection}
-                    disabled={bagSelectionFetching}
-                    defaultValue={`${patch.bag?.id}`}
-                >
-                    <option value="">Ingen påse</option>
-                    {bags.map((b, i) =>
-                        <option
-                            value={b.id}
-                            key={"bag-option-" + i}
-                        >
-                            {b.name} ({b.box?.name})
-                        </option>
-                    )}
-                </select>
-                <Button label="Spara" onClick={saveBagPlacement} disabled={bagSelectionFetching} />
-            </div>
-            <p>Vill du flytta en påse? Gör det i <Link to={ROUTES.STORAGE}><b>administratörsvyn</b></Link></p>
-            <div style={{ borderBottom: "solid 1px #afafaf4f" }}></div>
             <h4>Farliga grejer</h4>
             <DeleteBox>
                 <h4 style={{ color: Theme.palette.red }}><b>Radera märket</b></h4>

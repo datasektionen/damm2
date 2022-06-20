@@ -17,13 +17,29 @@ import { ArtefactCreator } from './views/ArtefactCreator/ArtefactCreator';
 import { StorageHandler } from './views/StorageHandler/StorageHandler';
 import { Landing } from './views/Landing/Landing';
 import { Admin } from './views/Admin/Admin';
+import { PatchList } from './views/PatchList/PatchList';
+import axios from 'axios';
+import { Configuration } from './common/configuration';
+import { BoxHandler } from './views/BoxHandler/BoxHandler';
+import { BagHandler } from './views/BagHandler/BagHandler';
+import { ExportPatches } from './views/ExportPatches/ExportPatches';
+
+axios.defaults.baseURL = Configuration.apiBaseUrl;
+axios.interceptors.request.use(config => {
+    if (!config.headers.Authorization) {
+        const token = localStorage.getItem("token");
+        if (token) config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+})
 
 export const AdminContext = React.createContext<{ loading: boolean; admin: string[]; user: string; }>({ loading: true, admin: [], user: "" })
 
 const defaultLinks = [
     <Link to={ROUTES.HOME} key={"methonel-home"}>Hem</Link>,
     <Link to={ROUTES.PATCH_ARCHIVE} key={"methonel-parchive"}>Märkesarkiv</Link>,
-    <Link to={ROUTES.MUSEUM} key={"methonel-museum"}>Museum</Link>,
+    // <Link to={ROUTES.MUSEUM} key={"methonel-museum"}>Museum</Link>,
     <Link to={ROUTES.TIMELINE} key={"methonel-timeline"}>Tidslinje</Link>,
 ];
 
@@ -63,8 +79,16 @@ export const App: React.FC = props => {
                         element={<Landing />}
                     />
                     <Route path={ROUTES.PATCH_ARCHIVE} element={<PatchArchive />} />
-                    <Route path={ROUTES.MUSEUM} element={<ArtefactArchive />} />
+                    {/* <Route path={ROUTES.MUSEUM} element={<ArtefactArchive />} /> */}
                     <Route path={ROUTES.ADMIN} element={<Admin />}>
+                        <Route
+                            path={ROUTES.ADMIN}
+                            element={
+                                <ProtectedRoute allowed={["prylis"]}>
+                                    <p>Välkommen till administratörsvyn. Välj flik till vänster och börja administrera.</p>
+                                </ProtectedRoute>
+                            }
+                        />
                         <Route
                             path={ROUTES.PATCH_CREATOR}
                             element={
@@ -94,11 +118,37 @@ export const App: React.FC = props => {
                                 </ProtectedRoute>
                             }
                         />
-                        <Route path={ROUTES.STORAGE}
+                        <Route path={ROUTES.MANAGE_BOXES}
                             element={
                                 <ProtectedRoute allowed={["prylis"]}>
-                                    <StorageHandler />
+                                    <BoxHandler />
                                 </ProtectedRoute>
+                            }
+                        />
+                        <Route path={ROUTES.MANAGE_BAGS}
+                            element={
+                                <ProtectedRoute allowed={["prylis"]}>
+                                    <BagHandler />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route path={ROUTES.PATCH_LIST}
+                            element={
+                                <ProtectedRoute allowed={["prylis"]}>
+                                    <PatchList />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route path={ROUTES.EXPORT_PATCHES}
+                            element={
+                                <ProtectedRoute allowed={["prylis"]}>
+                                    <ExportPatches />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route path="*"
+                            element={
+                                <Navigate to={ROUTES.ADMIN} />
                             }
                         />
                     </Route>
