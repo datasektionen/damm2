@@ -18,8 +18,7 @@ export const Landing: React.FC = (props) => {
                     <Alternative>
                         <Link to={ROUTES.PATCH_ARCHIVE}>
                             <Icon>
-                            <i className="fas fa-archive"></i>
-                                {/* <i className="fas fa-trophy" /> */}
+                                <i className="fa-solid fa-vest-patches"></i>
                             </Icon>
                             <Desc>
                                 Märkesarkiv

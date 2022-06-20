@@ -4,6 +4,7 @@ import prisma from '../../common/client';
 import { IUserRequest } from '../../common/requests';
 import { URL } from 'url';
 import { deleteFile } from './files';
+import { Bag, Patch } from '@prisma/client';
 
 export const getAllPatches = async (user: IUserRequest["user"]): Promise<ApiResponse> => {
 
@@ -14,13 +15,22 @@ export const getAllPatches = async (user: IUserRequest["user"]): Promise<ApiResp
                     children: true,
                 }
             },
+            bag: {
+                include: {
+                    box: true,
+                },
+            },
         }
-    }) as any;
+    });
 
     // Delete files if not admin or prylis
     if (!(user?.admin.includes("prylis") || user?.admin.includes("admin"))) {
-        patches.forEach((x: any) => {
+        patches.forEach((x: Partial<Patch>) => {
             delete x.files;
+        });
+        patches.forEach((p: Partial<Patch & { bag: Bag | null; }>) => {
+            delete p.bag;
+            delete p.bagId;
         });
     }
 
@@ -36,6 +46,7 @@ export const create = async (
     date = "",
     creators: string[] = [],
     tags: number[] = [],
+    amount = 0,
 ): Promise<ApiResponse> => {
 
     try {
@@ -50,6 +61,7 @@ export const create = async (
                     connect: tags.map(x => {return { id: x };}),
                 },
                 images: [],
+                amount,
             },
             include: {
                 tags: {
@@ -74,7 +86,7 @@ export const create = async (
     }
 };
 
-export const update = async (patchId: number, {name, date, description, tags, creators, files}: {name?: string, date?: string, description?: string, tags?: number[], creators: string[], files?: string[]}): Promise<ApiResponse> => {
+export const update = async (patchId: number, {name, date, description, tags, creators, files, amount}: {name?: string, date?: string, description?: string, tags?: number[], creators: string[], files?: string[], amount?: number }): Promise<ApiResponse> => {
     const data: any = { };
 
     if (name) {
@@ -101,6 +113,7 @@ export const update = async (patchId: number, {name, date, description, tags, cr
             set: files,
         };
     }
+    if (amount) data.amount = amount;
 
     const result = await prisma.patch.update({
         where: {

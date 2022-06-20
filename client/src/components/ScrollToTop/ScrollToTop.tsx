@@ -1,23 +1,18 @@
 import { useEffect } from "react";
-import { useHistory, useLocation } from "react-router-dom";
-import { ROUTES } from "../../common/routes";
+import { useLocation, Location } from "react-router-dom";
 
 export const ScrollToTop: React.FC = props => {
-    const history = useHistory()
+    const location = useLocation();
 
     useEffect(() => {
-        const unlisten = history.listen(({ pathname, search, state }: any) => {
-            if (state && state.from === pathname) {
-                // Don't scroll to top in when routing to where we are
-            } else {
-                window.scrollTo(0, 0);
-            }
-        })
-
-        return () => {
-            unlisten();
+        const { state, pathname }: (Location & { state: any }) = location;
+        if (state && state.from === pathname ) {
+            // Don't scroll to top in when routing to where we are
+        } else {
+            window.scrollTo(0, 0);
         }
-    })
+
+    }, [location]);
 
     return null;
 }

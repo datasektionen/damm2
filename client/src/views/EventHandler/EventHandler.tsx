@@ -13,7 +13,7 @@ import { EventEditor } from './compositions/EventEditor/EventEditor';
 import moment from 'moment';
 import { Spinner } from '../../components/Spinner/Spinner';
 import { Alert } from '../../components/Alert/Alert';
-import { useHistory, useLocation } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import queryString from 'query-string';
 import { AdminContext } from '../../App';
 
@@ -48,7 +48,8 @@ export const EventHandler: React.FC = props => {
     const [success, setSuccess] = useState<string>("");
     const [error, setError] = useState<string>("");
     const location = useLocation();
-    const history = useHistory();
+    const navigate = useNavigate();
+    // const history = useHistory();
 
     const { items, requestSort, sortConfig } = useSortableData(events as any[], { key: "date", direction: "desc" });
 
@@ -72,12 +73,14 @@ export const EventHandler: React.FC = props => {
             const event = events.filter(e => e.id === Number(edit_id))[0]
             // No event exists, don't render edit view
             if (!event) {
-                history.push({ search: "" })
+                // history.push({ search: "" })
+                navigate({ search: "" })
                 return
             }
             // Not owner of event and not admin, don't render edit view
             if (!admin.includes("admin") && user !== event.createdBy) {
-                history.push({ search: "" })
+                // history.push({ search: "" })
+                navigate({ search: "" })
                 return
             }
 
@@ -98,9 +101,10 @@ export const EventHandler: React.FC = props => {
         setEdit(false)
         setForm(defaultForm)
         setOriginal(defaultForm)
-        history.push({
-            search: "",
-        })
+        // history.push({
+        //     search: "",
+        // })
+        navigate({ search: "" })
     }
 
     const onEditClick = (event: IEvent) => {
@@ -108,9 +112,10 @@ export const EventHandler: React.FC = props => {
         setEdit(true);
         setOriginal(event)
         setForm(event)
-        history.push({
-            search: `?edit_id=${event.id}`,
-        })
+        // history.push({
+        //     search: `?edit_id=${event.id}`,
+        // })
+        navigate({ search: `?edit_id=${event.id}` })
     }
     
     const onReset = () => {
@@ -154,9 +159,10 @@ export const EventHandler: React.FC = props => {
             onCancel()
             setSuccess("Händelsen uppdaterad")
             setEvents(events.filter(e => e.id !== form.id).concat(res.data.body))
-            history.push({
-                search: "",
-            })
+            // history.push({
+            //     search: "",
+            // })
+            navigate({ search: "" })
         })
         .catch(err => {
             setError(JSON.stringify(err.response.data))
@@ -206,7 +212,7 @@ export const EventHandler: React.FC = props => {
             <Helmet>
                 <title>{title("Hantera händelser")}</title>
             </Helmet>
-            <Header title={edit ? (form.title.length === 0 ? "Titel" : form.title) : "Hantera händelser"} />
+            {/* <Header title={edit ? (form.title.length === 0 ? "Titel" : form.title) : "Hantera händelser"} /> */}
             <StyledEventHandler>
                 <Content>
                     {success.length !== 0 &&

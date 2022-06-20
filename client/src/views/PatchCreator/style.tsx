@@ -32,8 +32,6 @@ export const ImagePreview = styled.img({
 })
 
 export const Content = styled.div({
-    boxShadow: "0 2px 5px rgb(0 0 0 / 20%)",
-    maxWidth: px(Theme.sizes.maxContainerWidth),
     minWidth: "60%",
     backgroundColor: "#fff",
     padding: "50px",

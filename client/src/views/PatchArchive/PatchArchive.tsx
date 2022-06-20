@@ -7,7 +7,7 @@ import { Patch } from '../../components/Patch/Patch';
 import { IPatch, ITag } from '../../types/definitions';
 import { FilterAndSort } from './compositions/FilterAndSort/FilterAndSort';
 import { WrappedPatchDetails } from './compositions/PatchDetails/PatchDetails';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ROUTES } from '../../common/routes';
 import { SpinnerCover } from '../../components/SpinnerCover/SpinnerCover';
 import queryString from 'query-string';
@@ -59,7 +59,8 @@ export const PatchArchive: React.FC = props => {
     const [selectedTags, setSelectedTags] = useState([]);
     const [selectedPatch, setSelectedPatch] = useState<IPatch | null>(null);
     const pageRef = useRef(document.createElement("div"));
-    const history = useHistory();
+    // const history = useHistory();
+    const navigate = useNavigate();
     const location = useLocation();
     const isSmallScreen = useScreenSizeChecker(1100);
     // Sorted patches
@@ -153,11 +154,18 @@ export const PatchArchive: React.FC = props => {
     const clickPatch = (patch: IPatch) => {
         if (edit) return;
         setSelectedPatch(patch);
-        history.push({
-            search: `?patch=${patch.id}`,
-            // from is used in ScrollToTop.tsx. It makes us not scroll to top
-            state: { from: ROUTES.PATCH_ARCHIVE }
-        })
+        // history.push({
+        //     search: `?patch=${patch.id}`,
+        //     // from is used in ScrollToTop.tsx. It makes us not scroll to top
+        //     state: { from: ROUTES.PATCH_ARCHIVE }
+        // })
+        navigate(
+            {
+                search: `?patch=${patch.id}`,
+                // from is used in ScrollToTop.tsx. It makes us not scroll to top
+            },
+            { state: { from: ROUTES.PATCH_ARCHIVE } }
+        )
         if (isSmallScreen) {
             pageRef.current.scrollTo({ behavior: "smooth", top: 0 })
         }
@@ -165,10 +173,18 @@ export const PatchArchive: React.FC = props => {
 
     const patchClose = () => {
         setSelectedPatch(null);
-        history.push({
-            pathname: ROUTES.PATCH_ARCHIVE,
-            state: { from: ROUTES.PATCH_ARCHIVE }
-        });
+        // history.push({
+        //     pathname: ROUTES.PATCH_ARCHIVE,
+        //     state: { from: ROUTES.PATCH_ARCHIVE }
+        // });
+        navigate(
+            {
+                pathname: ROUTES.PATCH_ARCHIVE,
+            },
+            {
+                state: { from: ROUTES.PATCH_ARCHIVE }
+            }
+        )
         setEdit(false)
     }
 

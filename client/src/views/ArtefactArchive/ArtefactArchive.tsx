@@ -7,7 +7,7 @@ import { Patch } from '../../components/Patch/Patch';
 import { IArtefact, ITag } from '../../types/definitions';
 import { FilterAndSort } from '../PatchArchive/compositions/FilterAndSort/FilterAndSort';
 import { WrappedPatchDetails } from '../PatchArchive/compositions/PatchDetails/PatchDetails';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ROUTES } from '../../common/routes';
 import { SpinnerCover } from '../../components/SpinnerCover/SpinnerCover';
 import queryString from 'query-string';
@@ -35,7 +35,8 @@ export const ArtefactArchive: React.FC = props => {
     const [selectedTags, setSelectedTags] = useState([]);
     const [selectedArtefact, setSelectedArtefact] = useState<IArtefact | null>(null);
     const pageRef = useRef(document.createElement("div"));
-    const history = useHistory();
+    // const history = useHistory();
+    const navigate = useNavigate();
     const location = useLocation();
     const isSmallScreen = useScreenSizeChecker(1100);
 
@@ -89,10 +90,18 @@ export const ArtefactArchive: React.FC = props => {
     const clickArtefact = (artefact: IArtefact) => {
         if (edit) return;
         setSelectedArtefact(artefact);
-        history.push({
-            search: `?artefact=${artefact.id}`,
-            state: { from: ROUTES.MUSEUM }
-        })
+        // history.push({
+        //     search: `?artefact=${artefact.id}`,
+        //     state: { from: ROUTES.MUSEUM }
+        // })
+        navigate(
+            {
+                search: `?artefact=${artefact.id}`,
+            },
+            {
+                state: { from: ROUTES.MUSEUM }
+            }
+        )
         if (isSmallScreen) {
             pageRef.current.scrollTo({ behavior: "smooth", top: 0 })
         }
@@ -100,10 +109,18 @@ export const ArtefactArchive: React.FC = props => {
 
     const artefactClose = () => {
         setSelectedArtefact(null);
-        history.push({
-            pathname: ROUTES.MUSEUM,
-            state: { from: ROUTES.MUSEUM }
-        });
+        // history.push({
+        //     pathname: ROUTES.MUSEUM,
+        //     state: { from: ROUTES.MUSEUM }
+        // });
+        navigate(
+            {
+                pathname: ROUTES.MUSEUM,
+            },
+            {
+                state: { from: ROUTES.MUSEUM }
+            }
+        )
         setEdit(false);
     }
 
@@ -215,7 +232,7 @@ export const ArtefactArchive: React.FC = props => {
                                     .map((x: IArtefact, i: number) =>
                                         <Patch
                                             key={`artefact-${i}-${x.id}`}
-                                            patch={{...x, creators: []}}
+                                            patch={{...x, creators: [], amount: 0 }}
                                             onClick={(artefact: IArtefact) => clickArtefact(artefact)}
                                             disabled={edit}
                                         />
@@ -231,7 +248,7 @@ export const ArtefactArchive: React.FC = props => {
                             <WrappedPatchDetails
                                 editApiPath="/api/artefacts/update"
                                 type="artefact"
-                                patch={{...selectedArtefact, creators: []}}
+                                patch={{...selectedArtefact, creators: [], amount: 0}}
                                 onClose={artefactClose}
                                 allTags={tags}
                                 fetchPatches={fetchArtefacts}

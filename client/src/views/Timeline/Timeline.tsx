@@ -13,7 +13,7 @@ import { Filter } from './compositions/Filter';
 import { DFunkt } from '../../components/Timeline/Cards/DFunkt/DFunkt';
 import Helmet from 'react-helmet';
 import { title } from '../../common/strings';
-import { useHistory } from 'react-router';
+import { useNavigate } from 'react-router';
 import { ROUTES } from '../../common/routes';
 
 const templates = {
@@ -63,7 +63,8 @@ export const Timeline: React.FC = props => {
     const [events, setEvents] = useState<IEvent[]>([])
     const [years, setYears] = useState<IEventsPerYear[]>([])
     const [show, setShow] = useState<string[]>(Object.keys(templates));
-    const history = useHistory();
+    // const history = useHistory();
+    const navigate = useNavigate();
 
     const eventsPerYear = (events: IEvent[]): IEventsPerYear[] => {
         const years: IEventsPerYear[] = [];
@@ -99,10 +100,14 @@ export const Timeline: React.FC = props => {
     }
 
     const onEditClick = (id: number) => {
-        history.push({
+        navigate({
             pathname: ROUTES.EVENT_HANDLER,
             search: `?edit_id=${id}`
         })
+        // history.push({
+        //     pathname: ROUTES.EVENT_HANDLER,
+        //     search: `?edit_id=${id}`
+        // })
     }
 
     const filterCards = (cards: IEvent[]) => cards.filter(x => show.includes(x.type))

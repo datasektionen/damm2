@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { StyledPatch, Hover, PatchImage, PatchInfo, PatchName, PatchItemDate, HoverTags } from './style';
 import { Tag } from '../Tag/Tag';
-import { useHistory } from 'react-router-dom';
 import Moment from 'react-moment';
 import { IPatch } from '../../types/definitions';
 
@@ -14,7 +13,6 @@ interface Props {
 export const PatchComponent: React.FC<Props> = props => {
     
     const [hover, setHover] = useState(false);
-    const history = useHistory();
 
     const { patch } = props;
 
