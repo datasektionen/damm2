@@ -17,7 +17,6 @@ model Patch {
   date             String
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
-  creators         String[]
   tags             Tag[]
   images           String[]
   files            String[]
