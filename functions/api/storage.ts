@@ -306,7 +306,7 @@ export const updateManyPatches = async ({
 };
 
 // TODO: Move to util-file
-async function catchErrors(func: () => Promise<ApiResponse>): Promise<ApiResponse> {
+export async function catchErrors(func: () => Promise<ApiResponse>): Promise<ApiResponse> {
     try {
         return await func();
     } catch (err) {

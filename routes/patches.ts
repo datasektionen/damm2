@@ -24,7 +24,7 @@ router.post("/create",
     // array items should be an integer and NOT a string that is an integer
     check("tags.*").isInt().not().isString().withMessage("should be an integer"),
     body("creators").isArray().optional().withMessage("should be an array"),
-    check("creators.*").isString().trim().notEmpty().withMessage("should be a string"),
+    check("creators.*").isInt().withMessage("should be an integer"),
     body("amount").isInt({ min: 0 }).optional().withMessage("should be an integer"),
     validationCheck,
 async (req, res) => {
@@ -45,7 +45,7 @@ router.put("/update",
     // array items should be an integer and NOT a string that is an integer
     check("tags.*").isInt().not().isString().withMessage("should be an integer"),
     body("creators").isArray().optional().withMessage("should be an array"),
-    check("creators.*").isString().trim().notEmpty().withMessage("should be a string"),
+    check("creators.*").isInt().withMessage("should be ań integer"),
     body("amount").isInt({ min: 0 }).optional().withMessage("should be an integer"),
     validationCheck,
 async (req, res) => {

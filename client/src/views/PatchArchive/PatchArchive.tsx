@@ -218,8 +218,12 @@ export const PatchArchive: React.FC = props => {
         const pname = patch.name.toLowerCase();
         const query = new RegExp(patchQuery.toLowerCase(), "g");
         
-        const matchesCreators = patch.creators.reduce((acc, val) => {
-            return (val.toLowerCase().match(query) !== null) || acc;
+        // const matchesCreators = patch.creators.reduce((acc, val) => {
+        //     return (val.toLowerCase().match(query) !== null) || acc;
+        // }, false)
+
+        const matchesCreators = patch.createdBy.reduce((result, creator) => {
+            return creator.name.toLowerCase().match(query) !== null || result;
         }, false)
 
         return (pname.match(query) !== null) || matchesCreators;

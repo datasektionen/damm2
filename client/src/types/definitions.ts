@@ -40,6 +40,7 @@ export interface IPatch {
     bag?: Bag;
     bagId?: number;
     amount: number;
+    createdBy: IPerson[];
 }
 
 export interface ITag {
@@ -53,6 +54,11 @@ export interface ITag {
     children: ITag[];
     tagId: number;
     type: "PATCH" | "ARTEFACT"
+}
+
+export interface IPerson {
+    id: number;
+    name: string;
 }
 
 export interface IEvent {

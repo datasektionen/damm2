@@ -12,8 +12,8 @@ import { Timeline } from './views/Timeline/Timeline';
 import { EventHandler } from './views/EventHandler/EventHandler';
 import useAuthorization from './hooks/useAuthorization';
 import { ProtectedRoute } from './components/ProtectedRoute/ProtectedRoute';
-import { ArtefactArchive } from './views/ArtefactArchive/ArtefactArchive';
-import { ArtefactCreator } from './views/ArtefactCreator/ArtefactCreator';
+// import { ArtefactArchive } from './views/ArtefactArchive/ArtefactArchive';
+// import { ArtefactCreator } from './views/ArtefactCreator/ArtefactCreator';
 import { Landing } from './views/Landing/Landing';
 import { Admin } from './views/Admin/Admin';
 import { PatchList } from './views/PatchList/PatchList';
@@ -22,6 +22,8 @@ import { Configuration } from './common/configuration';
 import { BoxHandler } from './views/BoxHandler/BoxHandler';
 import { BagHandler } from './views/BagHandler/BagHandler';
 import { ExportPatches } from './views/ExportPatches/ExportPatches';
+import { MantineProvider } from "@mantine/core";
+import PersonManager from './views/PersonManager/PersonManager';
 
 axios.defaults.baseURL = Configuration.apiBaseUrl;
 axios.interceptors.request.use(config => {
@@ -58,6 +60,13 @@ export const App: React.FC = props => {
     return (
         <div id="application" className="cerise">
             <AdminContext.Provider value={{ loading, admin, user }}>
+                <MantineProvider
+                    theme={{
+                        fontFamily: "'Lato', sans-serif",
+                        primaryColor: "pink",
+                        fontFamilyMonospace: "'Lato', sans-serif"
+                    }}
+                >
                 <ScrollToTop />
                 <Methone
                     config={{
@@ -96,13 +105,13 @@ export const App: React.FC = props => {
                                 </ProtectedRoute>
                             }
                         />
-                        <Route path={ROUTES.ARTEFACT_CREATOR}
+                        {/* <Route path={ROUTES.ARTEFACT_CREATOR}
                             element={
                                 <ProtectedRoute allowed={["admin"]}>
                                     <ArtefactCreator />
                                 </ProtectedRoute>
                             }
-                        />
+                        /> */}
                         <Route path={ROUTES.TAGS_MANAGER}
                             element={
                                 <ProtectedRoute allowed={["prylis"]}>
@@ -145,6 +154,14 @@ export const App: React.FC = props => {
                                 </ProtectedRoute>
                             }
                         />
+                        <Route
+                            path={ROUTES.PERSON_MANAGER}
+                            element={
+                                <ProtectedRoute allowed={["prylis"]}>
+                                    <PersonManager />
+                                </ProtectedRoute>
+                            }
+                        />
                         <Route path="*"
                             element={
                                 <Navigate to={ROUTES.ADMIN} />
@@ -160,6 +177,7 @@ export const App: React.FC = props => {
                         }
                     />
                 </Routes>
+                </MantineProvider>
             </AdminContext.Provider>
         </div>
     );

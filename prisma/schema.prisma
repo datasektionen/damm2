@@ -23,8 +23,8 @@ model Patch {
   bag              Bag?               @relation(fields: [bagId], references: [id])
   bagId            Int?
   amount           Int                @default(0)
-  Donation         Donation[]
-  UserCreatedPatch UserCreatedPatch[]
+  donatedBy         Donation[]
+  createdBy UserCreatedPatch[]
 }
 
 model Box {
@@ -99,7 +99,7 @@ model Person {
   id               Int                @id @default(autoincrement())
   name             String
   donations        Donation[]
-  UserCreatedPatch UserCreatedPatch[]
+  createdPatches   UserCreatedPatch[]
 }
 
 model Donation {

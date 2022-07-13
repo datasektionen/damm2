@@ -20,6 +20,11 @@ export const getAllPatches = async (user: IUserRequest["user"]): Promise<ApiResp
                     box: true,
                 },
             },
+            createdBy: {
+                include: {
+                    person: true,
+                }
+            },
         }
     });
 
@@ -36,7 +41,10 @@ export const getAllPatches = async (user: IUserRequest["user"]): Promise<ApiResp
 
     return {
         statusCode: StatusCodes.OK,
-        body: patches,
+        body: patches.map(p => ({
+            ...p,
+            createdBy: p.createdBy.map(c => c.person) // Only send id and name
+        })),
     };
 };
 
@@ -44,7 +52,7 @@ export const create = async (
     name: string,
     description = "",
     date = "",
-    creators: string[] = [],
+    creators: number[] = [],
     tags: number[] = [],
     amount = 0,
 ): Promise<ApiResponse> => {
@@ -55,7 +63,7 @@ export const create = async (
                 name,
                 description,
                 date,
-                creators,
+                // creators,
                 // https://www.prisma.io/docs/concepts/components/prisma-client/relation-queries#connect-an-existing-record
                 tags: {
                     connect: tags.map(x => {return { id: x };}),
@@ -72,6 +80,13 @@ export const create = async (
             }
         });
 
+        await prisma.userCreatedPatch.createMany({
+            data: creators.map(c => ({
+                patchId: patch.id,
+                personId: c,
+            }))
+        });
+
         return {
             statusCode: StatusCodes.CREATED,
             body: patch
@@ -86,8 +101,8 @@ export const create = async (
     }
 };
 
-export const update = async (patchId: number, {name, date, description, tags, creators, files, amount}: {name?: string, date?: string, description?: string, tags?: number[], creators: string[], files?: string[], amount?: number }): Promise<ApiResponse> => {
-    const data: any = { };
+export const update = async (patchId: number, {name, date, description, tags, creators, files, amount}: {name?: string, date?: string, description?: string, tags?: number[], creators: number[], files?: string[], amount?: number }): Promise<ApiResponse> => {
+    const data: Partial<Patch & { tags: any ; files: any; } > = { };
 
     if (name) {
         data.name = name;
@@ -95,17 +110,12 @@ export const update = async (patchId: number, {name, date, description, tags, cr
     if (date) {
         data.date = date;
     }
-    if (description) {
+    if (description || description === "") {
         data.description = description;
     }
     if (tags) {
         data.tags = {
             set: tags.map((t: number) => {return {id: t};}),
-        };
-    }
-    if (creators) {
-        data.creators = {
-            set: creators,
         };
     }
     if (files) {
@@ -121,6 +131,21 @@ export const update = async (patchId: number, {name, date, description, tags, cr
         },
         data,
     });
+
+    if (creators) {
+        // Så jäkla dålig lösning
+        await prisma.userCreatedPatch.deleteMany({
+            where: {
+                patchId,
+            }
+        });
+        await prisma.userCreatedPatch.createMany({
+            data: creators.map(c => ({
+                patchId,
+                personId: c,
+            })),
+        });
+    }
 
     return {
         statusCode: 200,

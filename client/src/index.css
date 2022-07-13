@@ -1,5 +1,10 @@
 @import url(https://use.fontawesome.com/releases/v6.1.0/css/all.css);
 
+/* Affect the mantine dropdown only */
+body > div:not(#root) * {
+    transition: none;
+}
+
 a[href="/login"] {
     color: white;
 }
