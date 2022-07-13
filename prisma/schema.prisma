@@ -11,20 +11,21 @@ generator client {
 }
 
 model Patch {
-  id          Int        @id @default(autoincrement())
-  name        String
-  description String
-  date        String
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  creators    String[]
-  tags        Tag[]
-  images      String[]
-  files       String[]
-  bag         Bag?       @relation(fields: [bagId], references: [id])
-  bagId       Int?
-  amount      Int        @default(0)
-  Donation    Donation[]
+  id               Int                @id @default(autoincrement())
+  name             String
+  description      String
+  date             String
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  creators         String[]
+  tags             Tag[]
+  images           String[]
+  files            String[]
+  bag              Bag?               @relation(fields: [bagId], references: [id])
+  bagId            Int?
+  amount           Int                @default(0)
+  Donation         Donation[]
+  UserCreatedPatch UserCreatedPatch[]
 }
 
 model Box {
@@ -96,9 +97,10 @@ model Artefact {
 }
 
 model Person {
-  id        Int        @id @default(autoincrement())
-  name      String
-  donations Donation[]
+  id               Int                @id @default(autoincrement())
+  name             String
+  donations        Donation[]
+  UserCreatedPatch UserCreatedPatch[]
 }
 
 model Donation {
@@ -107,5 +109,13 @@ model Donation {
   Person   Person? @relation(fields: [personId], references: [id])
   personId Int?
   patch    Patch   @relation(fields: [patchId], references: [id])
+  patchId  Int
+}
+
+model UserCreatedPatch {
+  id       Int    @id @default(autoincrement())
+  person   Person @relation(fields: [personId], references: [id])
+  patch    Patch  @relation(fields: [patchId], references: [id])
+  personId Int
   patchId  Int
 }
