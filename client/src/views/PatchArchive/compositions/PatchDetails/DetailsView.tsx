@@ -134,22 +134,23 @@ export const DetailsView: React.FC<Props> = ({ patch, onEditClick, onClose, fetc
                         )}
                     </Tags>
                 </Content>
-                {isAdmin &&
                     <Storage>
-                        <StorageItems>
-                            <StorageItem title="Låda">
-                                <i className="fa-solid fa-box"></i>
-                                <span>
-                                    {patch.bag?.box.name ?? "?"}
-                                </span>
-                            </StorageItem>
-                            <StorageItem title="Påse">
-                                <i className="fa-solid fa-bag-shopping"></i>
-                                <span>
-                                    {patch.bag?.name ?? "?"}
-                                </span>
-                            </StorageItem>
-                        </StorageItems>
+                        {isAdmin &&
+                            <StorageItems>
+                                <StorageItem title="Låda">
+                                    <i className="fa-solid fa-box"></i>
+                                    <span>
+                                        {patch.bag?.box.name ?? "?"}
+                                    </span>
+                                </StorageItem>
+                                <StorageItem title="Påse">
+                                    <i className="fa-solid fa-bag-shopping"></i>
+                                    <span>
+                                        {patch.bag?.name ?? "?"}
+                                    </span>
+                                </StorageItem>
+                            </StorageItems>
+                        }
                         <StorageItems>
                             <StorageItem title="Antal i arkivet">
                                 <i className="fa-solid fa-hashtag"></i>
@@ -159,7 +160,6 @@ export const DetailsView: React.FC<Props> = ({ patch, onEditClick, onClose, fetc
                             </StorageItem>
                         </StorageItems>
                     </Storage>
-                }
             </Right>
             <CloseButton onClick={onClose} title="Stäng">
                 <i className="fas fa-times" />
