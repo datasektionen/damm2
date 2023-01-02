@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Field } from '../../../../components/Field/Field';
 import { Button } from '../../../../components/Button/Button';
 import { TextArea } from '../../../../components/TextArea/TextArea';
-import { Bag, IPatch, ITag } from '../../../../types/definitions';
+import { Bag, IPatch, IPerson, ITag } from '../../../../types/definitions';
 import { StyledEditDetails, Image, BRow, H1, H4, DeleteBox, DeleteCenter } from './style';
 import axios from 'axios';
 import { url } from '../../../../common/api';
@@ -30,11 +30,12 @@ interface Props {
 export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatches, editApiPath, type, onDeleteClick, bags }) => {
 
     const [editState, setEditState] = useState<IPatch>(patch);
-    const [creator, setCreator] = useState("");
+    const [creators, setCreators] = useState<string[]>(patch.createdBy.map(c => `${c.id}`));
     const [loading, setLoading] = useState(false);
     const [files, setFiles] = useState<File[]>([]);
     const [requestError, setRequestError] = useState("");
     const [deleteConfirmation, setDeleteConfirmation] = useState<string>("");
+    const [persons, setPersons] = useState<IPerson[]>([]);
 
     const [image, setImage] = useState<File | null>(null);
 
@@ -44,6 +45,15 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
         setEditState(patch);
         setFiles([])
     }, [patch])
+
+    useEffect(() => {
+        (async () => {
+            const result = await axios.get("/api/donations/persons");
+            if (result.status === 200) {
+                setPersons(result.data.body);
+            }
+        })();
+    }, []);
 
     const onChange = (e: any) => {
         setEditState({ ...editState, [e.target.name]: e.target.value })
@@ -58,7 +68,7 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
             description: editState.description,
             date: editState.date,
             tags: editState.tags.map((x: ITag) => x.id),
-            creators: editState.creators,
+            creators: creators.map(c => parseInt(c)),
             amount: parseInt(`${editState.amount}`),
         } as any
 
@@ -187,11 +197,17 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
             />
             <H4>Skapare</H4>
             <CreatorHandler
-                creator={creator}
-                setCreator={(value: string) => setCreator(value)}
-                creators={editState.creators}
-                setCreators={(next: string[]) => setEditState({ ...editState, creators: next })}
+                data={persons}
                 disabled={loading}
+                onCreate={async (query) => {
+                    const result = await axios.post("/api/donations/person", {
+                        name: query,
+                    });
+                    setPersons([...persons, result.data.body])
+                    return result.data.body;
+                }}
+                selected={creators}
+                setSelected={setCreators}
             />
             <H4>Ladda upp filer</H4>
             <FileUploader
@@ -218,7 +234,7 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
                 <Button
                     label="Spara"
                     onClick={put}
-                    disabled={loading || (patch === editState && files.length === 0 && image === null)}
+                    disabled={loading || (patch === editState && files.length === 0 && image === null && JSON.stringify(creators) == JSON.stringify(editState.createdBy.map(c => `${c.id}`)))}
                     isLoading={loading}
                 />
             </BRow>

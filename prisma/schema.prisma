@@ -11,19 +11,20 @@ generator client {
 }
 
 model Patch {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String
-  date        String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  creators    String[]
-  tags        Tag[]
-  images      String[]
-  files       String[]
-  bag         Bag?      @relation(fields: [bagId], references: [id])
-  bagId       Int?
-  amount      Int       @default(0)
+  id               Int                @id @default(autoincrement())
+  name             String
+  description      String
+  date             String
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  tags             Tag[]
+  images           String[]
+  files            String[]
+  bag              Bag?               @relation(fields: [bagId], references: [id])
+  bagId            Int?
+  amount           Int                @default(0)
+  donatedBy         Donation[]
+  createdBy UserCreatedPatch[]
 }
 
 model Box {
@@ -44,18 +45,18 @@ model Bag {
 }
 
 model Tag {
-  id              Int      @id @default(autoincrement())
+  id              Int        @id @default(autoincrement())
   name            String
   color           String
   backgroundColor String
   description     String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
   type            TagType
   patches         Patch[]
   artefacts       Artefact[]
-  children        Tag[]    @relation("TagToTag")
-  Tag             Tag?     @relation("TagToTag", fields: [tagId], references: [id])
+  children        Tag[]      @relation("TagToTag")
+  Tag             Tag?       @relation("TagToTag", fields: [tagId], references: [id])
   tagId           Int?
 
   @@unique([name, type])
@@ -73,13 +74,13 @@ enum EventType {
 }
 
 model Event {
-  id       Int       @id @default(autoincrement())
-  title    String
-  content  String
-  date     String
-  type     EventType @default(SM_DM)
-  protocol String?
-  createdBy String @default("axelelm")
+  id        Int       @id @default(autoincrement())
+  title     String
+  content   String
+  date      String
+  type      EventType @default(SM_DM)
+  protocol  String?
+  createdBy String    @default("axelelm")
 }
 
 model Artefact {
@@ -92,4 +93,28 @@ model Artefact {
   updatedAt   DateTime @updatedAt
   files       String[]
   tags        Tag[]
+}
+
+model Person {
+  id               Int                @id @default(autoincrement())
+  name             String
+  donations        Donation[]
+  createdPatches   UserCreatedPatch[]
+}
+
+model Donation {
+  id       Int     @id @default(autoincrement())
+  amount   Int     @default(1)
+  Person   Person? @relation(fields: [personId], references: [id])
+  personId Int?
+  patch    Patch   @relation(fields: [patchId], references: [id])
+  patchId  Int
+}
+
+model UserCreatedPatch {
+  id       Int    @id @default(autoincrement())
+  person   Person @relation(fields: [personId], references: [id])
+  patch    Patch  @relation(fields: [patchId], references: [id])
+  personId Int
+  patchId  Int
 }

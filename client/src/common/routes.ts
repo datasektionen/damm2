@@ -12,6 +12,7 @@ export const ROUTES = {
     MANAGE_BOXES: "/admin/manage-boxes",
     MANAGE_BAGS: "/admin/manage-bags",
     EXPORT_PATCHES: "/admin/export-patches",
+    PERSON_MANAGER: "/admin/persons",
     LOGIN: "/login",
     LOGOUT: "/logout"
 }

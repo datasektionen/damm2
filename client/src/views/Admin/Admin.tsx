@@ -12,6 +12,7 @@ const linkToTitle = {
     "/admin/patch-list": "Lista märken",
     "/admin/manage-boxes": "Hantera lådor",
     "/admin/manage-bags": "Hantera påsar",
+    "/admin/persons": "Hantera personer",
     "/admin/export-patches": "Exportera data",
 }
 
@@ -47,6 +48,9 @@ export const Admin = () => {
                                 </li>
                                 <li>
                                     <Link to={ROUTES.PATCH_LIST}>Lista märken</Link>
+                                </li>
+                                <li>
+                                    <Link to={ROUTES.PERSON_MANAGER}>Hantera personer</Link>
                                 </li>
                                 <li>
                                     <Link to={ROUTES.EXPORT_PATCHES}>Exportera data</Link>

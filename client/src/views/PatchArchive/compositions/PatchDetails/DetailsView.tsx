@@ -115,9 +115,9 @@ export const DetailsView: React.FC<Props> = ({ patch, onEditClick, onClose, fetc
                             {patch.updatedAt}
                         </Moment>
                     </span>
-                    {patch.creators.length !== 0 &&
+                    {patch.createdBy.length !== 0 &&
                         <div>
-                            Skapad av: <Creators>{patch.creators.join(", ")}</Creators>
+                            Skapad av <Creators>{patch.createdBy.map(c => c.name).join(", ")}</Creators>
                         </div>
                     }
                 </Meta>

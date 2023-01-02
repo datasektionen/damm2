@@ -9,6 +9,7 @@ import filesRouter from './files';
 import eventsRouter from './events';
 import artefactsRouter from './artefacts';
 import storageRouter from './storage';
+import donationsRouter from './donations';
 import { silentAuthorization } from '../common/middlewares';
 import { IUserRequest } from '../common/requests';
 
@@ -18,6 +19,7 @@ router.use("/files", filesRouter);
 router.use("/events", eventsRouter);
 router.use("/artefacts", artefactsRouter);
 router.use("/storage", storageRouter);
+router.use("/donations", donationsRouter);
 
 router.get("/ping", (req, res) => {
     res.json(ping());

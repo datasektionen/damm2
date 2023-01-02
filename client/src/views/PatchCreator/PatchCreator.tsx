@@ -5,7 +5,7 @@ import { Field } from '../../components/Field/Field';
 import { TextArea } from '../../components/TextArea/TextArea';
 import axios from 'axios';
 import { url } from '../../common/api';
-import { ITag } from '../../types/definitions';
+import { IPerson, ITag } from '../../types/definitions';
 import { Button } from '../../components/Button/Button';
 import { FileUploader } from '../../components/FileUploader/FileUploader';
 import { TagSelector } from '../../components/TagSelector/TagSelector';
@@ -49,6 +49,8 @@ export const PatchCreator: React.FC<Props> = props => {
     const [form, setForm] = useState<Form>(defaultForm);
     const [valid, setValid] = useState<boolean>(false);
     const [creator, setCreator] = useState("");
+    const [persons, setPersons] = useState<IPerson[]>([]);
+    const [creators, setCreators] = useState<string[]>([]);
     const [image, setImage] = useState<File | null>(null);
     const [files, setFiles] = useState<File[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
@@ -65,6 +67,15 @@ export const PatchCreator: React.FC<Props> = props => {
             }
             // TODO Handle error
         })()
+    }, []);
+
+    useEffect(() => {
+        (async () => {
+            const result = await axios.get("/api/donations/persons");
+            if (result.status === 200) {
+                setPersons(result.data.body);
+            }
+        })();
     }, []);
 
     const onChange = (e: any) => {
@@ -104,7 +115,8 @@ export const PatchCreator: React.FC<Props> = props => {
             name: form.name,
             description: form.description,
             tags: form.tags.map((t: ITag) => t.id),
-            creators: form.creators,
+            // creators: form.creators,
+            creators: creators.map(c => parseInt(c)),
             amount: form.amount,
         } as any;
 
@@ -257,11 +269,17 @@ export const PatchCreator: React.FC<Props> = props => {
                     />
                     <H3>Upphovsmän</H3>
                     <H4>Personer som skapade detta märke</H4>
-                    <CreatorHandler 
-                        creator={creator}
-                        setCreator={(name: string) => setCreator(name)}
-                        creators={form.creators}
-                        setCreators={(next: string[]) => setForm({ ...form, creators: next })}
+                    <CreatorHandler
+                        selected={creators}
+                        setSelected={setCreators}
+                        data={persons}
+                        onCreate={async (query: string) => {
+                            const result = await axios.post("/api/donations/person", {
+                                name: query,
+                            });
+                            setPersons([...persons, result.data.body])
+                            return result.data.body;
+                        }}
                         disabled={loading}
                     />
                     <H3>Antal i fysiska arkivet</H3>
