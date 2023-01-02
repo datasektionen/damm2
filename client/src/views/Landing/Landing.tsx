@@ -55,7 +55,7 @@ export const Landing: React.FC = (props) => {
                 <p>
                     Detta system sammanställer sektionens historia på tre sätt: märkesarkivet, tidslinjen och museet.
                 </p>
-                <p>Damm hanteras av sektionshistorikern, vänd dig till hen om du har några frågor eller vill bidra med historia: <a href="mailto:historiker@d.kth.se" target="_blank" rel="noopener noreferrer">historiker@d.kth.se</a></p>
+                <p>Damm hanteras av sektionshistorikern, vänd dig till hen om du har några frågor eller vill bidra med historia: <a href="mailto:historiker@datasektionen.se" target="_blank" rel="noopener noreferrer">historiker@datasektionen.se</a></p>
                 <h3>Märkesarkivet</h3>
                 <p>Märkesarkivet arkiverar märken som skapats inom sektionen genom tiderna. Här finner du allt från årskursmärket 1991 till fidgetspinnermärken från 2017. Arkivet består egentligen av ett fysiskt arkiv och ett digitalt arkiv. I det fysiska arkivet sparas märken för att sedan fotograferas och läggas upp i Damm. Damm, det digitala arkivet, är ett sätt för sektionsmedlemmar att lätt få tillgång till märkesarkivet. Arkivet är beroende av att funktionärer, projekt och evenemang sparar ett exemplar av varje märke som skapas och donerar till arkivet.</p>
                 <h3>Tidslinjen</h3>
