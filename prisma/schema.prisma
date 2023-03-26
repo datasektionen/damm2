@@ -55,16 +55,19 @@ model Tag {
   type            TagType
   patches         Patch[]
   artefacts       Artefact[]
-  children        Tag[]      @relation("TagToTag")
-  Tag             Tag?       @relation("TagToTag", fields: [tagId], references: [id])
-  tagId           Int?
-
+  category        TagCategory?
   @@unique([name, type])
 }
 
 enum TagType {
   PATCH
   ARTEFACT
+}
+
+enum TagCategory {
+  EVENT
+  CLUB
+  PATCHTYPE
 }
 
 enum EventType {
