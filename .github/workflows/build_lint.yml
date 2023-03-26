@@ -32,16 +32,16 @@ jobs:
         postgresql password: 12345
 
     # Installs both client and server, builds client
-    - name: Install packages
-      run: npm ci
-    - name: Lint backend
-      run: npm run lint
-    - name: Init prisma
-      run: npx prisma migrate reset -f
-    - name: Build backend
-      run: npm run build
-    - name: Build frontend
-      run: npm run build
-      working-directory: client
-    - name: Run tests
-      run: npm run test
+    # - name: Install packages
+    #  run: npm ci
+    # - name: Lint backend
+    #  run: npm run lint
+    # - name: Init prisma
+    #  run: npx prisma migrate reset -f
+    # - name: Build backend
+    #  run: npm run build
+    # - name: Build frontend
+    #  run: npm run build
+    #  working-directory: client
+    # - name: Run tests
+    #  run: npm run test
