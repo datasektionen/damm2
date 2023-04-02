@@ -9,13 +9,14 @@
     "dev": "nodemon",
     "test": "NODE_ENV=testing mocha -r ts-node/register test/*.ts --exit",
     "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix"
+    "lint:fix": "eslint . --ext .ts --fix",
+    "db:dev": "docker compose -f .docker/compose/docker-compose.yml up -d postgres pgadmin"
   },
   "engines": {
-    "node": "^12.20.1"
+    "node": "v16.18.0"
   },
   "dependencies": {
-    "@prisma/client": "^2.21.2",
+    "@prisma/client": "^4.12.0",
     "aws-sdk": "^2.921.0",
     "axios": "^0.21.1",
     "cors": "^2.8.5",
@@ -58,7 +59,7 @@
     "eslint": "^7.25.0",
     "mocha": "^8.3.2",
     "nodemon": "^2.0.7",
-    "prisma": "^2.21.2",
+    "prisma": "^4.12.0",
     "ts-node": "^5.0.1",
     "tslib": "^2.3.1"
   }
