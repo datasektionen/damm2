@@ -8,17 +8,12 @@ export const DEFAULT_BG_COLOR = "#E83D84";
 
 export const getAll = async (type?: string): Promise<ApiResponse> => {
 
-    const where = {
-        tagId: null,
-    } as any;
+    let where: any = {};
 
     // If type provided, filter by type
     if (type) where["type"] = type;
 
     const tags = await prisma.tag.findMany({
-        include: {
-            children: true,
-        },
         where,
     });
 
@@ -51,12 +46,8 @@ export const create = async (
                 description,
                 color,
                 backgroundColor,
-                tagId: parent,
                 type: (<any>TagType)[type],
             },
-            include: {
-                children: true,
-            }
         });
     
         return {
@@ -138,17 +129,6 @@ export const deleteTag = async (id: number): Promise<ApiResponse> => {
             where: {
                 id,
             },
-            include: {
-                children: true,
-            }
-        });
-        // On delete cascade not possible in prisma as of writing this (i.e. to define it in the .prisma-file.)
-        result.children.forEach(async t => {
-            await prisma.tag.delete({
-                where: {
-                    id: t.id,
-                }
-            });
         });
         console.log(result);
     } catch (err) {

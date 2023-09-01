@@ -10,11 +10,7 @@ export const getAllPatches = async (user: IUserRequest["user"]): Promise<ApiResp
 
     const patches = await prisma.patch.findMany({
         include: {
-            tags: {
-                include: {
-                    children: true,
-                }
-            },
+            tags: true,
             bag: {
                 include: {
                     box: true,
@@ -72,11 +68,7 @@ export const create = async (
                 amount,
             },
             include: {
-                tags: {
-                    include: {
-                        children: true,
-                    }
-                },
+                tags: true
             }
         });
 

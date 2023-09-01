@@ -51,8 +51,7 @@ export interface ITag {
     backgroundColor: string;
     createdAt: string;
     updatedAt: string;
-    children: ITag[];
-    tagId: number;
+    category:   "RECEPTION" | "COMMITTEE" | "EVENT" | "OTHER";
     type: "PATCH" | "ARTEFACT"
 }
 

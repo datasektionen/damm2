@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ITag } from '../../types/definitions';
 import { TagClickableAsClass as TagClickable } from '../TagClickable/TagClickable';
 import { StyledTagSelector, StyledFlipMove } from './style';
@@ -23,13 +23,6 @@ export const TagSelector: React.FC<Props> = ({ tags, selectedTags, setSelectedTa
         } else {
             // Remove the tag we clicked on
             let nextSelectedTags = [...selectedTags].filter(x => x.id !== tag.id);
-            // If we clicked on head tag, remove children of head tag
-            // Don't ask me what this code does, wrote this a long time ago and I don't understand
-            for (const t of nextSelectedTags) {
-                (tag.children ?? []).forEach((c, i) => {
-                    if (c.id === t.id) nextSelectedTags = nextSelectedTags.filter(x => x !== c)
-                })
-            }
             setSelectedTags(nextSelectedTags)
         }
     }
@@ -38,18 +31,24 @@ export const TagSelector: React.FC<Props> = ({ tags, selectedTags, setSelectedTa
         setFilteredTags(tags.filter((t: ITag) => t.name.toLowerCase().match(new RegExp(query.toLowerCase(), "g")) !== null));
     }, [query, tags])
 
-    // Merge array of arrays into one array
-    // https://stackoverflow.com/a/10865042
-    const subTags =
-        [].concat.apply(
-            [],
-            selectedTags
-            .map(x =>
-                x.children ?? []
-            ) as any
-        )
-        // Filter tags from search query
-        .filter((t: ITag) => t.name.toLowerCase().match(new RegExp(query.toLowerCase(), "g")) !== null)
+    const tagSections = useMemo<{ category:  ITag["category"], label: string; }[]>(() => ([
+        {
+            category: "COMMITTEE",
+            label: "Nämnd"
+        },
+        {
+            category: "EVENT",
+            label: "Event"
+        },
+        {
+            category: "RECEPTION",
+            label: "Mottagningen"
+        },
+        {
+            category: "OTHER",
+            label: "Övrigt"
+        },
+    ]), [])
 
     return (
         <StyledTagSelector>
@@ -58,11 +57,38 @@ export const TagSelector: React.FC<Props> = ({ tags, selectedTags, setSelectedTa
                     <span key="notags">Inga taggar</span>
                 </StyledFlipMove>
             }
+            // TODO: Fixa så man kan kategorisera en tagg vid skapande och redigering.
+            // TODO: Ta bort nullability på category-fältet hos en tagg
+            // TODO: Lägg till filtrering för "saknar tagg"
+            // TODO: Eventuellt dropdowns för taggkategorier.
+            {tagSections.map(x => (
+                <div key={x.category}>
+                    <h4>{x.label}</h4>
+                    {filteredTags.length !== 0 &&
+                        <StyledFlipMove enterAnimation="fade" leaveAnimation="fade" appearAnimation="fade" duration={250} >
+                            {
+                                filteredTags
+                                .filter(x => x.category === x.category)
+                                .map((t: ITag) => 
+                                    <TagClickable
+                                        tag={t}
+                                        clicked={selectedTags.filter((x: ITag) => x.id === t.id).length !== 0}
+                                        onClick={() => toggleTag(t)}
+                                        key={"tag-"+t.category+"-"+t.id}
+                                        disabled={disabled}
+                                    />
+                                )
+                            }
+                        </StyledFlipMove>
+                    }
+                </div>
+            ))}
+            {/* <h4>Event</h4>
             {filteredTags.length !== 0 &&
                 <StyledFlipMove enterAnimation="fade" leaveAnimation="fade" appearAnimation="fade" duration={250} >
                     {
                         filteredTags
-                        .filter(t => t.tagId === null)
+                        // .filter(x => x.category === "EVENT")
                         .map((t: ITag) => 
                             <TagClickable
                                 tag={t}
@@ -74,7 +100,8 @@ export const TagSelector: React.FC<Props> = ({ tags, selectedTags, setSelectedTa
                         )
                     }
                 </StyledFlipMove>
-            }
+            } */}
+{/*             
             {subTags.length !== 0 &&
                 <h4>Undertaggar</h4>
             }
@@ -93,7 +120,7 @@ export const TagSelector: React.FC<Props> = ({ tags, selectedTags, setSelectedTa
                         )
                     }
                 </StyledFlipMove>
-            }
+            } */}
         </StyledTagSelector>
     )
 }
