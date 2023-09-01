@@ -31,7 +31,7 @@ interface Form {
     date: string;
     tags: ITag[];
     creators: string[];
-    amount: number;
+    amount: string;
 }
 
 const defaultForm: Form = {
@@ -40,7 +40,7 @@ const defaultForm: Form = {
     date: "",
     tags: [],
     creators: [],
-    amount: 0,
+    amount: "0",
 }
 
 export const PatchCreator: React.FC<Props> = props => {
@@ -117,7 +117,7 @@ export const PatchCreator: React.FC<Props> = props => {
             tags: form.tags.map((t: ITag) => t.id),
             // creators: form.creators,
             creators: creators.map(c => parseInt(c)),
-            amount: form.amount,
+            amount: parseInt(form.amount),
         } as any;
 
         if (form.date.length !== 0) body.date = form.date;

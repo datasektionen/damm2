@@ -32,7 +32,7 @@ export const FilterAndSort: React.FC<Props> = props => {
         return groupLabels.map(l => {
             return {
                 groupLabel: l,
-                values: PATCH_SORT_MODES.filter(x => x.groupLabel === l).map(x => { return { key: x.key, label: x.label } })
+                values: PATCH_SORT_MODES.filter(x => x.groupLabel === l).map(x => ({ key: x.key, label: x.label }))
             }
         })
     }, []);

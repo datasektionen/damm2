@@ -1,0 +1,55 @@
+version: '3.7'
+
+networks:
+  postgres:
+
+
+volumes:
+  db-data:
+    name: damm-db
+    driver: local
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: damm-pg
+    environment:
+      - POSTGRES_SERVICE_NAME=postgres
+      - POSTGRES_LABEL=com.datasektionen.damm.postgres
+      # If you change these values, you should also make the same changes to .docker/resources/pgadmin/servers.json and .docker/resources/pgadmin/pgpass
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    labels:
+      - 'com.datasektionen.damm.postgres'
+    networks:
+      - postgres
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    # https://stackoverflow.com/a/70040661/16911837
+    entrypoint: >
+      /bin/sh -c "
+      cp -f /pgadmin4/pgpass /var/lib/pgadmin/;
+      chmod 600 /var/lib/pgadmin/pgpass;
+      chown pgadmin:root /var/lib/pgadmin/pgpass;
+      /entrypoint.sh
+      "
+    container_name: damm-pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@datasektionen.se
+      - PGADMIN_DEFAULT_PASSWORD=root
+      - PGADMIN_CONFIG_SERVER_MODE=False
+      - PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED=False
+    ports:
+      - 8011:80
+    volumes:
+      - ../resources/pgadmin/servers.json:/pgadmin4/servers.json
+      - ../resources/pgadmin/pgpass:/pgadmin4/pgpass
+    depends_on:
+      - postgres
+    networks:
+      - postgres

@@ -44,6 +44,9 @@ export const PATCH_SORT_MODES: { label: string; key: string; sort: (a: IPatch, b
 
     { label: "Stigande", key: "id-asc", sort: (a: IPatch, b: IPatch) => a.id > b.id ? 1 : -1, groupLabel: "ID" },
     { label: "Fallande", key: "id-desc", sort: (a: IPatch, b: IPatch) => a.id < b.id ? 1 : -1, groupLabel: "ID" },
+
+    { label: "Stigande", key: "amount-asc", sort: (a: IPatch, b: IPatch) => a.amount > b.amount ? 1 : -1, groupLabel: "Antal i arkiv" },
+    { label: "Fallande", key: "amount-desc", sort: (a: IPatch, b: IPatch) => a.amount < b.amount ? 1 : -1, groupLabel: "Antal i arkiv" },
 ]
 
 const ITEMS_PER_PAGE = 35;
