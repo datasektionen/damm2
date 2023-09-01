@@ -13,8 +13,6 @@ import { SpinnerCover } from '../../../../components/SpinnerCover/SpinnerCover';
 import { uploadFiles } from '../../../../functions/fileUploading';
 import { Alert } from '../../../../components/Alert/Alert';
 import Theme from '../../../../common/Theme';
-import { Link } from 'react-router-dom';
-import { ROUTES } from '../../../../common/routes';
 
 interface Props {
     onCancel: () => void;
@@ -215,6 +213,16 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
                 onAddFile={(f: File) => setFiles([f])}
                 onFileRemove={(f: File) => setFiles([])}
                 disabled={loading}
+            />
+
+            <H4>Antal i arkivet</H4>
+            <input
+                type="number"
+                value={editState.amount}
+                name="amount"
+                onChange={onChange}
+                disabled={loading}
+                min={0}
             />
             <BRow>
                 <Button

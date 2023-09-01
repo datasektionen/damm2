@@ -25,7 +25,7 @@ router.post("/create",
     check("tags.*").isInt().not().isString().withMessage("should be an integer"),
     body("creators").isArray().optional().withMessage("should be an array"),
     check("creators.*").isInt().withMessage("should be an integer"),
-    body("amount").isInt({ min: 0 }).optional().withMessage("should be an integer"),
+    body("amount").isInt({ min: 0 }).not().isString().optional().withMessage("should be an integer"),
     validationCheck,
 async (req, res) => {
     const { name, description, date, tags, creators, amount } = req.body;

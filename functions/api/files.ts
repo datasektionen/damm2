@@ -7,7 +7,10 @@ import Jimp from 'jimp';
 import { StatusCodes } from 'http-status-codes';
 import prisma from '../../common/client';
 
-AWS.config.update({ region: configuration.AWS_REGION });
+AWS.config.update({
+    region: configuration.AWS_REGION,
+    correctClockSkew: true,
+});
 const s3 = new AWS.S3({ apiVersion: "2006-03-01" });
 
 // Gets aws key from AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY in the .env file

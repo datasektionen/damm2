@@ -15,7 +15,7 @@
     "node": "^12.20.1"
   },
   "dependencies": {
-    "@prisma/client": "^2.21.2",
+    "@prisma/client": "^3.13.0",
     "aws-sdk": "^2.921.0",
     "axios": "^0.21.1",
     "cors": "^2.8.5",
@@ -58,7 +58,7 @@
     "eslint": "^7.25.0",
     "mocha": "^8.3.2",
     "nodemon": "^2.0.7",
-    "prisma": "^2.21.2",
+    "prisma": "^3.13.0",
     "ts-node": "^5.0.1",
     "tslib": "^2.3.1"
   }
