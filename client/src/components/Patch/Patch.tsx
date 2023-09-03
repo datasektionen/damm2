@@ -3,6 +3,7 @@ import { StyledPatch, Hover, PatchImage, PatchInfo, PatchName, PatchItemDate, Ho
 import { Tag } from '../Tag/Tag';
 import Moment from 'react-moment';
 import { IPatch } from '../../types/definitions';
+import { useDarkMode } from '../../hooks/useDarkMode';
 
 interface Props {
     patch: IPatch;
@@ -13,6 +14,7 @@ interface Props {
 export const PatchComponent: React.FC<Props> = props => {
     
     const [hover, setHover] = useState(false);
+    const { isDarkModeEnabled } = useDarkMode();
 
     const { patch } = props;
 
@@ -25,7 +27,6 @@ export const PatchComponent: React.FC<Props> = props => {
             onTouchMove={() => setHover(false)}
             onTouchEnd={() => setHover(false)}
             onClick={() => props.onClick(patch)}
-            title={patch.description}
         >
             {hover &&
                 <Hover title="Klicka för detaljer">
@@ -42,6 +43,11 @@ export const PatchComponent: React.FC<Props> = props => {
                         Klicka för detaljer
                     </div>
                 </Hover>
+            }
+            {isDarkModeEnabled && props.patch.tags.some(x => x.category === "RECEPTION") &&
+                <div style={{ position: "absolute", right: 8, top: 8 }} title="Märket är mörklagt och syns inte för icke-administratörer">
+                    <i className="fa-solid fa-eye-slash" style={{ fontSize: "24px"}}></i>
+                </div>
             }
             <PatchImage image={patch.images[1]} />
             <PatchInfo>

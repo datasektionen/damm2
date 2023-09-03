@@ -1,13 +1,13 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { IPatch, ITag } from '../../../../types/definitions';
 import Moment from 'react-moment';
 import { PatchImage, Left, Right, Description, Tags, Meta, CloseButton, Content, Files, Creators, Thrash, H1, Storage, StorageItem, StorageItems } from './style';
 import { Button } from '../../../../components/Button/Button';
 import { Tag } from '../../../../components/Tag/Tag';
 import { url } from '../../../../common/api';
-import { AdminContext } from '../../../../App';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
+import { useAppContext } from '../../../../hooks/useAppContext';
 
 interface Props {
     patch: IPatch;
@@ -18,7 +18,7 @@ interface Props {
 }
 
 export const DetailsView: React.FC<Props> = ({ patch, onEditClick, onClose, fetchPatches, type }) => {
-    const { admin } = useContext(AdminContext)
+    const { admin } = useAppContext();
     const isAdmin = admin.includes("admin") || admin.includes("prylis");
 
     const [loading, setLoading] = useState(false);

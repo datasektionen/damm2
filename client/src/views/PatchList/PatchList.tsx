@@ -1,9 +1,10 @@
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import DataGrid, { Column, SelectColumn } from "react-data-grid";
+import DataGrid, { Column, SelectColumn, SortColumn } from "react-data-grid";
 import { Bag, IPatch, ITag } from "../../types/definitions";
 import { groupBy as rowGrouper } from 'lodash';
 import { Button } from "../../components/Button/Button";
+import { Checkbox } from "../../components/Checkbox/Checkbox";
 
 interface Row {
     id: string;
@@ -23,8 +24,8 @@ const columns: Column<Row>[] = [
         width: 30,
         formatter: ({ row }) => <span style={{ display: "flex", justifyContent: "center" }}><img src={row.image} style={{ width: "35px", height: "35px", objectFit: "cover" }} /></span>
     },
-    { key: "name", name: "Namn" },
-    { key: "date", name: "Datum" },
+    { key: "name", name: "Namn", sortable: true },
+    { key: "date", name: "Datum", sortable: true },
     {
         key: "tags",
         name: "Taggar",
@@ -45,7 +46,7 @@ const columns: Column<Row>[] = [
     },
     { key: "bag", name: "Påse", width: 150 },
     { key: "box", name: "Låda" },
-    { key: "amount", name: "Antal", groupFormatter({ childRows }) { return <>{childRows.reduce((acc, { amount }) => acc + amount, 0)}</> } },
+    { key: "amount", name: "Antal", groupFormatter({ childRows }) { return <>{childRows.reduce((acc, { amount }) => acc + amount, 0)}</> }, sortable: true },
 ];
 
 const groupByOptions = [
@@ -64,6 +65,8 @@ export const PatchList = () => {
     const [isSavingAmount, setIsSavingAmount] = useState(false);
 
     const [amount, setAmount] = useState<number>(0);
+    const [showOnlyNoTags, setShowOnlyNoTags] = useState<boolean>(false);
+    const [sortColumns, setSortColumns] = useState<readonly SortColumn[]>([]);
 
     const getPatches = () => {
         axios.get("/api/patches/all")
@@ -148,6 +151,55 @@ export const PatchList = () => {
         setSelectedRows(selected)
     }, [patches])
 
+    type Comparator = (a: Row, b: Row) => number;
+
+    function getComparator(sortColumn: string): Comparator {
+        switch (sortColumn) {
+            case 'name':
+                return (a, b) => {
+                    return a[sortColumn].localeCompare(b[sortColumn]);
+                  };
+            case "date":
+                return (a, b) => {
+                    return new Date(a[sortColumn]).getTime() - new Date(b[sortColumn]).getTime();
+                };
+            case 'amount':
+                return (a, b) => {
+                    return a[sortColumn] - b[sortColumn];
+                };
+          default:
+            throw new Error(`unsupported sortColumn: "${sortColumn}"`);
+        }
+      }
+      const rows: readonly Row[] = patches
+        .filter(x => showOnlyNoTags ? x.tags.length === 0 : true)
+        .map(p => ({
+            id: p.id.toString(),
+            name: p.name,
+            image: p.images[1],
+            tags: p.tags,
+            date: p.date,
+            bag: p.bag?.name ?? "Ingen påse",
+            amount: p.amount,
+            box: p.bag?.box.name ?? "Ingen låda",
+        }));
+
+    const sortedRows = useMemo((): readonly Row[] => {
+        if (sortColumns.length === 0) return rows;
+
+        return [...rows].sort((a, b) => {
+          for (const sort of sortColumns) {
+            const comparator = getComparator(sort.columnKey);
+            const compResult = comparator(a, b);
+            if (compResult !== 0) {
+              return sort.direction === 'ASC' ? compResult : -compResult;
+            }
+          }
+          return 0;
+        });
+      }, [patches, sortColumns, rows]);
+
+
     return (
         <>
             <div>
@@ -160,8 +212,18 @@ export const PatchList = () => {
                     </label>
                 )}
             </div>
+            <div style={{ margin: "0 0 20px", display: "flex", justifyContent: "flex-start", alignContent: "flex-start"}}>
+                <Checkbox
+                    name="no-tags"
+                    label="Visa bara märken utan taggar"
+                    checked={showOnlyNoTags}
+                    setChecked={setShowOnlyNoTags}
+                />
+            </div>
             <DataGrid
                 style={{ maxHeight: "100%", minHeight: "500px" }}
+                sortColumns={sortColumns}
+                onSortColumnsChange={setSortColumns}
                 groupBy={groupBy}
                 columns={columns}
                 rowGrouper={rowGrouper}
@@ -170,19 +232,11 @@ export const PatchList = () => {
                 onSelectedRowsChange={onSelectedRowsChange}
                 expandedGroupIds={expandedGroupIds}
                 onExpandedGroupIdsChange={setExpandedGroupIds}
-                rows={
-                    patches.map(p => ({
-                        id: p.id,
-                        name: p.name,
-                        image: p.images[1],
-                        tags: p.tags,
-                        date: p.date,
-                        bag: p.bag?.name ?? "Ingen påse",
-                        amount: p.amount,
-                        box: p.bag?.box.name ?? "Ingen låda",
-                    })) as any
-                }
+                rows={sortedRows}
             />
+            <div style={{ fontWeight: "bold"}}>
+                {selectedRows.size} märke{selectedRows.size !== 1 && "n"} markerade
+            </div>
             <div>
                 Placera märke{selectedRows.size !== 1 ? "n" : ""} i påse:{" "}
                 <select
@@ -201,7 +255,7 @@ export const PatchList = () => {
                     disabled={selectedRows.size === 0 || isSavingAmount}
                 />
             </div>
-            <div>
+            <div style={{ marginTop: 10}}>
                 Antal i arkivet:{" "}
                 <input
                     value={amount}

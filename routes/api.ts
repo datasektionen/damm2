@@ -10,6 +10,7 @@ import eventsRouter from './events';
 import artefactsRouter from './artefacts';
 import storageRouter from './storage';
 import donationsRouter from './donations';
+import darkModeRouter from './dark-mode';
 import { silentAuthorization } from '../common/middlewares';
 import { IUserRequest } from '../common/requests';
 
@@ -20,6 +21,7 @@ router.use("/events", eventsRouter);
 router.use("/artefacts", artefactsRouter);
 router.use("/storage", storageRouter);
 router.use("/donations", donationsRouter);
+router.use("/dark-mode", darkModeRouter);
 
 router.get("/ping", (req, res) => {
     res.json(ping());

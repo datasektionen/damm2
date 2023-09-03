@@ -1,20 +1,34 @@
 import ApiResponse from '../../common/ApiResponse';
 import { StatusCodes } from 'http-status-codes';
 import prisma from '../../common/client';
-import { TagType } from '.prisma/client';
+import { Prisma, TagCategory, TagType } from '@prisma/client';
+import { IUserRequest } from 'common/requests';
 
 export const DEFAULT_TEXT_COLOR = "#FFFFFF";
 export const DEFAULT_BG_COLOR = "#E83D84";
 
-export const getAll = async (type?: string): Promise<ApiResponse> => {
+export const getAll = async (user: IUserRequest["user"], type?: TagType): Promise<ApiResponse> => {
 
-    let where: any = {};
+    let where: Prisma.TagWhereInput = {};
+
+    const darkMode = await prisma.darkMode.findFirst();
+    const isAdminOrPrylis = user?.admin.includes("admin") || user?.admin.includes("prylis")
+
+    console.log(darkMode)
+    console.log(isAdminOrPrylis)
 
     // If type provided, filter by type
     if (type) where["type"] = type;
 
+    if (darkMode?.value) {
+        if (!isAdminOrPrylis) where["category"] = { not: "RECEPTION" };
+    }
+
+    console.log(where)
+
     const tags = await prisma.tag.findMany({
         where,
+        orderBy: { name: "asc"}
     });
 
     return {
@@ -28,8 +42,8 @@ export const create = async (
     description = "",
     color: string = DEFAULT_TEXT_COLOR,
     backgroundColor: string = DEFAULT_BG_COLOR,
-    parent: number,
     type: string,
+    category: TagCategory,
 ): Promise<ApiResponse> => {
 
     try {
@@ -47,6 +61,7 @@ export const create = async (
                 color,
                 backgroundColor,
                 type: (<any>TagType)[type],
+                category
             },
         });
     
@@ -69,6 +84,7 @@ export const update = async (
     description = "",
     color: string = DEFAULT_TEXT_COLOR,
     backgroundColor: string = DEFAULT_BG_COLOR,
+    category: TagCategory,
 ): Promise<ApiResponse> => {
 
     const tagInQuestion = await prisma.tag.findUnique({where: {id}});
@@ -102,6 +118,11 @@ export const update = async (
     if (backgroundColor) {
         data.backgroundColor = backgroundColor;
     }
+    if (category) {
+        data.category = category;
+    }
+
+    console.log(data)
 
     try {
         await prisma.tag.update({

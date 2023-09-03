@@ -6,11 +6,13 @@ interface Props {
     right: { label: string; key: string };
     value: string;
     setValue: (value: string) => void;
+    disabled?: boolean;
 }
 
-export const BiSwitch: React.FC<Props> = ({ left, right, value, setValue }) => {
+export const BiSwitch: React.FC<Props> = ({ left, right, value, setValue, disabled }) => {
 
     const toggle = () => {
+        if (disabled) return;
         if (value === left.key) setValue(right.key)
         else setValue(left.key)
     }
@@ -20,7 +22,7 @@ export const BiSwitch: React.FC<Props> = ({ left, right, value, setValue }) => {
             <Text highlighted={left.key === value}>
                 {left.label}
             </Text>
-            <Area onClick={toggle}>
+            <Area onClick={toggle} on={right.key === value}>
                 <Indicator left={value === left.key} />
             </Area>
             <Text highlighted={right.key === value}>

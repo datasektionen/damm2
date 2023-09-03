@@ -20,6 +20,7 @@ const defaultFormValue: ITagEdit = {
     color: "",
     backgroundColor: "",
     type: "PATCH",
+    category: "RECEPTION"
 }
 
 export const TagsManager: React.FC<Props> = ({}) => {
@@ -55,7 +56,7 @@ export const TagsManager: React.FC<Props> = ({}) => {
         })()
     }, [])
 
-    const clickTag = (t: ITag) => {
+    const clickTag = (t: ITag| null) => {
         setSelectedTag(t)
     }
 

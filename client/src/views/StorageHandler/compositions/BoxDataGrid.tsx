@@ -95,11 +95,12 @@ export const BoxDataGrid = ({ boxes, setBoxes }: Props) => {
                 <Button
                     color="white"
                     backgroundColor="red"
-                    label={`Radera pås${selectedRows.size !== 1 ? "ar" : "e"}`}
+                    label={`Radera låd${selectedRows.size !== 1 ? "or" : "a"}`}
                     onClick={deleteBoxes}
                     isLoading={isDeletingBoxes}
                     disabled={selectedRows.size === 0 || selectedRows.size === 0}
                 />
+                <span>Du kan inte radera en låda som har påsar i sig</span>
             </div>
         </>
     )

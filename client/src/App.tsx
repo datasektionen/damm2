@@ -12,8 +12,6 @@ import { Timeline } from './views/Timeline/Timeline';
 import { EventHandler } from './views/EventHandler/EventHandler';
 import useAuthorization from './hooks/useAuthorization';
 import { ProtectedRoute } from './components/ProtectedRoute/ProtectedRoute';
-// import { ArtefactArchive } from './views/ArtefactArchive/ArtefactArchive';
-// import { ArtefactCreator } from './views/ArtefactCreator/ArtefactCreator';
 import { Landing } from './views/Landing/Landing';
 import { Admin } from './views/Admin/Admin';
 import { PatchList } from './views/PatchList/PatchList';
@@ -24,6 +22,9 @@ import { BagHandler } from './views/BagHandler/BagHandler';
 import { ExportPatches } from './views/ExportPatches/ExportPatches';
 import { MantineProvider } from "@mantine/core";
 import PersonManager from './views/PersonManager/PersonManager';
+import { DarkMode } from './views/DarkMode/DarkMode';
+import { DarkModeContextProvider } from './hooks/useDarkMode';
+import { AdminContext } from './hooks/useAppContext';
 
 axios.defaults.baseURL = Configuration.apiBaseUrl;
 axios.interceptors.request.use(config => {
@@ -35,12 +36,9 @@ axios.interceptors.request.use(config => {
     return config;
 })
 
-export const AdminContext = React.createContext<{ loading: boolean; admin: string[]; user: string; }>({ loading: true, admin: [], user: "" })
-
 const defaultLinks = [
     <Link to={ROUTES.HOME} key={"methonel-home"}>Hem</Link>,
     <Link to={ROUTES.PATCH_ARCHIVE} key={"methonel-parchive"}>Märkesarkiv</Link>,
-    // <Link to={ROUTES.MUSEUM} key={"methonel-museum"}>Museum</Link>,
     <Link to={ROUTES.TIMELINE} key={"methonel-timeline"}>Tidslinje</Link>,
 ];
 
@@ -60,124 +58,127 @@ export const App: React.FC = props => {
     return (
         <div id="application" className="cerise">
             <AdminContext.Provider value={{ loading, admin, user }}>
-                <MantineProvider
-                    theme={{
-                        fontFamily: "'Lato', sans-serif",
-                        primaryColor: "pink",
-                        fontFamilyMonospace: "'Lato', sans-serif"
-                    }}
-                >
-                <ScrollToTop />
-                <Methone
-                    config={{
-                        system_name: 'damm',
-                        color_scheme: 'cerise',
-                        links: methoneLinks,
-                        login_href: hasToken ? '/logout' : '/login',
-                        login_text: hasToken ? 'Logga ut' : 'Logga in',
-                    }}
-                />
-                <Routes>
-                    <Route
-                        path={ROUTES.TIMELINE}
-                        element={<Timeline />}
+                <DarkModeContextProvider>
+                    <MantineProvider
+                        theme={{
+                            fontFamily: "'Lato', sans-serif",
+                            primaryColor: "pink",
+                            fontFamilyMonospace: "'Lato', sans-serif"
+                        }}
+                    >
+                    <ScrollToTop />
+                    <Methone
+                        config={{
+                            system_name: 'damm',
+                            color_scheme: 'cerise',
+                            links: methoneLinks,
+                            login_href: hasToken ? '/logout' : '/login',
+                            login_text: hasToken ? 'Logga ut' : 'Logga in',
+                        }}
                     />
-                    <Route
-                        path={ROUTES.HOME}
-                        element={<Landing />}
-                    />
-                    <Route path={ROUTES.PATCH_ARCHIVE} element={<PatchArchive />} />
-                    {/* <Route path={ROUTES.MUSEUM} element={<ArtefactArchive />} /> */}
-                    <Route path={ROUTES.ADMIN} element={<Admin />}>
+                    <Routes>
                         <Route
-                            path={ROUTES.ADMIN}
-                            element={
-                                <ProtectedRoute allowed={["prylis"]}>
-                                    <p>Välkommen till administratörsvyn. Välj flik till vänster och börja administrera.</p>
-                                </ProtectedRoute>
-                            }
+                            path={ROUTES.TIMELINE}
+                            element={<Timeline />}
                         />
                         <Route
-                            path={ROUTES.PATCH_CREATOR}
-                            element={
-                                <ProtectedRoute allowed={["prylis"]}>
-                                    <PatchCreator />
-                                </ProtectedRoute>
-                            }
+                            path={ROUTES.HOME}
+                            element={<Landing />}
                         />
-                        {/* <Route path={ROUTES.ARTEFACT_CREATOR}
-                            element={
-                                <ProtectedRoute allowed={["admin"]}>
-                                    <ArtefactCreator />
-                                </ProtectedRoute>
-                            }
-                        /> */}
-                        <Route path={ROUTES.TAGS_MANAGER}
-                            element={
-                                <ProtectedRoute allowed={["prylis"]}>
-                                    <TagsManager />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route path={ROUTES.EVENT_HANDLER}
-                            element={
-                                <ProtectedRoute allowed={["admin", "post"]}>
-                                    <EventHandler />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route path={ROUTES.MANAGE_BOXES}
-                            element={
-                                <ProtectedRoute allowed={["prylis"]}>
-                                    <BoxHandler />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route path={ROUTES.MANAGE_BAGS}
-                            element={
-                                <ProtectedRoute allowed={["prylis"]}>
-                                    <BagHandler />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route path={ROUTES.PATCH_LIST}
-                            element={
-                                <ProtectedRoute allowed={["prylis"]}>
-                                    <PatchList />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route path={ROUTES.EXPORT_PATCHES}
-                            element={
-                                <ProtectedRoute allowed={["prylis"]}>
-                                    <ExportPatches />
-                                </ProtectedRoute>
-                            }
-                        />
+                        <Route path={ROUTES.PATCH_ARCHIVE} element={<PatchArchive />} />
+                        {/* <Route path={ROUTES.MUSEUM} element={<ArtefactArchive />} /> */}
+                        <Route path={ROUTES.ADMIN} element={<Admin />}>
+                            <Route
+                                path={ROUTES.ADMIN}
+                                element={
+                                    <ProtectedRoute allowed={["prylis"]}>
+                                        <p>Välkommen till administratörsvyn. Välj flik till vänster och börja administrera.</p>
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path={ROUTES.PATCH_CREATOR}
+                                element={
+                                    <ProtectedRoute allowed={["prylis"]}>
+                                        <PatchCreator />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route path={ROUTES.TAGS_MANAGER}
+                                element={
+                                    <ProtectedRoute allowed={["prylis"]}>
+                                        <TagsManager />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route path={ROUTES.EVENT_HANDLER}
+                                element={
+                                    <ProtectedRoute allowed={["admin", "post"]}>
+                                        <EventHandler />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route path={ROUTES.MANAGE_BOXES}
+                                element={
+                                    <ProtectedRoute allowed={["prylis"]}>
+                                        <BoxHandler />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route path={ROUTES.MANAGE_BAGS}
+                                element={
+                                    <ProtectedRoute allowed={["prylis"]}>
+                                        <BagHandler />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route path={ROUTES.PATCH_LIST}
+                                element={
+                                    <ProtectedRoute allowed={["prylis"]}>
+                                        <PatchList />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route path={ROUTES.EXPORT_PATCHES}
+                                element={
+                                    <ProtectedRoute allowed={["prylis"]}>
+                                        <ExportPatches />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path={ROUTES.PERSON_MANAGER}
+                                element={
+                                    <ProtectedRoute allowed={["prylis"]}>
+                                        <PersonManager />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path={ROUTES.DARK_MODE}
+                                element={
+                                    <ProtectedRoute allowed={["admin"]}>
+                                        <DarkMode />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route path="*"
+                                element={
+                                    <Navigate to={ROUTES.ADMIN} />
+                                }
+                            />
+                        </Route>
+                        <Route path={ROUTES.LOGIN} element={<Login />} />
+                        <Route path={ROUTES.LOGOUT} element={<Logout />} />
+                        <Route path="/token/:token" element={<Token />} />
                         <Route
-                            path={ROUTES.PERSON_MANAGER}
                             element={
-                                <ProtectedRoute allowed={["prylis"]}>
-                                    <PersonManager />
-                                </ProtectedRoute>
+                                <NotFound />
                             }
                         />
-                        <Route path="*"
-                            element={
-                                <Navigate to={ROUTES.ADMIN} />
-                            }
-                        />
-                    </Route>
-                    <Route path={ROUTES.LOGIN} element={<Login />} />
-                    <Route path={ROUTES.LOGOUT} element={<Logout />} />
-                    <Route path="/token/:token" element={<Token />} />
-                    <Route
-                        element={
-                            <NotFound />
-                        }
-                    />
-                </Routes>
-                </MantineProvider>
+                    </Routes>
+                    </MantineProvider>
+                </DarkModeContextProvider>
             </AdminContext.Provider>
         </div>
     );

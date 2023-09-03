@@ -1,14 +1,14 @@
-import React, { useContext } from 'react';
-import { AdminContext } from '../../App';
+import React from 'react';
 import { Unauthorized } from '../../views/Unauthorized/Unauthorized';
 import { SpinnerCover } from '../SpinnerCover/SpinnerCover';
+import { useAppContext } from '../../hooks/useAppContext';
 
 interface Props {
     allowed: ("prylis" | "admin" | "post")[];
 }
 // Component that protects a route.
 export const ProtectedRoute: React.FC<Props> = ({ children, allowed }) => {
-    const { admin, loading: checkingToken } = useContext(AdminContext)
+    const { admin, loading: checkingToken } = useAppContext()
     
     if (checkingToken) return <SpinnerCover />
 

@@ -44,17 +44,17 @@ model Bag {
 }
 
 model Tag {
-  id              Int          @id @default(autoincrement())
+  id              Int         @id @default(autoincrement())
   name            String
   color           String
   backgroundColor String
   description     String
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
   type            TagType
   patches         Patch[]
   artefacts       Artefact[]
-  category        TagCategory?
+  category        TagCategory
 
   @@unique([name, type])
 }
@@ -111,4 +111,9 @@ model UserCreatedPatch {
   patch    Patch  @relation(fields: [patchId], references: [id])
   personId Int
   patchId  Int
+}
+
+model DarkMode {
+  id    Int     @id @default(autoincrement())
+  value Boolean @default(false)
 }

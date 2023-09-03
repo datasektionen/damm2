@@ -4,9 +4,21 @@ import prisma from '../../common/client';
 import { IUserRequest } from '../../common/requests';
 import { URL } from 'url';
 import { deleteFile } from './files';
-import { Bag, Patch } from '@prisma/client';
+import { Bag, Patch, Prisma } from '@prisma/client';
 
 export const getAllPatches = async (user: IUserRequest["user"]): Promise<ApiResponse> => {
+
+    const darkMode = await prisma.darkMode.findFirst();
+    const isAdminOrPrylis = user?.admin.includes("admin") || user?.admin.includes("prylis")
+
+    const where = (): Prisma.PatchWhereInput => {
+        if (darkMode?.value) {
+            if (isAdminOrPrylis) return {};
+            else return { tags: { none: { category: 'RECEPTION'} } };
+        }
+
+        return {}
+    }
 
     const patches = await prisma.patch.findMany({
         include: {
@@ -21,7 +33,8 @@ export const getAllPatches = async (user: IUserRequest["user"]): Promise<ApiResp
                     person: true,
                 }
             },
-        }
+        },
+        where: where(),
     });
 
     // Delete files if not admin or prylis

@@ -1,31 +1,20 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Header } from 'methone';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { StyledTagEditor, HeadTags, SubTags, Editor, Color, Row } from './style';
-import axios from 'axios';
-import { url } from '../../common/api';
 import { ITag } from '../../types/definitions';
 import { TagClickable } from '../../components/TagClickable/TagClickable';
 import { Field } from '../../components/Field/Field';
-import { TextArea } from '../../components/TextArea/TextArea';
 import { Button } from '../Button/Button';
 import { ColorRandomizer, useCalculateTextContrast, useRandomizeColor } from '../ColorRandomizer/ColorRandomizer';
 import Theme from '../../common/Theme';
-import { BiSwitch } from '../BiSwitch/BiSwitch';
 
-export interface ITagEdit {
-    name: string;
-    description: string;
-    color: string;
-    backgroundColor: string;
+export type ITagEdit = {
     id?: number;
-    parent?: number;
-    type: "PATCH" | "ARTEFACT"
-}
+} & Pick<ITag, "name" | "description" | "color" | "backgroundColor" | "type" | "category">
 
 interface Props {
     tags: ITag[];
     selectedTag: ITag | null;
-    setSelectedTag: (t: ITag) => void;
+    setSelectedTag: (t: ITag | null) => void;
     value: ITagEdit;
     setValue: (next: ITagEdit) => void;
     onSubmit: () => void;
@@ -36,6 +25,7 @@ interface Props {
 export const TagEditor: React.FC<Props> = ({ tags, selectedTag, setSelectedTag, value, setValue, onSubmit, onDelete, loading }) => {
 
     const [edit, setEdit] = useState(false);
+    const [filter, setFilter] = useState<ITagEdit["category"] | "ALL">("ALL");
     const getTextColor = useCalculateTextContrast();
     const randomizeColor = useRandomizeColor();
 
@@ -53,7 +43,8 @@ export const TagEditor: React.FC<Props> = ({ tags, selectedTag, setSelectedTag, 
             description: "",
             backgroundColor: bgColor,
             color: textColor,
-            type: "PATCH"
+            type: "PATCH",
+            category: "RECEPTION"
         } as ITagEdit;
         
         setSelectedTag(newTag as ITag)
@@ -74,21 +65,46 @@ export const TagEditor: React.FC<Props> = ({ tags, selectedTag, setSelectedTag, 
     }, [selectedTag])
 
 
+    const categories = useMemo<{ label: string; id: ITagEdit["category"]}[]>(() => ([
+         { label: "Mottagning", id: "RECEPTION" },
+         { label: "Nämnd", id: "COMMITTEE" },
+         { label: "Event", id: "EVENT" },
+         { label: "Övrigt", id: "OTHER" }
+    ]), [])
+
+    useEffect(() => {
+        reset();
+        setSelectedTag(null)
+    }, [filter])
+
+    const filteredTags = tags
+        .filter(t => t.type === value.type)
+        .filter(x => filter === "ALL" ? true : x.category === filter)
+
     return (
         <StyledTagEditor>
             <div>
                 <Button label="Skapa ny tagg" onClick={onClickCreateNew}/>
             </div>
-            <h3>Redigera taggar</h3>
+            <div style={{ display: "flex", alignItems: "center" }}>
+                <h3 style={{ marginRight: 12}}>Redigera taggar</h3>
+                <select name="category" value={filter} onChange={(e: any) => setFilter(e.target.value)} defaultValue="ALL">
+                    <option value="ALL">Visa alla</option>
+                    {categories.map(x => <option key={x.id} value={x.id}>{x.label}</option>)}
+                </select>
+            </div>
             <HeadTags>
-                {tags.filter(t => t.type === value.type).map((t: ITag) =>
-                    <TagClickable
-                        tag={t}
-                        clicked={t.id === selectedTag?.id}
-                        onClick={() => clickTag(t)}
-                        key={"htag-"+t.id}
-                    />
+                {filteredTags
+                    .map((t: ITag) => (
+                        <TagClickable
+                            tag={t}
+                            clicked={t.id === selectedTag?.id}
+                            onClick={() => clickTag(t)}
+                            key={"htag-"+t.id}
+                        />
+                    )
                 )}
+                {filteredTags.length === 0 && <p>Finns inga taggar med den kategorin </p>}
             </HeadTags>
            
             {selectedTag != null &&
@@ -108,6 +124,12 @@ export const TagEditor: React.FC<Props> = ({ tags, selectedTag, setSelectedTag, 
                         onChange={(e: any) => setValue({...value, description: e.target.value})}
                         disabled={loading}
                     />
+                    <h4>Taggkategori</h4>
+                    <div>
+                        <select name="category" value={value.category} onChange={(e: any) => setValue({...value, category: e.target.value})} >
+                            {categories.map(x => <option key={x.id} value={x.id}>{x.label}</option>)}
+                        </select>
+                    </div>
                     <h4>Bakgrundsfärg</h4>
                     <Color>
                         <input
