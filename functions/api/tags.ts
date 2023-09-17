@@ -14,8 +14,6 @@ export const getAll = async (user: IUserRequest["user"], type?: TagType): Promis
     const darkMode = await prisma.darkMode.findFirst();
     const isAdminOrPrylis = user?.admin.includes("admin") || user?.admin.includes("prylis")
 
-    console.log(darkMode)
-    console.log(isAdminOrPrylis)
 
     // If type provided, filter by type
     if (type) where["type"] = type;
