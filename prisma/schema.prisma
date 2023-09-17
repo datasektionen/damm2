@@ -54,7 +54,7 @@ model Tag {
   type            TagType
   patches         Patch[]
   artefacts       Artefact[]
-  category        TagCategory
+  category        TagCategory @default(OTHER)
 
   @@unique([name, type])
 }
