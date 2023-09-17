@@ -20,12 +20,13 @@ const defaultFormValue: ITagEdit = {
     color: "",
     backgroundColor: "",
     type: "PATCH",
+    category: "RECEPTION"
 }
 
 export const TagsManager: React.FC<Props> = ({}) => {
 
     const [tags, setTags] = useState<ITag[]>([]);
-    const [selectedTags, setSelectedTags] = useState<ITag[]>([]);
+    const [selectedTag, setSelectedTag] = useState<ITag | null>(null);
     const [form, setForm] = useState<ITagEdit>(defaultFormValue)
     const [loading, setLoading] = useState<boolean>(true);
     const [requestError, setRequestError] = useState("");
@@ -43,7 +44,7 @@ export const TagsManager: React.FC<Props> = ({}) => {
         if (result.status === 200) {
             setTags(result.data.body)
             setLoading(false)
-            setSelectedTags([])
+            setSelectedTag(null)
             setForm(defaultFormValue)
         }
         // TODO: Handle error
@@ -55,13 +56,13 @@ export const TagsManager: React.FC<Props> = ({}) => {
         })()
     }, [])
 
-    const clickTag = (t: ITag[]) => {
-        setSelectedTags(t)
+    const clickTag = (t: ITag| null) => {
+        setSelectedTag(t)
     }
 
     useEffect(() => {
-        setForm(selectedTags.length === 1 ? selectedTags[0] : (selectedTags.length === 2 ? selectedTags[1] : {...defaultFormValue, type: form.type}))
-    }, [selectedTags])
+        setForm(selectedTag ? selectedTag : {...defaultFormValue, type: 'PATCH' })
+    }, [selectedTag])
 
     const submit = async () => {
         setLoading(true)
@@ -132,8 +133,8 @@ export const TagsManager: React.FC<Props> = ({}) => {
                     }
                     <TagEditor
                         tags={tags}
-                        selectedTags={selectedTags}
-                        setSelectedTags={clickTag}
+                        selectedTag={selectedTag}
+                        setSelectedTag={clickTag}
                         value={form}
                         setValue={(next: ITagEdit) => setForm(next)}
                         onSubmit={submit}

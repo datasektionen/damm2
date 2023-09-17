@@ -7,16 +7,22 @@ export const StyledBiSwitch = styled.div({
     alignItems: "center",
 })
 
+const gray = "#DDDDDD"
+
 export const Area = styled.div({
     position: "relative",
     width: "40px",
     height: "20px",
     backgroundColor: Theme.palette.cerise,
     borderRadius: "10px",
-    border: `solid 2px ${Theme.palette.cerise}`,
     cursor: "pointer",
     margin: "0 5px"
-})
+},
+    (props: any) => ({
+        backgroundColor: props.on ? Theme.palette.cerise : gray,
+        border: `solid 2px ${props.on ? Theme.palette.cerise : gray}`,
+    })
+)
 
 export const Indicator = styled.div({
     position: "relative",
@@ -24,7 +30,7 @@ export const Indicator = styled.div({
     width: "16px",
     height: "100%",
     borderRadius: "50%",
-    backgroundColor: "#eee",
+    backgroundColor: "#fff",
 },
     (props: any) => ({
         left: props.left ? 0 : "calc(100% - 16px)",

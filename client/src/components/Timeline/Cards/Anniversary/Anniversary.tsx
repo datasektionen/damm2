@@ -4,7 +4,7 @@ import { StyledAnniversary, Head, HeadArrow, Node } from './style';
 import moment from 'moment';
 import 'moment/locale/sv';
 import Moment from 'react-moment';
-import { AdminContext } from '../../../../App';
+import { useAppContext } from '../../../../hooks/useAppContext';
 
 interface Props {
     id: number;
@@ -18,7 +18,7 @@ interface Props {
 
 export const Anniversary: React.FC<Props> = ({ id, index, title, date, content, onEditClick, createdBy }) => {
 
-    const { admin, user } = useContext(AdminContext);
+    const { admin, user } = useAppContext();
     const isAdmin = admin.includes("prylis") || admin.includes("admin");
 
     return (

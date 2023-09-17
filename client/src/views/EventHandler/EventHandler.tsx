@@ -1,8 +1,7 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { title } from '../../common/strings';
 import { StyledEventHandler, Content } from './style';
-import { Header } from 'methone';
 import axios from 'axios';
 import { url } from '../../common/api';
 import { IEvent } from '../../types/definitions';
@@ -15,7 +14,7 @@ import { Spinner } from '../../components/Spinner/Spinner';
 import { Alert } from '../../components/Alert/Alert';
 import { useNavigate, useLocation } from 'react-router';
 import queryString from 'query-string';
-import { AdminContext } from '../../App';
+import { useAppContext } from '../../hooks/useAppContext';
 
 export interface Form {
     title: string;
@@ -36,7 +35,7 @@ const defaultForm: Form = {
 
 export const EventHandler: React.FC = props => {
 
-    const { admin, user } = useContext(AdminContext);
+    const { admin, user } = useAppContext();
 
     const [events, setEvents] = useState<IEvent[]>([]);
     const [form, setForm] = useState(defaultForm);

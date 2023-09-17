@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { StyledCardHead, Date, Day, Month, H2, Arrow, ArrowPoint } from './style';
 import 'moment/locale/sv';
-import { AdminContext } from '../../../App';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 interface Props {
     id: number;
@@ -15,7 +15,7 @@ interface Props {
 
 export const CardHead: React.FC<Props> = ({ id, title, type, index, date, onEditClick, createdBy }) => {
 
-    const { admin, user } = useContext(AdminContext);
+    const { admin, user } = useAppContext();
     const isAdmin = admin.includes("prylis") || admin.includes("admin");
 
     return (

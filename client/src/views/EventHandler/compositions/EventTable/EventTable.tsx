@@ -1,7 +1,7 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { ListContent, ListHead, ListEntry, HeadItem, ListItem, EditButton, StyledEventTable, TrashButton } from './style';
 import { IEvent } from '../../../../types/definitions';
-import { AdminContext } from '../../../../App';
+import { useAppContext } from '../../../../hooks/useAppContext';
 
 interface Props {
     items: IEvent[];
@@ -16,7 +16,7 @@ interface Props {
 export const EventTable: React.FC<Props> = ({ items, requestSort, sortConfig, collapse, onEditClick, onDelete, deleting }) => {
 
     const getAscDesc = (name: string) => sortConfig.key === name ? sortConfig.direction : "asc";
-    const { admin, user } = useContext(AdminContext)
+    const { admin, user } = useAppContext();
 
     return (
         <StyledEventTable>

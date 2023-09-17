@@ -146,5 +146,5 @@ export const Thrash = styled.span({
 })
 
 export const H1 = styled.h1({
-    wordBreak: "break-all",
+    wordBreak: "break-word",
 })

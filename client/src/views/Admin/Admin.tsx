@@ -1,8 +1,7 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { Header } from "methone";
 import { ROUTES } from "../../common/routes";
-import { useContext } from "react";
-import { AdminContext } from "../../App";
+import { useAppContext } from "../../hooks/useAppContext";
 
 const linkToTitle = {
     "/admin/create-patch": "Skapa märke",
@@ -18,12 +17,12 @@ const linkToTitle = {
 
 export const Admin = () => {
 
-    const { admin } = useContext(AdminContext);
+    const { admin } = useAppContext();
     const location = useLocation();
 
     const patchLinks = admin.includes("admin") || admin.includes("prylis");
     const timelineLinks = admin.includes("admin") || admin.includes("post");
-    const artefactLinks = admin.includes("admin");
+    const adminLinks = admin.includes("admin");
 
     return (
         <>
@@ -58,7 +57,7 @@ export const Admin = () => {
                             </ul>
                         </div>
                     }
-                    {timelineLinks &&
+                    {timelineLinks && (
                         <div id="secondary-nav">
                             <h3>Tidslinje</h3>
                             <ul>
@@ -67,7 +66,17 @@ export const Admin = () => {
                                 </li>
                             </ul>
                         </div>
-                    }
+                    )}
+                    {adminLinks && (
+                        <div id="secondary-nav">
+                            <h3>Mörkläggning</h3>
+                            <ul>
+                                <li>
+                                    <Link to={ROUTES.DARK_MODE}>Hantera mörkläggning</Link>
+                                </li>
+                            </ul>
+                        </div>
+                    )}
                     {/* {artefactLinks &&
                         <div id="secondary-nav">
                             <h3>Artefakter</h3>
