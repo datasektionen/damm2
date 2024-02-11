@@ -21,6 +21,7 @@ const columns: Column<Row>[] = [
   {
     key: 'image',
     name: 'Bild',
+    sortable: true,
     width: 30,
     formatter: ({ row }) => (
       <span style={{ display: 'flex', justifyContent: 'center' }}>
@@ -36,6 +37,7 @@ const columns: Column<Row>[] = [
   {
     key: 'tags',
     name: 'Taggar',
+    sortable: true,
     resizable: true,
     formatter: ({ row }) => (
       <div>
@@ -59,8 +61,8 @@ const columns: Column<Row>[] = [
       </div>
     ),
   },
-  { key: 'bag', name: 'Påse', width: 150 },
-  { key: 'box', name: 'Låda' },
+  { key: 'bag', name: 'Påse', sortable: true, width: 150},
+  { key: 'box', name: 'Låda', sortable: true },
   {
     key: 'amount',
     name: 'Antal',
@@ -190,6 +192,10 @@ export const PatchList = () => {
 
   function getComparator(sortColumn: string): Comparator {
     switch (sortColumn) {
+      case 'image':
+        return (a, b) => {
+          return a[sortColumn].localeCompare(b[sortColumn]);
+        };
       case 'name':
         return (a, b) => {
           return a[sortColumn].localeCompare(b[sortColumn]);
@@ -200,6 +206,18 @@ export const PatchList = () => {
             new Date(a[sortColumn]).getTime() -
             new Date(b[sortColumn]).getTime()
           );
+        };
+      case 'tags':
+        return (a, b) => {
+          return a[sortColumn].length - b[sortColumn].length;
+        };
+      case 'bag':
+        return (a, b) => {
+          return a[sortColumn].localeCompare(b[sortColumn]);
+        };
+      case 'box':
+        return (a, b) => {
+          return a[sortColumn].localeCompare(b[sortColumn]);
         };
       case 'amount':
         return (a, b) => {
