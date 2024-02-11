@@ -226,11 +226,16 @@ router.get("/export", async (req, res) => {
     "tags",
   ];
   const patches = await prisma.patch.findMany({
-    include: { bag: { include: { box: true } }, tags: true },
+    include: { bag: { include: { box: true } }, tags: true, createdBy: {
+      include: {
+        person: true,
+      },
+    }, },
   });
   const data = json2csv(
     patches.map((p) => ({
       ...p,
+      creators: p.createdBy.map((t) =>(t.person.name)).join(", "),
       bagName: p.bag?.name ?? "Ingen påse",
       tags: p.tags.map((t) => ({ name: t.name, type: t.type })),
       boxId: p.bag?.box?.id ?? null,
@@ -238,7 +243,6 @@ router.get("/export", async (req, res) => {
     })),
     { fields }
   );
-
   res.setHeader("Content-Type", "text/csv");
   res.send(data);
 });
