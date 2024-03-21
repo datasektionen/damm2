@@ -167,14 +167,6 @@ const AppInner = (props: AppInnerProps) => {
               </ProtectedRoute>
             }
           />
-          <Route
-            path={ROUTES.DARK_MODE}
-            element={
-              <ProtectedRoute allowed={['admin']}>
-                <DarkMode />
-              </ProtectedRoute>
-            }
-          />
           <Route path="*" element={<Navigate to={ROUTES.ADMIN} />} />
         </Route>
         <Route path={ROUTES.LOGIN} element={<Login />} />
