@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 import prisma from '../../common/client';
 import { Prisma, TagCategory, TagType } from '@prisma/client';
 import { IUserRequest } from 'common/requests';
+import axios from 'axios';
 
 export const DEFAULT_TEXT_COLOR = "#FFFFFF";
 export const DEFAULT_BG_COLOR = "#E83D84";
@@ -11,18 +12,16 @@ export const getAll = async (user: IUserRequest["user"], type?: TagType): Promis
 
     let where: Prisma.TagWhereInput = {};
 
-    const darkMode = await prisma.darkMode.findFirst();
+    const darkMode = (await axios("https://darkmode.datasektionen.se/")).data;
     const isAdminOrPrylis = user?.admin.includes("admin") || user?.admin.includes("prylis")
 
 
     // If type provided, filter by type
     if (type) where["type"] = type;
 
-    if (darkMode?.value) {
+    if (darkMode) {
         if (!isAdminOrPrylis) where["category"] = { not: "RECEPTION" };
     }
-
-    console.log(where)
 
     const tags = await prisma.tag.findMany({
         where,

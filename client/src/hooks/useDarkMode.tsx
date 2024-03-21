@@ -21,8 +21,8 @@ export const DarkModeContextProvider: FC = (props) => {
   const [isDarkModeEnabled, setIsDarkModeEnabled] = useState(false);
 
   const doFetch = () => {
-    axios.get('api/dark-mode').then((x) => {
-      setIsDarkModeEnabled(x.data);
+    axios.get('https://darkmode.datasektionen.se/').then((res) => {
+      setIsDarkModeEnabled(res.data);
     });
   };
 

@@ -22,8 +22,7 @@ import { BagHandler } from './views/BagHandler/BagHandler';
 import { ExportPatches } from './views/ExportPatches/ExportPatches';
 import { MantineProvider } from '@mantine/core';
 import PersonManager from './views/PersonManager/PersonManager';
-import { DarkMode } from './views/DarkMode/DarkMode';
-import { DarkModeContextProvider, useDarkMode } from './hooks/useDarkMode';
+import { DarkModeContextProvider } from './hooks/useDarkMode';
 import { AdminContext } from './hooks/useAppContext';
 
 axios.defaults.baseURL = Configuration.apiBaseUrl;

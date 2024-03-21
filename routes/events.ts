@@ -22,6 +22,7 @@ import express from "express";
 import { body, param } from "express-validator";
 import { StatusCodes } from "http-status-codes";
 import moment from "moment";
+import axios from "axios";
 
 const router = express.Router();
 
@@ -42,13 +43,13 @@ new CronJob(
 );
 
 router.get("/all", silentAuthorization, async (req: IUserRequest, res) => {
-  const darkMode = await prisma.darkMode.findFirst();
+  const darkMode = (await axios("https://darkmode.datasektionen.se/")).data;
   const user = req.user;
   const isAdminOrPrylis = Boolean(
     user?.admin.includes("admin") || user?.admin.includes("prylis")
   );
 
-  if (darkMode?.value && !isAdminOrPrylis) {
+  if (darkMode && !isAdminOrPrylis) {
     return res.status(StatusCodes.OK).json([]);
   }
 
