@@ -27,6 +27,7 @@ import { AdminContext } from './hooks/useAppContext';
 
 axios.defaults.baseURL = Configuration.apiBaseUrl;
 axios.interceptors.request.use((config) => {
+  if (new URL(config.url ?? "").origin != new URL(Configuration.apiBaseUrl).origin) return config;
   if (!config.headers.Authorization) {
     const token = localStorage.getItem('token');
     if (token) config.headers.Authorization = `Bearer ${token}`;
