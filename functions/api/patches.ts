@@ -5,14 +5,15 @@ import { IUserRequest } from '../../common/requests';
 import { URL } from 'url';
 import { deleteFile } from './files';
 import { Bag, Patch, Prisma } from '@prisma/client';
+import axios from 'axios';
 
 export const getAllPatches = async (user: IUserRequest["user"]): Promise<ApiResponse> => {
 
-    const darkMode = await prisma.darkMode.findFirst();
+    const darkMode = (await axios("https://darkmode.datasektionen.se/")).data;
     const isAdminOrPrylis = user?.admin.includes("admin") || user?.admin.includes("prylis")
 
     const where = (): Prisma.PatchWhereInput => {
-        if (darkMode?.value) {
+        if (darkMode) {
             if (isAdminOrPrylis) return {};
             else return { tags: { none: { category: 'RECEPTION'} } };
         }

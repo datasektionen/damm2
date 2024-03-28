@@ -67,16 +67,6 @@ export const Admin = () => {
                             </ul>
                         </div>
                     )}
-                    {adminLinks && (
-                        <div id="secondary-nav">
-                            <h3>Mörkläggning</h3>
-                            <ul>
-                                <li>
-                                    <Link to={ROUTES.DARK_MODE}>Hantera mörkläggning</Link>
-                                </li>
-                            </ul>
-                        </div>
-                    )}
                     {/* {artefactLinks &&
                         <div id="secondary-nav">
                             <h3>Artefakter</h3>

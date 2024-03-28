@@ -1,7 +1,6 @@
 import { silentAuthorization } from "../common/middlewares";
 import { IUserRequest } from "../common/requests";
 import { ping } from "../functions/api/ping";
-import darkModeRouter from "./dark-mode";
 import donationsRouter from "./donations";
 import eventsRouter from "./events";
 import filesRouter from "./files";
@@ -19,7 +18,6 @@ router.use("/files", filesRouter);
 router.use("/events", eventsRouter);
 router.use("/storage", storageRouter);
 router.use("/donations", donationsRouter);
-router.use("/dark-mode", darkModeRouter);
 
 router.get("/ping", (req, res) => {
   res.json(ping());

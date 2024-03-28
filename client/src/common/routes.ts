@@ -13,7 +13,6 @@ export const ROUTES = {
     MANAGE_BAGS: "/admin/manage-bags",
     EXPORT_PATCHES: "/admin/export-patches",
     PERSON_MANAGER: "/admin/persons",
-    DARK_MODE: "/admin/dark-mode",
     LOGIN: "/login",
     LOGOUT: "/logout"
 }

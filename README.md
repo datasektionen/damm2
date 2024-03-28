@@ -38,11 +38,11 @@ See [server/common/configuration.ts](server/common/configuration.ts)
 
 | Name                      | Default                                   | Description                                               |
 | ------------------------- | ----------------------------------------- | --------------------------------------------------------- |
-| DATABASE_URL              | -                                         | Example: `postgresql://postgres:1234@localhost:5432/damm`, follow the schema: `postgresql://USER:PASSWORD@HOST:PORT/DB_NAME`                                                          |
+| DATABASE_URL              | -                                         | Schema: `postgresql://USER:PASSWORD@HOST:PORT/DB_NAME`    |
 | PORT                      | 8080                                      | Server port                                               |
 | NODE_ENV                  | production                                |                                                           |
 | AWS_REGION                | eu-north-1                                |                                                           |
-| AWS_S3_BUCKET             | dsekt-damm-dev                            | NEVER!!!!!!!!!!! use `dsekt-damm-prod` locally                                                          |
+| AWS_S3_BUCKET             | dsekt-damm-dev                            | NEVER!!!!!!!!!!! use `dsekt-damm-prod` locally            |
 | AWS_ACCESS_KEY_ID         | -                                         |                                                           |
 | AWS_SECRET_ACCESS_KEY     | -                                         |                                                           |
 | LOGIN_API_URL             | https://login.datasektionen.se            | URL to login                                              |
@@ -52,10 +52,10 @@ See [server/common/configuration.ts](server/common/configuration.ts)
 ## Client
 See [server/client/src/common/configuration.ts](server/client/src/common/configuration.ts)
 
-| Name                      | Default                                   | Description                                               |
-| ------------------------- | ----------------------------------------- | --------------------------------------------------------- |
-| REACT_APP_API_ENDPOINT    | `http://localhost:8080` in development, `https://damm.datasektionen.se` in production                     | Used to fetch the API                                     |
-| HOST                      | `localhost.datasektionen.se` in development                     | Login denies a callback to `http://localhost:3000` (not a subdomain of datasektionen.se), this variable sets the url to `http://localhost.datasektionen.se:3000` instead, which points to `127.0.0.1` by our DNS                                    |
+| Name                      | Default                                                                               | Description           |
+| ------------------------- | ------------------------------------------------------------------------------------- | --------------------- |
+| REACT_APP_API_ENDPOINT    | `http://localhost:8080` in development, `https://damm.datasektionen.se` in production | Used to fetch the API |
+| HOST                      | `localhost` in development                                                            |                       |
 
 # How to run
 ## Development
