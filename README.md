@@ -31,7 +31,7 @@ Zfinger - to fetch images of users (timeline)
 
 # Environment variables
 
-To get a login API-key or access to the `dsekt-damm-dev` bucket, contact <a href="mailto:d-sys@datasektionen.se">d-sys</a>. Alternatively, login can be run locally and a different AWS account could be used. In that case, make sure to configure the bucket correctly, see [bucket configuration](bucket_configuration.md).
+When running locally you can mock login with [nyckeln under dörrmattan](https://github.com/datasektionen/nyckeln-under-dorrmattan) and use an own AWS account to get an s3 bucket, in which case you should look at [bucket configuration](bucket_configuration.md). There is also a bucket called `dsekt-damm-dev` that you may get access to from <a href="mailto:d-sys@datasektionen.se">d-sys</a>.
 
 ## Server
 See [server/common/configuration.ts](server/common/configuration.ts)
