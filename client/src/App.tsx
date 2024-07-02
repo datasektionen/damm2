@@ -22,12 +22,12 @@ import { BagHandler } from './views/BagHandler/BagHandler';
 import { ExportPatches } from './views/ExportPatches/ExportPatches';
 import { MantineProvider } from '@mantine/core';
 import PersonManager from './views/PersonManager/PersonManager';
-import { DarkMode } from './views/DarkMode/DarkMode';
-import { DarkModeContextProvider, useDarkMode } from './hooks/useDarkMode';
+import { DarkModeContextProvider } from './hooks/useDarkMode';
 import { AdminContext } from './hooks/useAppContext';
 
 axios.defaults.baseURL = Configuration.apiBaseUrl;
 axios.interceptors.request.use((config) => {
+  if (new URL(config.url ?? "").origin != new URL(Configuration.apiBaseUrl).origin) return config;
   if (!config.headers.Authorization) {
     const token = localStorage.getItem('token');
     if (token) config.headers.Authorization = `Bearer ${token}`;
@@ -165,14 +165,6 @@ const AppInner = (props: AppInnerProps) => {
             element={
               <ProtectedRoute allowed={['prylis']}>
                 <PersonManager />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path={ROUTES.DARK_MODE}
-            element={
-              <ProtectedRoute allowed={['admin']}>
-                <DarkMode />
               </ProtectedRoute>
             }
           />

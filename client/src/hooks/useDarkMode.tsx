@@ -18,11 +18,11 @@ type DarkModeContextType = {
 const DarkModeContext = createContext<DarkModeContextType>(null as never);
 // TODO: Move to useAuthorization
 export const DarkModeContextProvider: FC = (props) => {
-  const [isDarkModeEnabled, setIsDarkModeEnabled] = useState(false);
+  const [isDarkModeEnabled, setIsDarkModeEnabled] = useState(true);
 
   const doFetch = () => {
-    axios.get('api/dark-mode').then((x) => {
-      setIsDarkModeEnabled(x.data);
+    axios.get('https://darkmode.datasektionen.se/').then((res) => {
+      setIsDarkModeEnabled(res.data);
     });
   };
 
