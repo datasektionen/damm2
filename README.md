@@ -52,10 +52,11 @@ See [server/common/configuration.ts](server/common/configuration.ts)
 ## Client
 See [server/client/src/common/configuration.ts](server/client/src/common/configuration.ts)
 
-| Name                      | Default                                                                               | Description           |
-| ------------------------- | ------------------------------------------------------------------------------------- | --------------------- |
-| REACT_APP_API_ENDPOINT    | `http://localhost:8080` in development, `https://damm.datasektionen.se` in production | Used to fetch the API |
-| HOST                      | `localhost` in development                                                            |                       |
+| Name                      | Default                                                                               | Description                           |
+| ------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------- |
+| REACT_APP_API_ENDPOINT    | `http://localhost:8080` in development, `https://damm.datasektionen.se` in production | Used to fetch the API                 |
+| HOST                      | `localhost` in development                                                            |                                       |
+| NODE_OPTIONS              | --openssl-legacy-provider                                                             | Make webpack work on non-ancient node |
 
 # How to run
 ## Development

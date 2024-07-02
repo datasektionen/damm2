@@ -13,9 +13,6 @@
     "dc:up": "docker compose -f .docker/compose/docker-compose-dev.yml up -d postgres pgadmin",
     "dc:down": "docker compose -f .docker/compose/docker-compose-dev.yml down"
   },
-  "engines": {
-    "node": "^12.20.1"
-  },
   "dependencies": {
     "@prisma/client": "^3.13.0",
     "aws-sdk": "^2.921.0",
