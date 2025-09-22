@@ -57,7 +57,7 @@ export const authorizeHive = async (req: IUserRequest, res: express.Response, ne
         };
 
         const hiveResponse = await axios.get<hivePermission[]>(`${configuration.HIVE_API_URL}/user/${user.user}/permissions`, config);
-        var permissions = [];
+        const permissions = [];
         for (const perm of hiveResponse.data) {
             permissions.push(perm.id)
         }
