@@ -1,11 +1,11 @@
 import express from "express";
 import { body, check } from "express-validator";
-import { adminPrylisAuth, authorizePls, validationCheck } from "../common/middlewares";
+import { adminPrylisAuth, authorizeHive, validationCheck } from "../common/middlewares";
 import { createPerson, deletePersons, getPersons } from "../functions/api/donations";
 
 const router = express.Router();
 
-router.use(authorizePls);
+router.use(authorizeHive);
 router.use(adminPrylisAuth);
 
 router.get("/persons",

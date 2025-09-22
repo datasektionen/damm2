@@ -1,5 +1,5 @@
 import ApiResponse from '../common/ApiResponse';
-import { adminAuth, adminPrylisAuth, authorizePls, validationCheck } from '../common/middlewares';
+import { adminAuth, adminPrylisAuth, authorizeHive, validationCheck } from '../common/middlewares';
 import express from 'express';
 import { body, check, query } from 'express-validator';
 import { StatusCodes } from 'http-status-codes';
@@ -53,7 +53,7 @@ const hasFile = (req: express.Request, res: express.Response, next: express.Next
 
 // Uploads images (image for a patch or artefact)
 router.post("/upload/image",
-    authorizePls,
+    authorizeHive,
     adminPrylisAuth,
     imageUpload.single("image"),
     // Should not end with /
@@ -68,7 +68,7 @@ async (req, res) => {
 });
 
 router.post("/attach/img-to",
-    authorizePls,
+    authorizeHive,
     adminAuth,
     body("id").isInt().not().isString().withMessage("should be an integer"),
     body("images").isArray().optional().withMessage("should be an array"),
@@ -85,7 +85,7 @@ async (req, res) => {
 
 // Uploads files
 router.post("/upload/file",
-    authorizePls,
+    authorizeHive,
     adminPrylisAuth,
     fileUpload.single("file"),
     // Should not end with /
@@ -100,7 +100,7 @@ async (req, res) => {
 });
 
 router.post("/attach/file-to",
-    authorizePls,
+    authorizeHive,
     adminAuth,
     body("id").isInt().not().isString().withMessage("should be an integer"),
     body("file").trim().isString().notEmpty().withMessage("should be an URL"),
@@ -116,7 +116,7 @@ async (req, res) => {
 
 // Get protected files (patch-files for example)
 router.get("/get/:name",
-    authorizePls,
+    authorizeHive,
     adminPrylisAuth,
 async (req, res) => {
 
@@ -157,7 +157,7 @@ router.get("/get/unprotected/:name", async (req, res) => {
 // Delete an image from S3
 // Does not delete the image from anywhere else
 router.delete("/image",
-    authorizePls,
+    authorizeHive,
     adminPrylisAuth,
     query("key").isString().trim().notEmpty().withMessage("should be a string"),
     validationCheck,
@@ -179,7 +179,7 @@ async (req, res) => {
 });
 
 router.delete("/file",
-    authorizePls,
+    authorizeHive,
     adminPrylisAuth,
     query("name").isString().trim().notEmpty().withMessage("should be a string"),
     query("id").isInt().withMessage("should be an integer"),

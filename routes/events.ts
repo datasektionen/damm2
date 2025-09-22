@@ -2,7 +2,7 @@ import { unauthorizedResponse } from "../common/ApiResponse";
 import prisma from "../common/client";
 import {
   adminAuth,
-  authorizePls,
+  authorizeHive,
   silentAuthorization,
   validationCheck,
 } from "../common/middlewares";
@@ -66,7 +66,7 @@ router.get("/all", silentAuthorization, async (req: IUserRequest, res) => {
 
 router.post(
   "/create",
-  authorizePls,
+  authorizeHive,
   // adminAuth,
   body("title")
     .isString()
@@ -120,7 +120,7 @@ router.post(
 
 router.put(
   "/update",
-  authorizePls,
+  authorizeHive,
   // adminAuth,
   body("id").isInt().not().isString().withMessage("should be an integer"),
   body("title")
@@ -182,7 +182,7 @@ router.put(
 
 router.delete(
   "/:id",
-  authorizePls,
+  authorizeHive,
   adminAuth,
   param("id").isInt().withMessage("should be an integer"),
   validationCheck,

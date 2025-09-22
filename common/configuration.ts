@@ -12,7 +12,8 @@ const configuration = {
     AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
     LOGIN_API_URL: process.env.LOGIN_API_URL ?? "https://login.datasektionen.se",
     LOGIN_API_KEY: process.env.LOGIN_API_KEY,
-    PLS_API_URL: process.env.PLS_API_URL ?? "https://pls.datasektionen.se/api",
+    HIVE_API_URL: process.env.HIVE_API_URL ?? "https://hive.datasektionen.se/api/v1",
+    HIVE_API_KEY: process.env.HIVE_API_KEY,
 };
 
 if (configuration.NODE_ENV === "development" && configuration.AWS_S3_BUCKET === "dsekt-damm") {

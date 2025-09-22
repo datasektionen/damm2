@@ -1,4 +1,4 @@
-import { adminPrylisAuth, authorizePls, silentAuthorization, validationCheck } from '../common/middlewares';
+import { adminPrylisAuth, authorizeHive, silentAuthorization, validationCheck } from '../common/middlewares';
 import express from 'express';
 import { IUserRequest } from '../common/requests';
 import { body, check } from 'express-validator';
@@ -15,7 +15,7 @@ async (req: IUserRequest, res) => {
 });
 
 router.post("/create",
-    authorizePls,
+    authorizeHive,
     adminPrylisAuth,
     body("name").trim().isString().notEmpty().withMessage("should be a string"),
     body("description").trim().isString().optional().withMessage("should be a string"),
@@ -35,7 +35,7 @@ async (req, res) => {
 });
 
 router.put("/update",
-    authorizePls,
+    authorizeHive,
     adminPrylisAuth,
     body("id").isInt().not().isString().withMessage("should be an integer"),
     body("name").trim().isString().notEmpty().optional().withMessage("should be a string"),
@@ -56,7 +56,7 @@ async (req, res) => {
 });
 
 router.delete("/:id",
-    authorizePls,
+    authorizeHive,
     adminPrylisAuth,
 async (req, res) => {
     const id = Number(req.params.id);

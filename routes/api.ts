@@ -20,26 +20,26 @@ router.use("/storage", storageRouter);
 router.use("/donations", donationsRouter);
 
 router.get("/ping", (req, res) => {
-  res.json(ping());
+    res.json(ping());
 });
 
 router.get(
-  "/check-token",
-  silentAuthorization,
-  async (req: IUserRequest, res) => {
-    if (!req.user)
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        statusCode: StatusCodes.BAD_REQUEST,
-      });
-    return res.status(StatusCodes.OK).json(req.user);
-  }
+    "/check-token",
+    silentAuthorization,
+    async (req: IUserRequest, res) => {
+        if (!req.user)
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                statusCode: StatusCodes.BAD_REQUEST,
+            });
+        return res.status(StatusCodes.OK).json(req.user);
+    }
 );
 
 router.get("*", (req, res) => {
-  res.status(StatusCodes.NOT_FOUND).json({
-    statusCode: StatusCodes.NOT_FOUND,
-    body: "Invalid API path",
-  });
+    res.status(StatusCodes.NOT_FOUND).json({
+        statusCode: StatusCodes.NOT_FOUND,
+        body: "Invalid API path",
+    });
 });
 
 export default router;

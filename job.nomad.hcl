@@ -32,12 +32,13 @@ DATABASE_URL=postgres://damm:{{ .db_password }}@postgres.dsekt.internal:5432/dam
 LOGIN_API_KEY={{ .login_key }}
 AWS_SECRET_ACCESS_KEY={{ .aws_access_key }}
 AWS_ACCESS_KEY_ID={{ .aws_access_id }}
+HIVE_API_KEY={{ .hive_api_key }}
 {{ end }}
 PORT={{ env "NOMAD_PORT_http" }}
 NODE_ENV=production
 AWS_S3_BUCKET=dsekt-damm-prod
 LOGIN_URL=https://login.datasektionen.se
-PLS_URL=https://pls.datasektionen.se/api
+HIVE_API_URL=https://hive.datasektionen.se/api/v1
 ENV
         destination = "local/.env"
         env         = true
