@@ -6,6 +6,11 @@ import axios from 'axios';
 import configuration from './configuration';
 import { IUserRequest } from './requests';
 
+type hivePermission = {
+    id: string,
+    scope?: string
+}
+
 /**
  * Middleware that checks if there are any validation errors, if there are, it
  * sends 400 Bad Request. Otherwise it calls the next function in the chain.
@@ -22,9 +27,9 @@ export const validationCheck = (req: express.Request, res: express.Response, nex
     next();
 };
 
-// Authorizes against pls.
+// Authorizes against hive.
 // Takes token either in Authorization header or as a query string
-export const authorizePls = async (req: IUserRequest, res: express.Response, next: express.NextFunction): Promise<void> => {
+export const authorizeHive = async (req: IUserRequest, res: express.Response, next: express.NextFunction): Promise<void> => {
     const authorizationHeader = req.headers.authorization;
     let token;
     if (authorizationHeader) {
@@ -44,12 +49,20 @@ export const authorizePls = async (req: IUserRequest, res: express.Response, nex
             unauthorizedResponse(res);
             return;
         }
-        
+
         const user = response.data;
-    
-        const plsResponse = await axios.get(`${configuration.PLS_API_URL}/user/${user.user}/damm`);
-        req.user = { ...user, admin: plsResponse.data };
-    
+
+        const config = {
+            headers: { Authorization: `Bearer ${configuration.HIVE_API_KEY}` }
+        };
+
+        const hiveResponse = await axios.get<hivePermission[]>(`${configuration.HIVE_API_URL}/user/${user.user}/permissions`, config);
+        const permissions = [];
+        for (const perm of hiveResponse.data) {
+            permissions.push(perm.id)
+        }
+        req.user = { ...user, admin: permissions };
+
         next();
     } catch (err) {
         unauthorizedResponse(res);
@@ -59,19 +72,19 @@ export const authorizePls = async (req: IUserRequest, res: express.Response, nex
 
 export const adminAuth = async (req: IUserRequest, res: express.Response, next: express.NextFunction): Promise<void> => {
     if (req.user?.admin.includes("admin")) return next();
-    
+
     unauthorizedResponse(res);
 };
 
 export const prylisAuth = async (req: IUserRequest, res: express.Response, next: express.NextFunction): Promise<void> => {
     if (req.user?.admin.includes("prylis")) return next();
-    
+
     unauthorizedResponse(res);
 };
 
 export const adminPrylisAuth = async (req: IUserRequest, res: express.Response, next: express.NextFunction): Promise<void> => {
     if (req.user?.admin.includes("admin") || req.user?.admin.includes("prylis")) return next();
-    
+
     unauthorizedResponse(res);
 };
 
@@ -97,14 +110,23 @@ export const silentAuthorization = async (req: IUserRequest, res: express.Respon
             next();
             return;
         }
-        
+
         const user = response.data;
-    
-        const plsResponse = await axios.get(`${configuration.PLS_API_URL}/user/${user.user}/damm`);
-        req.user = { ...user, admin: plsResponse.data };
-    
+
+        const config = {
+            headers: { Authorization: `Bearer ${configuration.HIVE_API_KEY}` }
+        };
+
+        const hiveResponse = await axios.get<hivePermission[]>(`${configuration.HIVE_API_URL}/user/${user.user}/permissions`, config);
+        const permissions = [];
+        for (const perm of hiveResponse.data) {
+            permissions.push(perm.id)
+        }
+        req.user = { ...user, admin: permissions };
+
         next();
     } catch (err) {
+        console.log(err)
         next();
     }
 };

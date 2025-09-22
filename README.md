@@ -5,7 +5,7 @@ Historiesystem
 Available [here](https://duckumentation.datasektionen.se/damm)
 
 # Pls permissions
-There are two pls permissions:
+There are three hive permissions:
 - `admin`
 - `prylis`
 - `post`
@@ -47,7 +47,8 @@ See [server/common/configuration.ts](server/common/configuration.ts)
 | AWS_SECRET_ACCESS_KEY     | -                                         |                                                           |
 | LOGIN_API_URL             | https://login.datasektionen.se            | URL to login                                              |
 | LOGIN_API_KEY             | -                                         | Login key                                                 |
-| PLS_API_URL               | https://pls.datasektionen.se/api          | URL to pls api                                            |
+| HIVE_API_URL              | https://hive.datasektionen.se/api/v1      | URL to hive api                                           |
+| HIVE_API_KEY              |                                           | API key to check permissions in hive                      |
 
 ## Client
 See [server/client/src/common/configuration.ts](server/client/src/common/configuration.ts)

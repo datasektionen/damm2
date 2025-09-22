@@ -1,7 +1,7 @@
 import prisma from "../common/client";
 import {
   adminPrylisAuth,
-  authorizePls,
+  authorizeHive,
   validationCheck,
 } from "../common/middlewares";
 import {
@@ -28,7 +28,7 @@ import { parse as json2csv } from "json2csv";
 const router = express.Router();
 
 // All routes here require admin access
-router.use(authorizePls);
+router.use(authorizeHive);
 router.use(adminPrylisAuth);
 
 // Get all boxes

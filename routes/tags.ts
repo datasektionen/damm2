@@ -1,4 +1,4 @@
-import { adminPrylisAuth, authorizePls, silentAuthorization, validationCheck } from '../common/middlewares';
+import { adminPrylisAuth, authorizeHive, silentAuthorization, validationCheck } from '../common/middlewares';
 import express from 'express';
 import { body, param } from 'express-validator';
 import { StatusCodes } from 'http-status-codes';
@@ -26,7 +26,7 @@ const tagValidators = [
 ];
 
 router.post("/create",
-    authorizePls,
+    authorizeHive,
     adminPrylisAuth,
     body("parent").optional().isInt().not().isString().withMessage("should be an integer"),
     body("type").isString().trim().matches(TAG_TYPES).withMessage("should be either 'PATCH' or 'ARTEFACT'"),
@@ -40,7 +40,7 @@ async (req, res) => {
 });
 
 router.put("/update",
-    authorizePls,
+    authorizeHive,
     adminPrylisAuth,
     body("id").isInt().not().isString().withMessage("should be an integer"),
     ...tagValidators,
@@ -51,7 +51,7 @@ async (req, res) => {
 });
 
 router.delete("/:id",
-    authorizePls,
+    authorizeHive,
     adminPrylisAuth,
     param("id").isInt().withMessage("should be an integer"),
     validationCheck,
