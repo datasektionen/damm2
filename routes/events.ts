@@ -1,5 +1,6 @@
 import { unauthorizedResponse } from "../common/ApiResponse";
 import prisma from "../common/client";
+import configuration from "../common/configuration";
 import {
   adminAuth,
   authorizeHive,
@@ -17,12 +18,12 @@ import {
 import { dfunkt } from "../functions/generator/dfunkt";
 import { generator } from "../functions/generator/generator";
 import { EventType } from ".prisma/client";
+import axios from "axios";
 import { CronJob } from "cron";
 import express from "express";
 import { body, param } from "express-validator";
 import { StatusCodes } from "http-status-codes";
 import moment from "moment";
-import axios from "axios";
 
 const router = express.Router();
 
@@ -61,7 +62,52 @@ router.get("/all", silentAuthorization, async (req: IUserRequest, res) => {
       ? -1
       : 0
   );
-  return res.status(events.statusCode).json(events);
+
+  // Get picture links for mandates
+  const kthids = events.body
+    .filter((element: any) => element.type == "DFUNKT")
+    .flatMap((element: any) => element.mandates.map((e: any) => e.user.kthid));
+
+  const unique = [...new Set(kthids)];
+
+  const headers = new Headers();
+  headers.append("Authorization", "Bearer " + configuration.RFINGER_API_KEY);
+
+  const opts = {
+    method: "POST",
+    body: JSON.stringify(unique),
+    headers: headers,
+  };
+
+  const request = new Request(
+    configuration.RFINGER_API_URL + "/api/batch",
+    opts
+  );
+
+  const pictures = await fetch(request)
+    .then((response) => {
+      if (response.status !== 200) {
+        throw new Error("Something went wrong on API server!");
+      }
+      return response.json();
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+
+  const updated_events = events.body.map((element: any) => {
+    if (element.type == "DFUNKT") {
+      element.mandates = element.mandates.map((e: any) => {
+        e.user.picture = pictures[e.user.kthid];
+        return e;
+      });
+      return element;
+    } else {
+      return element;
+    }
+  });
+
+  return res.status(events.statusCode).json(updated_events);
 });
 
 router.post(

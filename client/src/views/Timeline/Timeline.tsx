@@ -96,7 +96,7 @@ export const Timeline: React.FC = (props) => {
   useEffect(() => {
     (async () => {
       const events = await axios.get(url('/api/events/all'));
-      const body = events.data?.body ?? [];
+      const body = events.data ?? [];
       setEvents(body);
       setYears(eventsPerYear(body));
     })();
