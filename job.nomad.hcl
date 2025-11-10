@@ -45,7 +45,7 @@ ENV
       }
 
       resources {
-        memory = 120
+        memory = 512
       }
     }
   }
