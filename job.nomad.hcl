@@ -37,7 +37,7 @@ HIVE_API_KEY={{ .hive_api_key }}
 PORT={{ env "NOMAD_PORT_http" }}
 NODE_ENV=production
 AWS_S3_BUCKET=dsekt-damm-prod
-LOGIN_URL=https://login.datasektionen.se
+LOGIN_URL=https://sso.datasektionen.se/legacyapi
 HIVE_API_URL=https://hive.datasektionen.se/api/v1
 ENV
         destination = "local/.env"
