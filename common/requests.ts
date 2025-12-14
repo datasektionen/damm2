@@ -1,5 +1,5 @@
 import { Request } from "express";
-import { User } from "./types";
+import { DammUser } from "./types";
 export interface IUserRequest extends Request {
-    user?: User
+    user?: DammUser
 }

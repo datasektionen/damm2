@@ -4,7 +4,7 @@
 */
 import moment from 'moment';
 import axios, { AxiosResponse } from 'axios';
-import { User } from '../../common/types';
+import { DammUser } from '../../common/types';
 
 export interface IRole {
 	id: number;
@@ -17,10 +17,10 @@ export interface IRole {
 
 interface IMandatesForRole {
 	role: IRole;
-	mandates: { start: string; end: string; User: User }[]
+	mandates: { start: string; end: string; User: DammUser }[]
 }
 
-const fetchMandatesForRole = async (role: IRole): Promise<{ date: moment.Moment; role: IRole; user: User; }[]> => {
+const fetchMandatesForRole = async (role: IRole): Promise<{ date: moment.Moment; role: IRole; user: DammUser; }[]> => {
 	return axios.get(`https://dfunkt.datasektionen.se/api/role/${encodeURIComponent(role.identifier)}`)
 		.catch(() => console.log('Couldn\'t fetch dfunkt mandates for role ' + role.identifier))
 		.then((response: void | AxiosResponse<any>) => (response as AxiosResponse<any>).data)
@@ -55,8 +55,8 @@ export const dfunkt: () => Promise<{ date: moment.Moment; template: "DFUNKT"; ma
 				roles.forEach(role => promises.push(fetchMandatesForRole(role)));
 
 				Promise.all(promises)
-					.then((results: { date: moment.Moment; role: IRole; user: User; }[]) => {
-						const mandates = ([] as { date: moment.Moment; role: IRole; user: User; }[]).concat.apply([], results);
+					.then((results: { date: moment.Moment; role: IRole; user: DammUser; }[]) => {
+						const mandates = ([] as { date: moment.Moment; role: IRole; user: DammUser; }[]).concat.apply([], results);
 						mandates.sort((a, b) => a.date.isBefore(b.date) ? 1 : (a.date.isAfter(b.date) ? -1 : 0));
 
 						const dates = [] as any;

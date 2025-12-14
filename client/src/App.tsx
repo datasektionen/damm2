@@ -220,9 +220,7 @@ const Token = () => {
 
 const Login = () => {
   useEffect(() => {
-    window.location = `https://login.datasektionen.se/login?callback=${encodeURIComponent(
-      window.location.origin
-    )}/token/` as any;
+    window.location = `/login` as any;
   });
 
   return <></>;

@@ -18,6 +18,7 @@ const useAuthorization = () => {
             },
         })
         .then(res => {
+            setHasToken(true)
             setAdmin(res.data.admin)
             setUser(res.data.user)
         })
