@@ -21,6 +21,7 @@ export const DFunkt: React.FC<Props> = ({ date, index, mandates }) => {
                         title={x.user.first_name + " " + x.user.last_name + " tillträdde som " + x.role.title}
                         key={'mandate-pic-' + x.user.kthid + '-' + x.role.identifier + '-' + date}
                         user={x.user.kthid}   
+                        picture={x.user.picture}   
                     />
                 ))}
             </Users>

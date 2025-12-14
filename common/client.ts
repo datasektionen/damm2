@@ -1,20 +1,20 @@
 import { PrismaClient } from '@prisma/client';
 import configuration from './configuration';
 
-// Prevent multiple instances when hot reloading
-// https://www.prisma.io/docs/guides/performance-and-optimization/connection-management#prevent-hot-reloading-from-creating-new-instances-of-prismaclient
+const prismaClientSingleton = () => {
+  return new PrismaClient();
+};
 
+// Augment globalThis
+declare global {
+  // eslint-disable-next-line no-var
+  var prisma: PrismaClient | undefined;
+}
 
-// add prisma to the NodeJS global type
-interface CustomNodeJsGlobal extends NodeJS.Global {
-    prisma: PrismaClient;
-  }
-  
-  // Prevent multiple instances of Prisma Client in development
-  declare const global: CustomNodeJsGlobal;
-  
-  const prisma = global.prisma || new PrismaClient();
-  
-  if (configuration.NODE_ENV === "development") global.prisma = prisma;
-  
-  export default prisma;
+const prisma = globalThis.prisma ?? prismaClientSingleton();
+
+if (configuration.NODE_ENV === 'development') {
+  globalThis.prisma = prisma;
+}
+
+export default prisma;

@@ -37,9 +37,19 @@ RUN npm run build
 
 FROM base
 
+RUN apk add nginx
+
 COPY --from=backend /app/prisma /app/prisma
 COPY --from=backend /app/node_modules /app/node_modules
 COPY --from=backend /app/dist /app/dist
 COPY --from=frontend /app/build/ /app/dist/client/build/
 
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/app.js"]
+RUN echo "nginx -g 'daemon off;' &" >> run.sh
+RUN echo "npx prisma migrate deploy && node dist/app.js" >> run.sh
+# RUN echo "wget http://nyckeln:7004/api/v1/user/turetek/permissions" >> run.sh
+# RUN echo "wget http://localhost:7003/api/users?format=single&u=turetek" >> run.sh
+# RUN echo "wget http://localhost:7002/hello" >> run.sh
+# RUN echo "nginx -T" >> run.sh
+RUN chmod +x run.sh
+
+ENTRYPOINT ./run.sh
