@@ -28,6 +28,7 @@ job "damm" {
       template {
         data        = <<ENV
 {{ with nomadVar "nomad/jobs/damm" }}
+SESSION_SECRET={{ .session_secret }}
 DATABASE_URL=postgres://damm:{{ .db_password }}@postgres.dsekt.internal:5432/damm
 AWS_SECRET_ACCESS_KEY={{ .aws_access_key }}
 AWS_ACCESS_KEY_ID={{ .aws_access_id }}
