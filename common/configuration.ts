@@ -5,18 +5,17 @@ dotenv.config();
 
 const configuration = {
   PORT: process.env.PORT ?? 8080,
+  SESSION_SECRET: process.env.SESSION_SECRET,
   NODE_ENV: process.env.NODE_ENV ?? "production",
   AWS_REGION: process.env.AWS_REGION ?? "eu-north-1",
   // Default to dev bucket, just in case
   AWS_S3_BUCKET: process.env.AWS_S3_BUCKET ?? "dsekt-damm-dev",
   AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
   AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
-  HIVE_API_URL:
-    process.env.HIVE_API_URL ?? "https://hive.datasektionen.se/api/v1",
-  HIVE_API_KEY: process.env.HIVE_API_KEY,
   OIDC_PROVIDER: process.env.OIDC_PROVIDER ?? "https://sso.datasektionen.se/op",
-  OIDC_CLIENT_ID: process.env.OIDC_CLIENT_ID,
+  OIDC_CLIENT_ID: process.env.OIDC_CLIENT_ID ?? "damm",
   OIDC_CLIENT_SECRET: process.env.OIDC_CLIENT_SECRET,
+  REDIRECT_URL: process.env.REDIRECT_URL ?? "https://damm.datasektionen.se/oidc/callback",
   RFINGER_API_URL:
     process.env.RFINGER_API_URL ?? "https://rfinger.datasektionen.se",
   RFINGER_API_KEY: process.env.RFINGER_API_KEY,

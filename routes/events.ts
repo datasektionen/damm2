@@ -87,12 +87,13 @@ router.get("/all", silentAuthorization, async (req: IUserRequest, res) => {
   const pictures = await fetch(request)
     .then((response) => {
       if (response.status !== 200) {
-        throw new Error("Something went wrong on API server!");
+        throw new Error("Something went wrong on API server!: response code " + response.status);
       }
       return response.json();
     })
     .catch((error) => {
       console.error(error);
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR);
     });
 
   const updated_events = events.body.map((element: any) => {

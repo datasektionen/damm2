@@ -18,7 +18,7 @@ app.use(cors());
 
 app.use(
     session({
-        secret: process.env.SESSION_SECRET!,
+        secret: configuration.SESSION_SECRET,
         resave: false,
         saveUninitialized: true,
     })
@@ -36,12 +36,12 @@ let client: any;
 
 async function initOIDC() {
     const { Issuer } = await import('openid-client');
-    const issuer = await Issuer.discover(process.env.OIDC_PROVIDER!);
+    const issuer = await Issuer.discover(configuration.OIDC_PROVIDER!);
 
     client = new issuer.Client({
-        client_id: process.env.OIDC_CLIENT_ID!,
-        client_secret: process.env.OIDC_CLIENT_SECRET,
-        redirect_uris: [process.env.REDIRECT_URL!],
+        client_id: configuration.OIDC_CLIENT_ID,
+        client_secret: configuration.OIDC_CLIENT_SECRET,
+        redirect_uris: [configuration.REDIRECT_URL],
         // response_types: ['code'],
     });
 
@@ -63,7 +63,7 @@ app.get('/oidc/callback', async (req, res, next) => {
     try {
         const params = client.callbackParams(req);
         const tokenSet = await client.callback(
-            process.env.REDIRECT_URL!,
+            configuration.REDIRECT_URL,
             params
         );
 
