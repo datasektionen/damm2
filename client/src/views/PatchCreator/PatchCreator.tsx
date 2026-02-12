@@ -71,7 +71,7 @@ export const PatchCreator: React.FC<Props> = props => {
 
     useEffect(() => {
         (async () => {
-            const result = await axios.get("/api/donations/persons");
+            const result = await axios.get("/api/persons/all");
             if (result.status === 200) {
                 setPersons(result.data.body);
             }
@@ -274,7 +274,7 @@ export const PatchCreator: React.FC<Props> = props => {
                         setSelected={setCreators}
                         data={persons}
                         onCreate={async (query: string) => {
-                            const result = await axios.post("/api/donations/person", {
+                            const result = await axios.post("/api/persons/person", {
                                 name: query,
                             });
                             setPersons([...persons, result.data.body])

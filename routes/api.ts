@@ -1,7 +1,7 @@
 import { silentAuthorization } from "../common/middlewares";
 import { IUserRequest } from "../common/requests";
 import { ping } from "../functions/api/ping";
-import donationsRouter from "./donations";
+import personsRouter from "./persons";
 import eventsRouter from "./events";
 import filesRouter from "./files";
 import patchesRouter from "./patches";
@@ -17,7 +17,7 @@ router.use("/tags", tagsRouter);
 router.use("/files", filesRouter);
 router.use("/events", eventsRouter);
 router.use("/storage", storageRouter);
-router.use("/donations", donationsRouter);
+router.use("/persons", personsRouter);
 
 router.get("/ping", (req, res) => {
     res.json(ping());
