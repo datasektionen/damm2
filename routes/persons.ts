@@ -8,7 +8,7 @@ const router = express.Router();
 router.use(authorizeHive);
 router.use(adminPrylisAuth);
 
-router.get("/",
+router.get("/all",
     async (_, res) => {
         const result = await getPersons();
         return res.status(result.statusCode).json(result);
