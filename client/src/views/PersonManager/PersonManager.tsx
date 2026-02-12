@@ -24,14 +24,14 @@ const PersonManager = () => {
 
     useEffect(() => {
         (async () => {
-            const result = await axios.get("/api/donations/persons")
+            const result = await axios.get("/api/persons/all")
             if (result.status === 200) setPersons(result.data.body);
         })();
     }, [])
 
     const onDelete = () => {
         setLoading(true);
-        axios.post("/api/donations/persons/delete", {
+        axios.post("/api/persons/delete", {
             ids: Array.from(selectedRows)
         })
         .then(() => {
