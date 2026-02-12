@@ -46,7 +46,7 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
 
     useEffect(() => {
         (async () => {
-            const result = await axios.get("/api/donations/persons");
+            const result = await axios.get(url("/api/donations/persons"));
             if (result.status === 200) {
                 setPersons(result.data.body);
             }
@@ -198,7 +198,7 @@ export const EditDetails: React.FC<Props> = ({ patch, onCancel, tags, fetchPatch
                 data={persons}
                 disabled={loading}
                 onCreate={async (query) => {
-                    const result = await axios.post("/api/donations/person", {
+                    const result = await axios.post(url("/api/donations/person"), {
                         name: query,
                     });
                     setPersons([...persons, result.data.body])
