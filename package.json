@@ -1,6 +1,9 @@
 {
   "name": "damm-server",
   "version": "1.0.0",
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "build": "tsc && npm run copy-files",
     "copy-files": "cp -r fuzzyfile.json prisma ./dist/",
