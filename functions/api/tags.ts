@@ -2,7 +2,7 @@ import ApiResponse from '../../common/ApiResponse';
 import { StatusCodes } from 'http-status-codes';
 import prisma from '../../common/client';
 import { Prisma, TagCategory, TagType } from '@prisma/client';
-import { IUserRequest } from 'common/requests';
+import { IUserRequest } from '../../common/requests';
 import axios from 'axios';
 
 export const DEFAULT_TEXT_COLOR = "#FFFFFF";
