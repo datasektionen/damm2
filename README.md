@@ -76,7 +76,8 @@ See [server/client/src/common/configuration.ts](server/client/src/common/configu
 ## Development
 
 1. Set up environment variables
-1. Run `npm install` in root. Will install dependencies in both server and client.
+1. Run `npm install` in root.
+1. Run `npm run setup` in root to deploy migrations and install client dependencies.
 1. Run `npx prisma migrate reset` in server/ (yes, npx, not npm)
 1. Run `npm run dev:server` in project root
 1. In another terminal, run `npm run dev:client` in project root
