@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { title } from '../../common/strings';
 import { StyledEventHandler, Content } from './style';
-import axios from 'axios';
+import http from '../../common/api';
 import { url } from '../../common/api';
 import { IEvent } from '../../types/definitions';
 import useSortableData from '../../hooks/useSortableData';
@@ -54,7 +54,7 @@ export const EventHandler: React.FC = props => {
 
     useEffect(() => {
         (async () => {
-            const result = await axios.get(url("/api/events/all"))
+            const result = await http.get(url("/api/events/all"))
             if (result.status !== 200) {
                 // TODO
                 return;
@@ -121,7 +121,7 @@ export const EventHandler: React.FC = props => {
         setForm(original)
     }
 
-    const axiosConfig = {
+    const authConfig = {
         headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`
         }
@@ -132,7 +132,7 @@ export const EventHandler: React.FC = props => {
         setError("")
         setLoading(true)
         if (form.type !== "SM_DM") delete form.protocol
-        axios.post(url("/api/events/create"), form, axiosConfig)
+        http.post(url("/api/events/create"), form, authConfig)
         .then(res => {
             
             onCancel()
@@ -152,7 +152,7 @@ export const EventHandler: React.FC = props => {
         setError("")
         setLoading(true)
         if (form.type !== "SM_DM") delete form.protocol
-        axios.put(url("/api/events/update"), form, axiosConfig)
+        http.put(url("/api/events/update"), form, authConfig)
         .then(res => {
             
             onCancel()
@@ -181,7 +181,7 @@ export const EventHandler: React.FC = props => {
         setDeleting(true)
         setSuccess("")
         setError("")
-        axios.delete(url(`/api/events/${id}`), axiosConfig)
+        http.delete(url(`/api/events/${id}`), authConfig)
         .then(res => {
             setEvents(events.filter(e => e.id !== id));
             setSuccess("Händelsen raderad")

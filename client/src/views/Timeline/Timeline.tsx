@@ -1,4 +1,4 @@
-import axios from 'axios';
+import http from '../../common/api';
 import React, { useEffect, useState } from 'react';
 import { url } from '../../common/api';
 import { FancyHeader } from '../../components/FancyHeader/FancyHeader';
@@ -95,7 +95,7 @@ export const Timeline: React.FC = (props) => {
 
   useEffect(() => {
     (async () => {
-      const events = await axios.get(url('/api/events/all'));
+      const events = await http.get(url('/api/events/all'));
       const body = events.data ?? [];
       setEvents(body);
       setYears(eventsPerYear(body));

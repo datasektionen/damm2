@@ -3,14 +3,21 @@ import prisma from "../../common/client";
 import { IUserRequest } from "../../common/requests";
 import { deleteFile } from "./files";
 import { Bag, Patch, Prisma } from "@prisma/client";
-import axios from "axios";
 import { StatusCodes } from "http-status-codes";
 import { URL } from "url";
 
 export const getAllPatches = async (
   user: IUserRequest["user"],
 ): Promise<ApiResponse> => {
-  const darkMode = (await axios("https://darkmode.datasektionen.se/")).data;
+  let darkMode = false;
+  try {
+    const response = await fetch("https://darkmode.datasektionen.se/");
+    if (response.ok) {
+      darkMode = (await response.json()) as boolean;
+    }
+  } catch {
+    darkMode = false;
+  }
   const isAdminOrPrylis =
     user?.admin.includes("admin") || user?.admin.includes("prylis");
 

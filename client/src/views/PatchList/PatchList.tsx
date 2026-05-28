@@ -1,4 +1,4 @@
-import axios from 'axios';
+import http from '../../common/api';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import DataGrid, { Column, SelectColumn, SortColumn } from 'react-data-grid';
 import { Bag, IPatch, ITag } from '../../types/definitions';
@@ -97,14 +97,14 @@ export const PatchList = () => {
   const [sortColumns, setSortColumns] = useState<readonly SortColumn[]>([]);
 
   const getPatches = () => {
-    axios
+    http
       .get('/api/patches/all')
-      // axios.get("https://damm.datasektionen.se/api/patches/all")
+      // http.get("https://damm.datasektionen.se/api/patches/all")
       .then((res) => setPatches(res.data.body));
   };
 
   const getBags = () => {
-    axios.get('/api/storage/bag/all').then((res) => setBags(res.data.body));
+    http.get('/api/storage/bag/all').then((res) => setBags(res.data.body));
   };
 
   const toggleGroupBy = (key: string) => {
@@ -126,7 +126,7 @@ export const PatchList = () => {
     if (selectedRows.size === 0) return;
     setIsAssigningPatches(true);
 
-    axios
+    http
       .put('/api/storage/patches/bag', {
         patches: Array.from(selectedRows),
         bagId: parseInt(selectedBag),
@@ -153,7 +153,7 @@ export const PatchList = () => {
     if (selectedRows.size === 0) return;
     setIsSavingAmount(true);
 
-    axios
+    http
       .put('/api/storage/patches/amount', {
         patches: Array.from(selectedRows),
         amount,

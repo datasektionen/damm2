@@ -2,8 +2,6 @@ import express from 'express';
 import { validationResult } from 'express-validator';
 import { StatusCodes } from 'http-status-codes';
 import { errorResponse, unauthorizedResponse } from './ApiResponse';
-import axios from 'axios';
-import configuration from './configuration';
 import { IUserRequest } from './requests';
 
 /**

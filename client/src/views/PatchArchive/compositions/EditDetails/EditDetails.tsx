@@ -12,7 +12,7 @@ import {
   DeleteBox,
   DeleteCenter,
 } from './style';
-import axios from 'axios';
+import http from '../../../../common/api';
 import { url } from '../../../../common/api';
 import { Configuration } from '../../../../common/configuration';
 import { FileUploader } from '../../../../components/FileUploader/FileUploader';
@@ -65,7 +65,7 @@ export const EditDetails: React.FC<Props> = ({
 
   useEffect(() => {
     (async () => {
-      const result = await axios.get(url('/api/persons/all'));
+      const result = await http.get(url('/api/persons/all'));
       if (result.status === 200) {
         setPersons(result.data.body);
       }
@@ -94,7 +94,7 @@ export const EditDetails: React.FC<Props> = ({
     }
 
     if (editState.date.length === 0) delete body.date;
-    axios
+    http
       .put(url(editApiPath), body, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -135,13 +135,13 @@ export const EditDetails: React.FC<Props> = ({
       },
     };
     // Upload new image
-    const uploadImageResult = await axios.post(
+    const uploadImageResult = await http.post(
       url('/api/files/upload/image?path=patches'),
       imageFormData,
       config
     );
     // Attach the returned image and the compressed image to the Patch
-    const result = await axios.post(
+    const result = await http.post(
       url('/api/files/attach/img-to'),
       {
         id: editState.id,
@@ -157,7 +157,7 @@ export const EditDetails: React.FC<Props> = ({
       // i is a complete url, we need the key which is extracted from the pathname
       // Remove the first "/" from the pathname: what remains is the key of the object
       const u = new URL(i, Configuration.apiBaseUrl).pathname.substring(1);
-      await axios.delete(url(`/api/files/image?key=${u}`), config);
+      await http.delete(url(`/api/files/image?key=${u}`), config);
     });
   }, [image, editState.id]);
 
@@ -224,7 +224,7 @@ export const EditDetails: React.FC<Props> = ({
         data={persons}
         disabled={loading}
         onCreate={async (query) => {
-          const result = await axios.post(url('/api/persons/person'), {
+          const result = await http.post(url('/api/persons/person'), {
             name: query,
           });
           setPersons([...persons, result.data.body]);

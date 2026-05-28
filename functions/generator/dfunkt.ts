@@ -3,7 +3,6 @@
 	Written by Jonas Dahl.
 */
 import moment from 'moment';
-import axios, { AxiosResponse } from 'axios';
 import { DammUser } from '../../common/types';
 
 export interface IRole {
@@ -20,15 +19,36 @@ interface IMandatesForRole {
 	mandates: { start: string; end: string; User: DammUser }[]
 }
 
+const fetchJson = async <T>(target: string, errorMessage: string): Promise<T | null> => {
+	try {
+		const response = await fetch(target);
+		if (!response.ok) {
+			console.log(errorMessage);
+			return null;
+		}
+
+		return await response.json() as T;
+	} catch {
+		console.log(errorMessage);
+		return null;
+	}
+};
+
 const fetchMandatesForRole = async (role: IRole): Promise<{ date: moment.Moment; role: IRole; user: DammUser; }[]> => {
-	return axios.get(`https://dfunkt.datasektionen.se/api/role/${encodeURIComponent(role.identifier)}`)
-		.catch(() => console.log('Couldn\'t fetch dfunkt mandates for role ' + role.identifier))
-		.then((response: void | AxiosResponse<any>) => (response as AxiosResponse<any>).data)
-		.then((r: IMandatesForRole) => r.mandates.map(mandate => ({
-			date: moment(mandate.start),
-			role: role,
-			user: mandate.User,
-		})));
+	const response = await fetchJson<IMandatesForRole>(
+		`https://dfunkt.datasektionen.se/api/role/${encodeURIComponent(role.identifier)}`,
+		`Couldn't fetch dfunkt mandates for role ${role.identifier}`
+	);
+
+	if (!response) {
+		return [];
+	}
+
+	return response.mandates.map(mandate => ({
+		date: moment(mandate.start),
+		role: role,
+		user: mandate.User,
+	}));
 	// return fetch('https://dfunkt.datasektionen.se/api/role/' + role.identifier)
 	// 	.catch(x => console.log('Couldn\'t fetch dfunkt mandates for role ' + role.identifier))
 	// 	.then(res => res.json())
@@ -46,10 +66,13 @@ export const dfunkt: () => Promise<{ date: moment.Moment; template: "DFUNKT"; ma
 
 		// First, we need to fetch all roles, to then be able to fetch their mandates
 		// At the moment, dfunkt does not support fetching it all in one request
-		axios.get("https://dfunkt.datasektionen.se/api/roles")
-			.catch(() => console.log('Couldn\'t fetch dfunkt roles list'))
-			.then((response: void | AxiosResponse<any>) => (response as AxiosResponse<any>).data)
-			.then((roles: IRole[]) => {
+		fetchJson<IRole[]>("https://dfunkt.datasektionen.se/api/roles", "Couldn't fetch dfunkt roles list")
+			.then((roles) => {
+				if (!roles) {
+					resolve(events);
+					return;
+				}
+
 				const promises = [] as any[];
 
 				roles.forEach(role => promises.push(fetchMandatesForRole(role)));

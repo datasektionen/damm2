@@ -1,4 +1,4 @@
-import axios from "axios";
+import http from "../../common/api";
 import { useEffect, useState } from "react";
 import { IPerson } from "../../types/definitions";
 import DataGrid, { Column, SelectColumn } from "react-data-grid";
@@ -24,14 +24,14 @@ const PersonManager = () => {
 
     useEffect(() => {
         (async () => {
-            const result = await axios.get("/api/persons/all")
+            const result = await http.get("/api/persons/all")
             if (result.status === 200) setPersons(result.data.body);
         })();
     }, [])
 
     const onDelete = () => {
         setLoading(true);
-        axios.post("/api/persons/delete", {
+        http.post("/api/persons/delete", {
             ids: Array.from(selectedRows)
         })
         .then(() => {

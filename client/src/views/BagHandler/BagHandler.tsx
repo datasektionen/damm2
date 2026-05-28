@@ -1,4 +1,4 @@
-import axios from 'axios';
+import http from '../../common/api';
 import { useCallback, useEffect, useState } from 'react';
 import { Alert } from '../../components/Alert/Alert';
 import { Button } from '../../components/Button/Button';
@@ -25,7 +25,7 @@ export const BagHandler = () => {
     setIsCreatingBag(true);
     setError('');
 
-    axios
+    http
       .post('/api/storage/bag/create', {
         name: bagName,
         boxId: parseInt(selectedBox),
@@ -58,13 +58,13 @@ export const BagHandler = () => {
   }, [bagName, selectedBox]);
 
   const getBoxes = useCallback(() => {
-    axios.get('/api/storage/box/all').then((res) => {
+    http.get('/api/storage/box/all').then((res) => {
       setBoxes(res.data.body);
     });
   }, []);
 
   const getBags = useCallback(() => {
-    axios.get('/api/storage/bag/all').then((res) => {
+    http.get('/api/storage/bag/all').then((res) => {
       setBags(res.data.body);
     });
   }, []);

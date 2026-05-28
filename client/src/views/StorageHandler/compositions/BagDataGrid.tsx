@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from 'axios';
+import http from '../../../common/api';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import DataGrid, { Column, SelectColumn, EditorProps } from 'react-data-grid';
 import { url } from '../../../common/api';
@@ -41,7 +41,7 @@ export const BagDataGrid = ({ bags, boxes, setBags }: Props) => {
   const [security, setSecurity] = useState('');
 
   const updateBagName = async (rowId: number, value: string) => {
-    return axios
+    return http
       .put('/api/storage/bag/name', {
         bagId: rowId,
         name: value,
@@ -109,7 +109,7 @@ export const BagDataGrid = ({ bags, boxes, setBags }: Props) => {
     if (selectedRows.size === 0) return;
     setAssigningBags(true);
 
-    axios
+    http
       .put('/api/storage/bags/box', {
         bags: Array.from(selectedRows),
         boxId: parseInt(selectedBox),
@@ -134,7 +134,7 @@ export const BagDataGrid = ({ bags, boxes, setBags }: Props) => {
     if (selectedRows.size === 0) return;
     setDeletingBags(true);
 
-    axios
+    http
       .post('/api/storage/bags/delete', {
         bags: Array.from(selectedRows),
       })

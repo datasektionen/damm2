@@ -1,4 +1,4 @@
-import axios from "axios"
+import http from "../../common/api"
 import { useCallback, useEffect, useState } from "react"
 import { Alert } from "../../components/Alert/Alert"
 import { Button } from "../../components/Button/Button"
@@ -15,7 +15,7 @@ export const BoxHandler = () => {
     const createBox = useCallback(async () => {
         setIsCreatingBox(true)
         setError("");
-        axios.post("/api/storage/box/create", { name: boxName })
+        http.post("/api/storage/box/create", { name: boxName })
             .then(res => {
                 setBoxes([...boxes, { ...res.data.body, "#patches": 0, "#uniquePatches": 0, bags: [] }])
                 setBoxName("")
@@ -29,7 +29,7 @@ export const BoxHandler = () => {
     }, [boxName])
 
     const getBoxes = useCallback(() => {
-        axios.get("/api/storage/box/all")
+        http.get("/api/storage/box/all")
             .then(res => {
                 setBoxes(res.data.body)
             })

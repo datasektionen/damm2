@@ -4,7 +4,7 @@ import { StyledPatchDetails } from './style';
 import 'moment/locale/sv';
 import { DetailsView } from './DetailsView'
 import { EditDetails } from '../EditDetails/EditDetails'
-import axios from 'axios'
+import http from '../../../../common/api'
 import { url } from '../../../../common/api';
 
 interface Props {
@@ -30,7 +30,7 @@ export const PatchDetails: React.FC<Props> = ({ patch, onClose, allTags, fetchPa
     const [bags, setBags] = useState<Bag[]>([]);
 
     useEffect(() => {
-        axios.get(url("/api/storage/bag/all?includePatches=false"), {
+        http.get(url("/api/storage/bag/all?includePatches=false"), {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token") ?? ""}`,
             }
