@@ -2,7 +2,7 @@ name: Deploy
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   workflow_dispatch:
 
 jobs:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup Nomad CLI
-        uses: hashicorp/setup-nomad@v2
+        uses: hashicorp/setup-nomad@v1.0.0
 
       - name: Deploy to Nomad
         uses: datasektionen/nomad-deploy@v1
