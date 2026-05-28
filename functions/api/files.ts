@@ -1,7 +1,7 @@
 import AWS from 'aws-sdk';
 import ApiResponse from '../../common/ApiResponse';
 import configuration from '../../common/configuration';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import path from 'path';
 import Jimp from 'jimp';
 import { StatusCodes } from 'http-status-codes';
@@ -39,7 +39,7 @@ const uploadToS3 = ({ Bucket, Key, Body, ContentType }: { Bucket: string, Key: s
 
 export const uploadImage = async (file: Express.Multer.File, folder: string): Promise<ApiResponse> => {
 
-    const fileName = uuidv4();
+    const fileName = randomUUID();
     const extension = path.extname(file.originalname);
     const fullFileName = fileName + extension;
 
