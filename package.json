@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc && npm run copy-files",
     "copy-files": "cp -r fuzzyfile.json prisma ./dist/",
-    "postinstall": "npx prisma migrate deploy && cd client && npm install",
+    "setup": "npx prisma migrate deploy && npm --prefix client install",
     "start": "node dist/app.js",
     "dev": "nodemon",
     "test": "NODE_ENV=testing mocha -r ts-node/register test/*.ts --exit",
@@ -37,7 +37,7 @@
     "openid-client": "^5.6.5",
     "path": "^0.12.7",
     "prisma": "^6.19.1",
-    "uuid": "^8.3.2"
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.1.1",
@@ -57,7 +57,6 @@
     "@types/multer": "^1.4.5",
     "@types/node": "^18.19.130",
     "@types/node-fetch": "^2.5.10",
-    "@types/uuid": "^8.3.0",
     "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.22.0",
     "chai": "^4.3.4",
