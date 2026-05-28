@@ -18,7 +18,6 @@ import {
 import { dfunkt } from "../functions/generator/dfunkt";
 import { generator } from "../functions/generator/generator";
 import { EventType } from ".prisma/client";
-import axios from "axios";
 import { CronJob } from "cron";
 import express from "express";
 import { body, param } from "express-validator";
@@ -44,7 +43,15 @@ new CronJob(
 );
 
 router.get("/all", silentAuthorization, async (req: IUserRequest, res) => {
-  const darkMode = (await axios("https://darkmode.datasektionen.se/")).data;
+  let darkMode = false;
+  try {
+    const response = await fetch("https://darkmode.datasektionen.se/");
+    if (response.ok) {
+      darkMode = (await response.json()) as boolean;
+    }
+  } catch {
+    darkMode = false;
+  }
   const user = req.user;
   const isAdminOrPrylis = Boolean(
     user?.admin.includes("admin") || user?.admin.includes("prylis")

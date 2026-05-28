@@ -21,7 +21,7 @@ import {
 import { Button } from '../../../../components/Button/Button';
 import { Tag } from '../../../../components/Tag/Tag';
 import { url } from '../../../../common/api';
-import axios from 'axios';
+import http from '../../../../common/api';
 import ReactMarkdown from 'react-markdown';
 import { useAppContext } from '../../../../hooks/useAppContext';
 import { useShouldHidePatch } from '../../../../components/Patch/Patch';
@@ -50,7 +50,7 @@ export const DetailsView: React.FC<Props> = ({
 
   const deleteFile = (name: string) => {
     setLoading(true);
-    axios
+    http
       .delete(
         url(
           `/api/files/file/?name=${encodeURIComponent(name)}&id=${

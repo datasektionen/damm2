@@ -1,4 +1,4 @@
-import axios from 'axios';
+import http from '../../../common/api';
 import React, { useCallback, useMemo, useState } from 'react';
 import DataGrid, { Column, SelectColumn } from 'react-data-grid';
 import { Button } from '../../../components/Button/Button';
@@ -28,7 +28,7 @@ export const BoxDataGrid = ({ boxes, setBoxes }: Props) => {
     if (selectedRows.size === 0) return;
     setIsDeletingBoxes(true);
 
-    axios
+    http
       .post('/api/storage/boxes/delete', {
         boxes: Array.from(selectedRows),
       })
@@ -73,7 +73,7 @@ export const BoxDataGrid = ({ boxes, setBoxes }: Props) => {
   }, [boxes]);
 
   const updateBoxName = async (rowId: number, value: string) => {
-    return axios
+    return http
       .put('/api/storage/box/name', {
         boxId: rowId,
         name: value,

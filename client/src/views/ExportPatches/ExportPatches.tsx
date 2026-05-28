@@ -1,10 +1,10 @@
-import axios from "axios"
+import http from "../../common/api"
 import { Button } from "../../components/Button/Button"
 
 export const ExportPatches = () => {
 
     const exportData = () => {
-        axios.get("/api/storage/export", {
+        http.get("/api/storage/export", {
             responseType: "blob"
         })
         .then(res => {

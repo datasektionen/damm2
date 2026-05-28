@@ -3,7 +3,7 @@ import { H3, H4, Content, StyledPatchCreator, BRow, StyledRequired, ImagePreview
 import { Header } from 'methone';
 import { Field } from '../../components/Field/Field';
 import { TextArea } from '../../components/TextArea/TextArea';
-import axios from 'axios';
+import http from '../../common/api';
 import { url } from '../../common/api';
 import { ITag } from '../../types/definitions';
 import { Button } from '../../components/Button/Button';
@@ -54,7 +54,7 @@ export const ArtefactCreator: React.FC<Props> = props => {
     useEffect(() => {
         (async () => {
             setLoading(true)
-            const result = await axios.get(url("/api/tags/all?type=ARTEFACT"))
+            const result = await http.get(url("/api/tags/all?type=ARTEFACT"))
             if (result.status === 200) {
                 setAllTags(result.data.body);
                 setLoading(false)
@@ -112,16 +112,16 @@ export const ArtefactCreator: React.FC<Props> = props => {
 
         let createPatchResult;
         try {
-            createPatchResult = await axios.post(url("/api/artefacts/create"), body, config)
+            createPatchResult = await http.post(url("/api/artefacts/create"), body, config)
             if (createPatchResult.status !== 200) {
             }
 
             const imageFormData = new FormData();
             imageFormData.append("image", image as File);
     
-            const uploadImageResult = await axios.post(url("/api/files/upload/image?path=artefacts"), imageFormData, config)
+            const uploadImageResult = await http.post(url("/api/files/upload/image?path=artefacts"), imageFormData, config)
     
-            await axios.post(url("/api/files/attach/img-to"), {
+            await http.post(url("/api/files/attach/img-to"), {
                 id: createPatchResult.data.body.id,
                 images: uploadImageResult.data.body.map((b: any) => b.Location),
                 type: "artefact",

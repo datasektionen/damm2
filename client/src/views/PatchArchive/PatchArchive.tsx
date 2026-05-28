@@ -14,7 +14,7 @@ import {
   StyledFlipMoveDetails,
 } from './style';
 import { FancyHeader } from '../../components/FancyHeader/FancyHeader';
-import axios from 'axios';
+import http from '../../common/api';
 import { url } from '../../common/api';
 import { Patch } from '../../components/Patch/Patch';
 import { IPatch, ITag } from '../../types/definitions';
@@ -187,7 +187,7 @@ export const PatchArchive: React.FC = (props) => {
   }, [page, resultingPatches]);
 
   const fetchPatches = async () => {
-    const response = await axios.get(url('/api/patches/all'), {
+    const response = await http.get(url('/api/patches/all'), {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token') ?? ''}`,
       },
@@ -210,7 +210,7 @@ export const PatchArchive: React.FC = (props) => {
   // Fetch tags on mount
   useEffect(() => {
     (async () => {
-      const response = await axios.get(url('/api/tags/all?type=PATCH'));
+      const response = await http.get(url('/api/tags/all?type=PATCH'));
       if (response.status !== 200) {
         // TODO
         return;
@@ -318,7 +318,7 @@ export const PatchArchive: React.FC = (props) => {
         'Är du säker på att du vill radera märket? All data om märket kommer tas bort, inklusive filer tillhörande märket'
       )
     ) {
-      const result = await axios.delete(url(`/api/patches/${id}`), {
+      const result = await http.delete(url(`/api/patches/${id}`), {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },

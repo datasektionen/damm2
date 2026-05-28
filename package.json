@@ -19,7 +19,6 @@
   "dependencies": {
     "@prisma/client": "^6.19.3",
     "aws-sdk": "^2.1693.0",
-    "axios": "^0.21.4",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "cron": "^2.4.4",

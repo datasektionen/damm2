@@ -4,7 +4,7 @@ export {}
 // import React, { useEffect, useMemo, useRef, useState } from 'react';
 // import { StyledPatchArchive, StyledFlipMove, StyledPatchArchiveDivider, Left, Right, StyledFlipMoveDetails } from '../PatchArchive/style';
 // import { FancyHeader } from '../../components/FancyHeader/FancyHeader';
-// import axios from 'axios';
+// import http from '../../common/api';
 // import { url } from '../../common/api';
 // import { Patch } from '../../components/Patch/Patch';
 // import { IArtefact, ITag } from '../../types/definitions';
@@ -44,7 +44,7 @@ export {}
 //     const isSmallScreen = useScreenSizeChecker(1100);
 
 //     const fetchArtefacts = async () => {
-//         const response = await axios.get(url("/api/artefacts/all"), {
+//         const response = await http.get(url("/api/artefacts/all"), {
 //             headers: {
 //                 Authorization: `Bearer ${localStorage.getItem("token") ?? ""}`,
 //             }
@@ -66,7 +66,7 @@ export {}
 
 //     useEffect(() => {
 //         (async () => {
-//             const response = await axios.get(url("/api/tags/all?type=ARTEFACT"));
+//             const response = await http.get(url("/api/tags/all?type=ARTEFACT"));
 //             if (response.status !== 200) {
 //                 // TODO
 //                 return;
@@ -185,7 +185,7 @@ export {}
 
 //     const deleteArtefact = async (id: number) => {
 //         if (window.confirm("Är du säker på att du vill radera föremålet? All data om föremålet kommer tas bort, inklusive filer tillhörande föremålet")) {
-//             const result = await axios.delete(url(`/api/artefacts/${id}`), {
+//             const result = await http.delete(url(`/api/artefacts/${id}`), {
 //                 headers: {
 //                     Authorization: `Bearer ${localStorage.getItem("token")}`,
 //                 }

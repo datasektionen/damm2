@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Header } from 'methone';
 import { StyledTagManager, Content } from './style';
-import axios from 'axios';
+import http from '../../common/api';
 import { url } from '../../common/api';
 import { ITag } from '../../types/definitions';
 import { TagEditor, ITagEdit } from '../../components/TagEditor/TagEditor';
@@ -33,14 +33,14 @@ export const TagsManager: React.FC<Props> = ({}) => {
     const [success, setSuccess] = useState<string>("");
     const ref = useRef(document.createElement("div"));
 
-    const axiosConfig = {
+    const authConfig = {
         headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`
         }
     }
 
     const fetchTags = async () => {
-        const result = await axios.get(url("/api/tags/all"))
+        const result = await http.get(url("/api/tags/all"))
         if (result.status === 200) {
             setTags(result.data.body)
             setLoading(false)
@@ -71,7 +71,7 @@ export const TagsManager: React.FC<Props> = ({}) => {
 
         // Update
         if (form.id) {
-            axios.put(url("/api/tags/update"), form, axiosConfig)
+            http.put(url("/api/tags/update"), form, authConfig)
             .then(async res => {
                 await fetchTags();
                 setSuccess("Taggen sparades")
@@ -84,7 +84,7 @@ export const TagsManager: React.FC<Props> = ({}) => {
                 setLoading(false)
             })
         } else { // Create new
-            axios.post(url("/api/tags/create"), form, axiosConfig)
+            http.post(url("/api/tags/create"), form, authConfig)
             .then(async res => {
                 await fetchTags()
                 setSuccess("Taggen sparades")
@@ -101,7 +101,7 @@ export const TagsManager: React.FC<Props> = ({}) => {
 
     const deleteTag = async () => {
         setLoading(true)
-        axios.delete(url(`/api/tags/${form.id}`), axiosConfig)
+        http.delete(url(`/api/tags/${form.id}`), authConfig)
         .then(async res => {
             setLoading(false)
             setSuccess("Taggen togs bort")

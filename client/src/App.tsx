@@ -15,8 +15,6 @@ import { ProtectedRoute } from './components/ProtectedRoute/ProtectedRoute';
 import { Landing } from './views/Landing/Landing';
 import { Admin } from './views/Admin/Admin';
 import { PatchList } from './views/PatchList/PatchList';
-import axios from 'axios';
-import { Configuration } from './common/configuration';
 import { BoxHandler } from './views/BoxHandler/BoxHandler';
 import { BagHandler } from './views/BagHandler/BagHandler';
 import { ExportPatches } from './views/ExportPatches/ExportPatches';
@@ -24,25 +22,6 @@ import { MantineProvider } from '@mantine/core';
 import PersonManager from './views/PersonManager/PersonManager';
 import { DarkModeContextProvider } from './hooks/useDarkMode';
 import { AdminContext } from './hooks/useAppContext';
-
-axios.defaults.baseURL = Configuration.apiBaseUrl;
-axios.interceptors.request.use((config) => {
-  const requestUrl = new URL(
-    config.url ?? '',
-    config.baseURL ?? Configuration.apiBaseUrl
-  );
-
-  if (requestUrl.origin !== new URL(Configuration.apiBaseUrl).origin) {
-    return config;
-  }
-
-  if (!config.headers.Authorization) {
-    const token = localStorage.getItem('token');
-    if (token) config.headers.Authorization = `Bearer ${token}`;
-  }
-
-  return config;
-});
 
 type Links = {
   home: JSX.Element;

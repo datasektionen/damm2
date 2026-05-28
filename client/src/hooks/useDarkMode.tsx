@@ -1,4 +1,4 @@
-import axios from 'axios';
+import http from '../common/api';
 import {
   FC,
   createContext,
@@ -21,7 +21,7 @@ export const DarkModeContextProvider: FC = (props) => {
   const [isDarkModeEnabled, setIsDarkModeEnabled] = useState(true);
 
   const doFetch = () => {
-    axios.get('https://darkmode.datasektionen.se/').then((res) => {
+    http.get('https://darkmode.datasektionen.se/').then((res) => {
       setIsDarkModeEnabled(res.data);
     });
   };

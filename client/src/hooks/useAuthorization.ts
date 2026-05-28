@@ -1,4 +1,4 @@
-import axios from 'axios';
+import http from '../common/api';
 import { useEffect, useState } from 'react'
 import { url } from '../common/api';
 
@@ -12,7 +12,7 @@ const useAuthorization = () => {
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (token) setHasToken(true)
-        axios.get(url("/api/check-token"), {
+        http.get(url("/api/check-token"), {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
