@@ -9,42 +9,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Nomad CLI
-        uses: hashicorp/setup-nomad@v1.0.0
-
       - name: Deploy to Nomad
         uses: datasektionen/nomad-deploy@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           nomad-token: ${{ secrets.NOMAD_TOKEN }}
           nomad-addr: ${{ vars.NOMAD_ADDR }}
-
-      - name: Nomad Diagnostics On Failure
-        if: failure()
-        env:
-          NOMAD_ADDR: ${{ vars.NOMAD_ADDR }}
-          NOMAD_TOKEN: ${{ secrets.NOMAD_TOKEN }}
-        run: |
-          set +e
-
-          echo "=== Nomad job status ==="
-          nomad job status damm || true
-
-          DEPLOY_ID=$(nomad job status -json damm 2>/dev/null | jq -r '.LatestDeployment // empty')
-          if [ -n "$DEPLOY_ID" ]; then
-            echo "=== Nomad deployment status ($DEPLOY_ID) ==="
-            nomad deployment status "$DEPLOY_ID" || true
-          fi
-
-          echo "=== Nomad allocations ==="
-          ALLOCS=$(nomad job allocs -json damm 2>/dev/null | jq -r '.[].ID')
-          for alloc in $ALLOCS; do
-            echo "=== alloc status: $alloc ==="
-            nomad alloc status "$alloc" || true
-
-            echo "=== alloc stderr: $alloc ==="
-            nomad alloc logs -stderr -tail 200 "$alloc" || true
-
-            echo "=== alloc stdout: $alloc ==="
-            nomad alloc logs -stdout -tail 200 "$alloc" || true
-          done
