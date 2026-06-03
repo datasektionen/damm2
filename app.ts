@@ -12,7 +12,6 @@ const session = require("express-session");
 
 const app = express();
 app.use(express.json());
-// app.use(express.cookieParser());
 app.use(cors());
 
 app.use(
