@@ -8,7 +8,7 @@ FROM base AS frontend
 
 COPY client/package.json client/package-lock.json ./
 
-RUN npm install --ignore-scripts
+RUN npm install
 
 COPY client/ .
 
