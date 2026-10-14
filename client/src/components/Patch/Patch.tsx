@@ -78,7 +78,7 @@ export const PatchComponent: React.FC<Props> = (props) => {
           {patch.date.length === 0 ? (
             'Okänt'
           ) : (
-            <Moment format="Do MMM YYYY">{patch.date}</Moment>
+            <Moment format="D MMM YYYY">{patch.date}</Moment>
           )}
         </PatchItemDate>
       </PatchInfo>

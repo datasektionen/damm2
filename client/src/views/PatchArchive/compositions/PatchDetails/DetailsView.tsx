@@ -173,20 +173,20 @@ export const DetailsView: React.FC<Props> = ({
             {patch.date.length === 0 ? (
               'Okänt'
             ) : (
-              <Moment format="Do MMMM YYYY" locale="sv">
+              <Moment format="D MMMM YYYY" locale="sv">
                 {patch.date}
               </Moment>
             )}
           </span>
           <span title="Uppladdningsdatum">
             <i className="fas fa-cloud-upload-alt" />
-            <Moment format="Do MMMM YYYY" locale="sv">
+            <Moment format="D MMMM YYYY" locale="sv">
               {patch.createdAt}
             </Moment>
           </span>
           <span title="Senast redigerad">
             <i className="fas fa-edit"></i>
-            <Moment format="Do MMMM YYYY HH:mm:ss" locale="sv">
+            <Moment format="D MMMM YYYY HH:mm:ss" locale="sv">
               {patch.updatedAt}
             </Moment>
           </span>
