@@ -1,5 +1,4 @@
-# 3.18 is needed for openssl1.1-compat
-FROM node:18-alpine AS base
+FROM node:24-alpine AS base
 
 WORKDIR /app
 ENV NODE_OPTIONS=--openssl-legacy-provider

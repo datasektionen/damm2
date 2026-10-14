@@ -3,7 +3,7 @@ import ApiResponse from '../../common/ApiResponse';
 import configuration from '../../common/configuration';
 import { randomUUID } from 'crypto';
 import path from 'path';
-import Jimp from 'jimp';
+import sharp from 'sharp';
 import { StatusCodes } from 'http-status-codes';
 import prisma from '../../common/client';
 
@@ -19,11 +19,14 @@ AWS.config.getCredentials((err) => {
     else console.log(AWS.config.credentials?.accessKeyId);
 });
 
+// Keep libvips memory usage low in the 512 MB container
+sharp.cache(false);
+
 const compressImage = async (file: Express.Multer.File): Promise<Buffer> => {
-    const image = await Jimp.read(file.buffer);
-    return await image.resize(250, Jimp.AUTO)
-        .quality(100)
-        .getBufferAsync(image.getMIME());
+    return await sharp(file.buffer)
+        .rotate()
+        .resize({ width: 250 })
+        .toBuffer();
 };
 
 const uploadToS3 = ({ Bucket, Key, Body, ContentType }: { Bucket: string, Key: string; Body: Buffer; ContentType: string; }) => {
@@ -49,7 +52,7 @@ export const uploadImage = async (file: Express.Multer.File, folder: string): Pr
         const result = await uploadToS3({
             Bucket: configuration.AWS_S3_BUCKET,
             Key: `${folder}/${fullFileName}`,
-            Body: Buffer.from(file.buffer),
+            Body: file.buffer,
             ContentType: file.mimetype,
         }).promise();
 
@@ -132,7 +135,7 @@ export const uploadFile = async (file: Express.Multer.File, folder: string): Pro
         const result = await uploadToS3({
             Bucket: configuration.AWS_S3_BUCKET,
             Key: `${folder}/${fileName}`,
-            Body: Buffer.from(file.buffer),
+            Body: file.buffer,
             ContentType: file.mimetype,
         }).promise();
 

@@ -9,6 +9,7 @@ import { uploadImage, attachImageTo, uploadFile, attachFileTo, getFile, deleteFi
 import { FOLDER_PATH } from '../common/patterns';
 
 const imageUpload = multer({
+    limits: { fileSize: 1024 * 1024 * 20 },
     fileFilter: (req, file, callback) => {
         // Only checks extension, so it's possible to fool this...
         const validFileType = file.mimetype === "image/jpeg" || file.mimetype === "image/png";
@@ -21,14 +22,21 @@ const imageUpload = multer({
 });
 
 const fileUpload = multer({
-    fileFilter: (req, file, callback) => {
-        if (file.size > 1024*1024*10) {
-            return callback(null, false);
-        }
-        
-        return callback(null, true);
-    },
+    limits: { fileSize: 1024 * 1024 * 10 },
 });
+
+const handleUpload = (upload: express.RequestHandler): express.RequestHandler => (req, res, next) => {
+    upload(req, res, (err) => {
+        if (err instanceof multer.MulterError && err.code === "LIMIT_FILE_SIZE") {
+            const response: ApiResponse = {
+                statusCode: StatusCodes.REQUEST_TOO_LONG,
+                body: "File too large.",
+            };
+            return res.status(response.statusCode).json(response);
+        }
+        next(err);
+    });
+};
 
 const hasImage = (req: express.Request, res: express.Response, next: express.NextFunction) => {
     const response: ApiResponse = {
@@ -55,7 +63,7 @@ const hasFile = (req: express.Request, res: express.Response, next: express.Next
 router.post("/upload/image",
     authorizeHive,
     adminPrylisAuth,
-    imageUpload.single("image"),
+    handleUpload(imageUpload.single("image")),
     // Should not end with /
     query("path").matches(FOLDER_PATH),
     validationCheck,
@@ -87,7 +95,7 @@ async (req, res) => {
 router.post("/upload/file",
     authorizeHive,
     adminPrylisAuth,
-    fileUpload.single("file"),
+    handleUpload(fileUpload.single("file")),
     // Should not end with /
     query("path").matches(FOLDER_PATH),
     validationCheck,
