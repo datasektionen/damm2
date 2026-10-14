@@ -39,7 +39,7 @@ new CronJob(
     cachedData = init()();
   }, // onTick
   null, // onComplete
-  true // start now
+  true, // start now
 );
 
 router.get("/all", silentAuthorization, async (req: IUserRequest, res) => {
@@ -54,7 +54,7 @@ router.get("/all", silentAuthorization, async (req: IUserRequest, res) => {
   }
   const user = req.user;
   const isAdminOrPrylis = Boolean(
-    user?.admin.includes("admin") || user?.admin.includes("prylis")
+    user?.admin.includes("admin") || user?.admin.includes("prylis"),
   );
 
   if (darkMode && !isAdminOrPrylis) {
@@ -66,8 +66,8 @@ router.get("/all", silentAuthorization, async (req: IUserRequest, res) => {
     moment(a.date).isBefore(b.date)
       ? 1
       : moment(a.date).isAfter(b.date)
-      ? -1
-      : 0
+        ? -1
+        : 0,
   );
 
   // Get picture links for mandates
@@ -88,25 +88,28 @@ router.get("/all", silentAuthorization, async (req: IUserRequest, res) => {
 
   const request = new Request(
     configuration.RFINGER_API_URL + "/api/batch",
-    opts
+    opts,
   );
 
-  const pictures = await fetch(request)
+  const pictures: Record<string, string> = await fetch(request)
     .then((response) => {
       if (response.status !== 200) {
-        throw new Error("Something went wrong on API server!: response code " + response.status);
+        throw new Error(
+          "Something went wrong on API server!: response code " +
+            response.status,
+        );
       }
       return response.json();
     })
     .catch((error) => {
       console.error(error);
-      return res.status(StatusCodes.INTERNAL_SERVER_ERROR);
+      return {};
     });
 
   const updated_events = events.body.map((element: any) => {
     if (element.type == "DFUNKT") {
       element.mandates = element.mandates.map((e: any) => {
-        e.user.picture = pictures[e.user.kthid];
+        e.user.picture = pictures?.[e.user.kthid];
         return e;
       });
       return element;
@@ -166,10 +169,10 @@ router.post(
       date,
       type,
       protocol ?? "",
-      req.user.user
+      req.user.user,
     );
     return res.status(result.statusCode).json(result);
-  }
+  },
 );
 
 router.put(
@@ -231,7 +234,7 @@ router.put(
       protocol,
     });
     return res.status(result.statusCode).json(result);
-  }
+  },
 );
 
 router.delete(
@@ -245,7 +248,7 @@ router.delete(
 
     const result = await deleteEvent(id);
     return res.status(result.statusCode).json(result);
-  }
+  },
 );
 
 export default router;
