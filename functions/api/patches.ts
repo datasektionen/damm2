@@ -204,13 +204,13 @@ export const deletePatch = async (id: number): Promise<ApiResponse> => {
   const errors = [];
 
   // Delete images
-  for (const img of patch?.images) {
+  for (const img of patch.images) {
     const url = new URL(img);
     // Skip first '/'
     const name = url.pathname.substring(1);
     try {
       await deleteFile(name);
-    } catch (err) {
+    } catch {
       errors.push({
         error: `Something went wrong when deleting image ${name}`,
       });
@@ -222,7 +222,7 @@ export const deletePatch = async (id: number): Promise<ApiResponse> => {
     const name = file;
     try {
       await deleteFile(name);
-    } catch (err) {
+    } catch {
       errors.push({
         error: `Something went wrong when deleting file ${name}`,
       });
@@ -243,7 +243,7 @@ export const deletePatch = async (id: number): Promise<ApiResponse> => {
         id,
       },
     });
-  } catch (err) {
+  } catch {
     return {
       statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
       error: ["Failed to delete Patch from database", ...errors],

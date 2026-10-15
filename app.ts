@@ -4,11 +4,10 @@ import { SsoUser } from "./common/types";
 import apiRouter from "./routes/api";
 import cors from "cors";
 import express from "express";
+import session from "express-session";
 import fs from "fs";
 import morgan from "morgan";
 import path from "path";
-
-const session = require("express-session");
 
 const app = express();
 app.use(express.json());
@@ -16,7 +15,7 @@ app.use(cors());
 
 app.use(
   session({
-    secret: configuration.SESSION_SECRET,
+    secret: configuration.SESSION_SECRET!,
     resave: false,
     saveUninitialized: true,
   }),
@@ -101,7 +100,7 @@ app.get("/fuzzyfile", (req, res) => res.send(fuzzyfile));
 
 // Serve React app
 app.use(express.static(path.join(__dirname, "client", "build")));
-app.get("*", (req, res) =>
+app.get("/{*splat}", (req, res) =>
   res.sendFile(path.join(__dirname, "client", "build", "index.html")),
 );
 

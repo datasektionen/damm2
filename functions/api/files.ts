@@ -1,4 +1,9 @@
-import AWS from "aws-sdk";
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
 import ApiResponse from "../../common/ApiResponse";
 import configuration from "../../common/configuration";
 import { randomUUID } from "crypto";
@@ -7,17 +12,13 @@ import sharp from "sharp";
 import { StatusCodes } from "http-status-codes";
 import prisma from "../../common/client";
 
-AWS.config.update({
-  region: configuration.AWS_REGION,
-  correctClockSkew: true,
-});
-const s3 = new AWS.S3({ apiVersion: "2006-03-01" });
+const s3 = new S3Client({ region: configuration.AWS_REGION });
 
 // Gets aws key from AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY in the .env file
-AWS.config.getCredentials((err) => {
-  if (err) console.log(err);
-  else console.log(AWS.config.credentials?.accessKeyId);
-});
+s3.config
+  .credentials()
+  .then((credentials) => console.log(credentials.accessKeyId))
+  .catch((err) => console.log(err));
 
 // Keep libvips memory usage low in the 512 MB container
 sharp.cache(false);
@@ -37,14 +38,17 @@ const uploadToS3 = ({
   Body: Buffer;
   ContentType: string;
 }) => {
-  return s3.upload({
-    Bucket,
-    Key,
-    Body,
-    ContentType,
-    // 2 days hours (48 hours)
-    CacheControl: "max-age: 172800",
-  });
+  return new Upload({
+    client: s3,
+    params: {
+      Bucket,
+      Key,
+      Body,
+      ContentType,
+      // 2 days hours (48 hours)
+      CacheControl: "max-age=172800",
+    },
+  }).done();
 };
 
 export const uploadImage = async (
@@ -63,7 +67,7 @@ export const uploadImage = async (
       Key: `${folder}/${fullFileName}`,
       Body: file.buffer,
       ContentType: file.mimetype,
-    }).promise();
+    });
 
     uploadResults.push(result);
   } catch (err) {
@@ -82,7 +86,7 @@ export const uploadImage = async (
       Key: `${folder}/${fileName}-compressed${extension}`,
       Body: compressedImage,
       ContentType: file.mimetype,
-    }).promise();
+    });
 
     uploadResults.push(result);
 
@@ -151,7 +155,7 @@ export const uploadFile = async (
       Key: `${folder}/${fileName}`,
       Body: file.buffer,
       ContentType: file.mimetype,
-    }).promise();
+    });
 
     return {
       statusCode: StatusCodes.CREATED,
@@ -210,13 +214,14 @@ export const attachFileTo = async (
 
 export const getFile = async (name: string) => {
   return new Promise((resolve, reject) => {
-    s3.getObject({
-      Bucket: configuration.AWS_S3_BUCKET,
-      Key: `${name}`,
-    })
-      .promise()
-      .then((res) => {
-        resolve(res.Body);
+    s3.send(
+      new GetObjectCommand({
+        Bucket: configuration.AWS_S3_BUCKET,
+        Key: `${name}`,
+      }),
+    )
+      .then(async (res) => {
+        resolve(Buffer.from(await res.Body!.transformToByteArray()));
       })
       .catch(() => {
         reject(null);
@@ -226,11 +231,12 @@ export const getFile = async (name: string) => {
 
 export const deleteFile = async (name: string) => {
   return new Promise((resolve, reject) => {
-    s3.deleteObject({
-      Bucket: configuration.AWS_S3_BUCKET,
-      Key: `${name}`,
-    })
-      .promise()
+    s3.send(
+      new DeleteObjectCommand({
+        Bucket: configuration.AWS_S3_BUCKET,
+        Key: `${name}`,
+      }),
+    )
       .then((res) => {
         resolve(res);
       })

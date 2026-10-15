@@ -27,12 +27,12 @@ export const getAllBoxes = async ({
       ...b,
       "#uniquePatches": b.bags.reduce(
         (acc, bag) => bag?.patches?.length + acc,
-        0
+        0,
       ), // How many unique patches the box has
       "#patches": b.bags.reduce(
         (acc, bag) =>
           bag?.patches?.reduce((sum, patch) => patch.amount + sum, 0) + acc,
-        0
+        0,
       ), // How many patches the box has
       bags: b.bags.map((bag: Partial<Bag & { patches: Patch[] }>) => {
         const uniquePatches = bag.patches?.length;
@@ -71,7 +71,7 @@ export const getAllBags = async ({
 
   if (!includePatches)
     result.map(
-      (b: Partial<Bag & { patches: Patch[]; box: Box }>) => delete b.patches
+      (b: Partial<Bag & { patches: Patch[]; box: Box }>) => delete b.patches,
     );
 
   return {
@@ -104,7 +104,7 @@ export const createBox = async (name: string): Promise<ApiResponse> => {
 
 export const changeBoxName = async (
   boxId: number,
-  name: string
+  name: string,
 ): Promise<ApiResponse> => {
   return await catchErrors(async () => {
     await prisma.box.update({
@@ -121,7 +121,7 @@ export const changeBoxName = async (
 
 export const createBag = async (
   name: string,
-  boxId: number
+  boxId: number,
 ): Promise<ApiResponse> => {
   return await catchErrors(async () => {
     const exists = await prisma.bag.findFirst({ where: { name } });
@@ -147,7 +147,7 @@ export const createBag = async (
 
 export const putPatchInBag = async (
   patchId: number,
-  bagId: number
+  bagId: number,
 ): Promise<ApiResponse> => {
   return await catchErrors(async () => {
     await prisma.patch.update({
@@ -165,7 +165,7 @@ export const putPatchInBag = async (
 
 export const changeBagLocation = async (
   bagId: number,
-  boxId: number
+  boxId: number,
 ): Promise<ApiResponse> => {
   return await catchErrors(async () => {
     await prisma.bag.update({
@@ -182,7 +182,7 @@ export const changeBagLocation = async (
 
 export const changeBagName = async (
   bagId: number,
-  name: string
+  name: string,
 ): Promise<ApiResponse> => {
   return await catchErrors(async () => {
     await prisma.bag.update({
@@ -279,7 +279,7 @@ export const deleteBoxes = async (boxIds: number[]): Promise<ApiResponse> => {
 
 export const changeMultipleBagsLocation = async (
   bagIds: number[],
-  boxId: number
+  boxId: number,
 ): Promise<ApiResponse> => {
   return await catchErrors(async () => {
     const result = await prisma.bag.updateMany({
@@ -337,7 +337,7 @@ export const updateManyPatches = async ({
 
 // TODO: Move to util-file
 export async function catchErrors(
-  func: () => Promise<ApiResponse>
+  func: () => Promise<ApiResponse>,
 ): Promise<ApiResponse> {
   try {
     return await func();

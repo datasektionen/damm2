@@ -49,7 +49,7 @@ router.post(
 
     const box = await createBox(name);
     return res.status(box.statusCode).json(box);
-  }
+  },
 );
 
 // Change bag name
@@ -62,7 +62,7 @@ router.put(
     const { boxId, name } = req.body;
     const result = await changeBoxName(boxId, name);
     return res.status(result.statusCode).json(result);
-  }
+  },
 );
 
 // Get all bags
@@ -84,7 +84,7 @@ router.post(
 
     const bag = await createBag(name, boxId);
     return res.status(bag.statusCode).json(bag);
-  }
+  },
 );
 
 // Change bag name
@@ -97,7 +97,7 @@ router.put(
     const { bagId, name } = req.body;
     const result = await changeBagName(bagId, name);
     return res.status(result.statusCode).json(result);
-  }
+  },
 );
 
 // Move bag to a box
@@ -110,7 +110,7 @@ router.put(
     const { bagId, boxId } = req.body;
     const result = await changeBagLocation(bagId, boxId);
     return res.status(result.statusCode).json(result);
-  }
+  },
 );
 
 // Assign patch to bag
@@ -123,22 +123,30 @@ router.put(
     const { bagId, patchId } = req.body;
     const result = await putPatchInBag(patchId, bagId);
     return res.status(result.statusCode).json(result);
-  }
+  },
 );
 
 // Delete a bag
-router.delete("/bag/:bagId", validationCheck, async (req, res) => {
-  const { bagId } = req.params;
-  const result = await deleteBag(parseInt(bagId));
-  return res.status(result.statusCode).json(result);
-});
+router.delete<{ bagId: string }>(
+  "/bag/:bagId",
+  validationCheck,
+  async (req, res) => {
+    const { bagId } = req.params;
+    const result = await deleteBag(parseInt(bagId));
+    return res.status(result.statusCode).json(result);
+  },
+);
 
 // Delete a box
-router.delete("/box/:boxId", validationCheck, async (req, res) => {
-  const { boxId } = req.params;
-  const result = await deleteBox(parseInt(boxId));
-  return res.status(result.statusCode).json(result);
-});
+router.delete<{ boxId: string }>(
+  "/box/:boxId",
+  validationCheck,
+  async (req, res) => {
+    const { boxId } = req.params;
+    const result = await deleteBox(parseInt(boxId));
+    return res.status(result.statusCode).json(result);
+  },
+);
 
 router.post(
   "/bags/delete",
@@ -149,7 +157,7 @@ router.post(
     const { bags } = req.body;
     const result = await deleteBags(bags);
     return res.status(result.statusCode).json(result);
-  }
+  },
 );
 
 router.post(
@@ -161,7 +169,7 @@ router.post(
     const { boxes } = req.body;
     const result = await deleteBoxes(boxes);
     return res.status(result.statusCode).json(result);
-  }
+  },
 );
 
 router.put(
@@ -174,7 +182,7 @@ router.put(
     const { bags, boxId } = req.body;
     const result = await changeMultipleBagsLocation(bags, boxId);
     return res.status(result.statusCode).json(result);
-  }
+  },
 );
 
 router.put(
@@ -188,7 +196,7 @@ router.put(
     const patches = patchesStrings.map((x: string) => parseInt(x, 10));
     const result = await updateManyPatches({ patchIds: patches, bagId });
     return res.status(result.statusCode).json(result);
-  }
+  },
 );
 
 router.put(
@@ -204,7 +212,7 @@ router.put(
       amount,
     });
     return res.status(result.statusCode).json(result);
-  }
+  },
 );
 
 router.get("/export", async (req, res) => {
@@ -226,22 +234,26 @@ router.get("/export", async (req, res) => {
     "tags",
   ];
   const patches = await prisma.patch.findMany({
-    include: { bag: { include: { box: true } }, tags: true, createdBy: {
-      include: {
-        person: true,
+    include: {
+      bag: { include: { box: true } },
+      tags: true,
+      createdBy: {
+        include: {
+          person: true,
+        },
       },
-    }, },
+    },
   });
   const data = json2csv(
     patches.map((p) => ({
       ...p,
-      creators: p.createdBy.map((t) =>(t.person.name)).join(", "),
+      creators: p.createdBy.map((t) => t.person.name).join(", "),
       bagName: p.bag?.name ?? "Ingen påse",
       tags: p.tags.map((t) => ({ name: t.name, type: t.type })),
       boxId: p.bag?.box?.id ?? null,
       boxName: p.bag?.box?.name ?? "Ingen låda",
     })),
-    { fields }
+    { fields },
   );
   res.setHeader("Content-Type", "text/csv");
   res.send(data);

@@ -6,7 +6,7 @@ import {
   validationCheck,
 } from "../common/middlewares";
 import express from "express";
-import { body, check, query } from "express-validator";
+import { body, check, matchedData, query } from "express-validator";
 import { StatusCodes } from "http-status-codes";
 const router = express.Router();
 import multer from "multer";
@@ -156,19 +156,24 @@ router.post(
 );
 
 // Get protected files (patch-files for example)
-router.get("/get/:name", authorizeHive, adminPrylisAuth, async (req, res) => {
-  const { name } = req.params;
+router.get<{ name: string }>(
+  "/get/:name",
+  authorizeHive,
+  adminPrylisAuth,
+  async (req, res) => {
+    const { name } = req.params;
 
-  getFile(name)
-    .then((result: any) => {
-      res.status(200).send(result);
-    })
-    .catch(() => {
-      return res.status(StatusCodes.NOT_FOUND).json({
-        statusCode: StatusCodes.NOT_FOUND,
+    getFile(name)
+      .then((result: any) => {
+        res.status(200).send(result);
+      })
+      .catch(() => {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          statusCode: StatusCodes.NOT_FOUND,
+        });
       });
-    });
-});
+  },
+);
 
 // Get artefact files
 router.get("/get/unprotected/:name", async (req, res) => {
@@ -200,7 +205,7 @@ router.delete(
   query("key").isString().trim().notEmpty().withMessage("should be a string"),
   validationCheck,
   async (req, res) => {
-    const { key } = req.query;
+    const { key } = matchedData(req);
 
     deleteFile(key as string)
       .then(() => {
@@ -228,7 +233,7 @@ router.delete(
     .withMessage("should be either 'patch' or 'artefact'"),
   validationCheck,
   async (req, res) => {
-    const { name, id, type } = req.query;
+    const { name, id, type } = matchedData(req);
 
     deleteFile(name as string)
       .then(async () => {
