@@ -1,6 +1,7 @@
 # Configuring the S3 bucket on AWS
 
 The S3 bucket consists of four folders:
+
 - patches
 - patch-files
 - artefacts
@@ -12,29 +13,23 @@ The following bucket policy sets the above rules, and can be set by navigating t
 
 ```json
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "PublicRead",
-            "Effect": "Allow",
-            "Principal": "*",
-            "Action": [
-                "s3:GetObject",
-                "s3:GetObjectVersion"
-            ],
-            "Resource": "arn:aws:s3:::dsekt-damm-dev/patches/*"
-        },
-        {
-            "Sid": "PublicRead",
-            "Effect": "Allow",
-            "Principal": "*",
-            "Action": [
-                "s3:GetObject",
-                "s3:GetObjectVersion"
-            ],
-            "Resource": "arn:aws:s3:::dsekt-damm-dev/artefact*"
-        }
-    ]
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "PublicRead",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": ["s3:GetObject", "s3:GetObjectVersion"],
+      "Resource": "arn:aws:s3:::dsekt-damm-dev/patches/*"
+    },
+    {
+      "Sid": "PublicRead",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": ["s3:GetObject", "s3:GetObjectVersion"],
+      "Resource": "arn:aws:s3:::dsekt-damm-dev/artefact*"
+    }
+  ]
 }
 ```
 

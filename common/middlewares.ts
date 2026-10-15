@@ -1,8 +1,8 @@
-import express from 'express';
-import { validationResult } from 'express-validator';
-import { StatusCodes } from 'http-status-codes';
-import { errorResponse, unauthorizedResponse } from './ApiResponse';
-import { IUserRequest } from './requests';
+import express from "express";
+import { validationResult } from "express-validator";
+import { StatusCodes } from "http-status-codes";
+import { errorResponse, unauthorizedResponse } from "./ApiResponse";
+import { IUserRequest } from "./requests";
 
 /**
  * Middleware that checks if there are any validation errors, if there are, it
@@ -11,58 +11,83 @@ import { IUserRequest } from './requests';
  * @param res the response object
  * @param next next function
  */
-export const validationCheck = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        errorResponse(res, StatusCodes.BAD_REQUEST, errors.array());
-        return;
-    }
-    next();
+export const validationCheck = (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction,
+): void => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    errorResponse(res, StatusCodes.BAD_REQUEST, errors.array());
+    return;
+  }
+  next();
 };
 
 // Authorizes against hive.
 // Takes token either in Authorization header or as a query string
-export const authorizeHive = async (req: IUserRequest, res: express.Response, next: express.NextFunction): Promise<void> => {
-    if (req.session.user === undefined) {
-        unauthorizedResponse(res);
-        return;
-    } else {
-        const user = req.session.user;
+export const authorizeHive = async (
+  req: IUserRequest,
+  res: express.Response,
+  next: express.NextFunction,
+): Promise<void> => {
+  if (req.session.user === undefined) {
+    unauthorizedResponse(res);
+    return;
+  } else {
+    const user = req.session.user;
 
-        req.user = user;
+    req.user = user;
 
-        next();
-    }
+    next();
+  }
 };
 
-export const adminAuth = async (req: IUserRequest, res: express.Response, next: express.NextFunction): Promise<void> => {
-    if (req.user?.admin.includes("admin")) return next();
+export const adminAuth = async (
+  req: IUserRequest,
+  res: express.Response,
+  next: express.NextFunction,
+): Promise<void> => {
+  if (req.user?.admin.includes("admin")) return next();
 
-    unauthorizedResponse(res);
+  unauthorizedResponse(res);
 };
 
-export const prylisAuth = async (req: IUserRequest, res: express.Response, next: express.NextFunction): Promise<void> => {
-    if (req.user?.admin.includes("prylis")) return next();
+export const prylisAuth = async (
+  req: IUserRequest,
+  res: express.Response,
+  next: express.NextFunction,
+): Promise<void> => {
+  if (req.user?.admin.includes("prylis")) return next();
 
-    unauthorizedResponse(res);
+  unauthorizedResponse(res);
 };
 
-export const adminPrylisAuth = async (req: IUserRequest, res: express.Response, next: express.NextFunction): Promise<void> => {
-    if (req.user?.admin.includes("admin") || req.user?.admin.includes("prylis")) return next();
+export const adminPrylisAuth = async (
+  req: IUserRequest,
+  res: express.Response,
+  next: express.NextFunction,
+): Promise<void> => {
+  if (req.user?.admin.includes("admin") || req.user?.admin.includes("prylis"))
+    return next();
 
-    unauthorizedResponse(res);
+  unauthorizedResponse(res);
 };
 
 // Checks authorization but does not reject.
 // Takes token either in Authorization header or as a query string
-export const silentAuthorization = async (req: IUserRequest, res: express.Response, next: express.NextFunction): Promise<void> => {
-    if (req.session.user === undefined) {
-        next();
-        return;
-    } else {
-        const user = req.session.user;
+export const silentAuthorization = async (
+  req: IUserRequest,
+  res: express.Response,
+  next: express.NextFunction,
+): Promise<void> => {
+  if (req.session.user === undefined) {
+    next();
+    return;
+  } else {
+    const user = req.session.user;
 
-        req.user = user;
-        next();
-    }
+    req.user = user;
+    next();
+  }
 };

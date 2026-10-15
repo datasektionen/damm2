@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client';
-import configuration from './configuration';
+import { PrismaClient } from "@prisma/client";
+import configuration from "./configuration";
 
 const prismaClientSingleton = () => {
   return new PrismaClient();
@@ -7,13 +7,13 @@ const prismaClientSingleton = () => {
 
 // Augment globalThis
 declare global {
-  // eslint-disable-next-line no-var
+   
   var prisma: PrismaClient | undefined;
 }
 
 const prisma = globalThis.prisma ?? prismaClientSingleton();
 
-if (configuration.NODE_ENV === 'development') {
+if (configuration.NODE_ENV === "development") {
   globalThis.prisma = prisma;
 }
 

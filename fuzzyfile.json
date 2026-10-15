@@ -1,23 +1,23 @@
 {
-    "@type": "fuzzyfile",
-    "fuzzes": [
-        {
-            "name": "Tidslinje - Damm",
-            "str": "damm tidslinje historia",
-            "color": "#E83D84",
-            "href": "/timeline"
-        },
-        {
-            "name": "Märkesarkiv - Damm",
-            "str": "märkesarkiv arkiv damm märke",
-            "color": "#E83D84",
-            "href": "/patch-archive"
-        },
-        {
-            "name": "Museum - Damm",
-            "str": "museum arkiv damm föremål",
-            "color": "#E83D84",
-            "href": "/museum"
-        }
-    ]
+  "@type": "fuzzyfile",
+  "fuzzes": [
+    {
+      "name": "Tidslinje - Damm",
+      "str": "damm tidslinje historia",
+      "color": "#E83D84",
+      "href": "/timeline"
+    },
+    {
+      "name": "Märkesarkiv - Damm",
+      "str": "märkesarkiv arkiv damm märke",
+      "color": "#E83D84",
+      "href": "/patch-archive"
+    },
+    {
+      "name": "Museum - Damm",
+      "str": "museum arkiv damm föremål",
+      "color": "#E83D84",
+      "href": "/museum"
+    }
+  ]
 }
