@@ -22,7 +22,6 @@ import { CronJob } from "cron";
 import express from "express";
 import { body, param } from "express-validator";
 import { StatusCodes } from "http-status-codes";
-import moment from "moment";
 
 const router = express.Router();
 
@@ -62,12 +61,8 @@ router.get("/all", silentAuthorization, async (req: IUserRequest, res) => {
   }
 
   const events = await getAll();
-  events.body = [...events.body, ...cachedData].sort((a, b) =>
-    moment(a.date).isBefore(b.date)
-      ? 1
-      : moment(a.date).isAfter(b.date)
-        ? -1
-        : 0,
+  events.body = [...events.body, ...cachedData].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 
   // Get picture links for mandates
