@@ -38,11 +38,11 @@ Rfinger - to fetch images of users (timeline)
 
 # Environment variables
 
-When running locally you can mock login with [nyckeln under dörrmattan](https://github.com/datasektionen/nyckeln-under-dorrmattan) and use an own AWS account to get an s3 bucket, in which case you should look at [bucket configuration](bucket_configuration.md). There is also a bucket called `dsekt-damm-dev` that you may get access to from <a href="mailto:d-sys@datasektionen.se">d-sys</a>.
+When running locally you can mock login with [nyckeln under dörrmattan](https://github.com/datasektionen/nyckeln-under-dorrmattan) (`docker compose up nyckeln`, see [.env.example](.env.example)) and use an own AWS account to get an s3 bucket, in which case you should look at [bucket configuration](bucket_configuration.md). There is also a bucket called `dsekt-damm-dev` that you may get access to from <a href="mailto:d-sys@datasektionen.se">d-sys</a>.
 
 ## Server
 
-See [server/common/configuration.ts](server/common/configuration.ts)
+See [common/configuration.ts](common/configuration.ts)
 
 | Name                  | Default                                     | Description                                            |
 | --------------------- | ------------------------------------------- | ------------------------------------------------------ |
@@ -56,20 +56,20 @@ See [server/common/configuration.ts](server/common/configuration.ts)
 | AWS_SECRET_ACCESS_KEY | -                                           |                                                        |
 | OIDC_PROVIDER         | https://sso.datasektionen.se/op             | base url for oidc provider                             |
 | OIDC_CLIENT_ID        | damm                                        |                                                        |
-| OIDC_CLIENT_SECRECT   | -                                           |                                                        |
-| REDIRECT_URL          | https://damm.datasektionen.se/oidc/callback |                                                        |
+| OIDC_CLIENT_SECRET    | -                                           |                                                        |
+| REDIRECT_URL          | https://damm.datasektionen.se/oidc/callback | `http://localhost:3000/oidc/callback` in development   |
 | RFINGER_API_URL       | https://rfinger.datasektionen.se            |                                                        |
 | RFINGER_API_KEY       | -                                           |                                                        |
 
 ## Client
 
-See [server/client/src/common/configuration.ts](server/client/src/common/configuration.ts)
+See [client/src/common/configuration.ts](client/src/common/configuration.ts)
 
-| Name                   | Default                                                                               | Description                           |
-| ---------------------- | ------------------------------------------------------------------------------------- | ------------------------------------- |
-| REACT_APP_API_ENDPOINT | `http://localhost:8080` in development, `https://damm.datasektionen.se` in production | Used to fetch the API                 |
-| HOST                   | `localhost` in development                                                            |                                       |
-| NODE_OPTIONS           | --openssl-legacy-provider                                                             | Make webpack work on non-ancient node |
+| Name              | Default                                                                               | Description           |
+| ----------------- | ------------------------------------------------------------------------------------- | --------------------- |
+| VITE_API_ENDPOINT | `http://localhost:3000` in development, `https://damm.datasektionen.se` in production | Used to fetch the API |
+
+In development, Vite proxies `/api`, `/login`, `/logout`, `/oidc` and `/fuzzyfile` to the server on port 8080.
 
 # How to run
 
@@ -78,12 +78,12 @@ See [server/client/src/common/configuration.ts](server/client/src/common/configu
 1. Set up environment variables
 1. Run `npm install` in root.
 1. Run `npm run setup` in root to deploy migrations and install client dependencies.
-1. Run `npx prisma migrate reset` in server/ (yes, npx, not npm)
-1. Run `npm run dev:server` in project root
-1. In another terminal, run `npm run dev:client` in project root
+1. Run `npx prisma migrate reset` in root (yes, npx, not npm)
+1. Run `npm run dev` in root
+1. In another terminal, run `npm start` in `client/` and open http://localhost:3000
 
 Server and client will hot reload when changes occurs
 
-### Linting
+### Linting and formatting
 
-Lint with `npm run lint` and fix (if possible) with `npm run lint:fix`. Make sure to lint before commiting (the CI will lint, but it won't fix any errors for you).
+Lint with `npm run lint` and fix (if possible) with `npm run lint:fix`. Format the server with `npm run format`. Make sure to lint and format before commiting (the CI will check, but it won't fix any errors for you).

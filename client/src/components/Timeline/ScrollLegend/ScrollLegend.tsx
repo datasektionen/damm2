@@ -1,200 +1,246 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React from 'react';
 import { IEventsPerYear } from '../../../types/definitions';
 import { StyledScrollLegend, Year, Scroller } from './style';
 
 interface Props {
-    years: IEventsPerYear[];
+  years: IEventsPerYear[];
 }
 
 interface State {
-    scrollTop: number;
-    positions: any;
-    documentHeight: number;
-    year: number;
+  scrollTop: number;
+  positions: Record<number, number>;
+  documentHeight: number;
+  year: number;
 }
 
 export class ScrollLegend extends React.Component<Props, State> {
-    constructor(props: Props) {
-        super(props)
+  constructor(props: Props) {
+    super(props);
 
-        this.state = {
-            scrollTop: Math.max(document.body.scrollTop, document.documentElement.scrollTop),
-            year: 1983,
-            positions: {},
-            documentHeight: 1,
-        }
+    this.state = {
+      scrollTop: Math.max(
+        document.body.scrollTop,
+        document.documentElement.scrollTop
+      ),
+      year: 1983,
+      positions: {},
+      documentHeight: 1,
+    };
+  }
+
+  componentDidUpdate(prevProps: Props) {
+    // Only re-init on parent re-renders, not on this component's own setState
+    if (prevProps === this.props) return;
+    const init = () => {
+      this.updatePositions();
+      document.body.onscroll = () => this.onScroll();
+      this.onScroll();
+      this.makeScrollHandleDraggable();
+      this.initTouchHandlers();
+    };
+    window.onresize = function () {
+      init();
+    };
+    setTimeout(init, 500);
+  }
+
+  initTouchHandlers() {
+    const touchHandler = (event: TouchEvent) => {
+      const touches = event.changedTouches;
+      const first = touches[0];
+      let type: string;
+
+      switch (event.type) {
+        case 'touchstart':
+          type = 'mousedown';
+          break;
+        case 'touchmove':
+          type = 'mousemove';
+          break;
+        case 'touchend':
+          type = 'mouseup';
+          break;
+        default:
+          return;
+      }
+
+      const simulatedEvent = document.createEvent('MouseEvent');
+      simulatedEvent.initMouseEvent(
+        type,
+        true,
+        true,
+        window,
+        1,
+        first.screenX,
+        first.screenY,
+        first.clientX,
+        first.clientY,
+        false,
+        false,
+        false,
+        false,
+        0,
+        null
+      );
+
+      const target = first.target as HTMLElement;
+      if (target.id !== 'YearScroller') return;
+      target.dispatchEvent(simulatedEvent);
+      event.preventDefault();
+    };
+
+    document.addEventListener('touchstart', touchHandler, true);
+    document.addEventListener('touchmove', touchHandler, true);
+    document.addEventListener('touchend', touchHandler, true);
+    document.addEventListener('touchcancel', touchHandler, true);
+  }
+
+  makeScrollHandleDraggable() {
+    if (!document || !window) {
+      return;
+    }
+    const handle = document.getElementById('YearScroller');
+    const documentElement = document.documentElement;
+    if (!handle || !documentElement) {
+      return;
     }
 
-    componentWillReceiveProps(nextProps: Props) {
-        const init = () => {
-            this.updatePositions()
-            document.body.onscroll = _ => this.onScroll()
-            this.onScroll()
-            this.makeScrollHandleDraggable()
-            this.initTouchHandlers()
-        }
-        window.onresize = function (event: any) {
-            init()
-        }
-        setTimeout(init, 500)
+    let grippingOffset = 0;
+
+    const repositionElement = (event: MouseEvent) => {
+      event.stopPropagation();
+      event.preventDefault();
+
+      const newScroll =
+        ((event.clientY - grippingOffset) / documentElement.clientHeight) *
+        (1 / 0.95) *
+        this.state.documentHeight;
+      window.scrollTo(0, newScroll);
+      this.onScroll();
+      //   window.onscroll()
+    };
+
+    handle.addEventListener(
+      'mousedown',
+      (event) => {
+        grippingOffset = event.offsetY;
+        documentElement.addEventListener('mousemove', repositionElement, false);
+
+        window.addEventListener(
+          'mouseup',
+          () => {
+            documentElement.removeEventListener(
+              'mousemove',
+              repositionElement,
+              false
+            );
+          },
+          false
+        );
+      },
+      false
+    );
+  }
+
+  onScroll() {
+    let year: number = 0;
+    for (let i = 0; i < this.props.years.length - 1; i++) {
+      year = this.props.years[i].year;
+      if (
+        this.state.positions[this.props.years[i + 1].year] - 50 >
+        this.state.scrollTop
+      ) {
+        break;
+      }
     }
 
-    initTouchHandlers() {
-        const touchHandler = (event: any) => {
-            const touches = event.changedTouches
-            const first = touches[0]
-            let type = ""
+    this.setState({
+      scrollTop: Math.max(
+        document.body.scrollTop,
+        document.documentElement.scrollTop
+      ),
+      documentHeight: Math.max(
+        document.body.scrollHeight,
+        document.body.offsetHeight,
+        document.documentElement.clientHeight,
+        document.documentElement.scrollHeight,
+        document.documentElement.offsetHeight
+      ),
+      year: Number(year),
+    });
+  }
 
-            switch (event.type) {
-                case "touchstart": type = "mousedown"; break;
-                case "touchmove": type = "mousemove"; break;
-                case "touchend": type = "mouseup"; break;
-                default: return;
-            }
+  /**
+   * Update the positions list of the different years.
+   * @return void
+   */
+  updatePositions() {
+    // Lambda function for getting position of year
+    const position = (year: number) => {
+      if (!document || !window) {
+        return 0;
+      }
+      const element = document.getElementById('year-' + year);
+      if (!element) {
+        return 0;
+      }
+      const elementPos = element.getBoundingClientRect().top + window.scrollY;
+      return elementPos;
+    };
 
-            const simulatedEvent = document.createEvent("MouseEvent");
-            simulatedEvent.initMouseEvent(type, true, true, window, 1,
-                first.screenX, first.screenY,
-                first.clientX, first.clientY, false,
-                false, false, false, 0, null);
+    // Loop through the years and save their position
+    const positions: Record<number, number> = {};
+    this.props.years.forEach((year) => {
+      positions[year.year] = position(year.year);
+    });
 
-            if (first.target.id !== "YearScroller") return
-            first.target.dispatchEvent(simulatedEvent);
-            event.preventDefault();
-        }
+    this.setState({ positions });
+  }
 
-        document.addEventListener("touchstart", touchHandler, true)
-        document.addEventListener("touchmove", touchHandler, true)
-        document.addEventListener("touchend", touchHandler, true)
-        document.addEventListener("touchcancel", touchHandler, true)
+  goTo(year: number) {
+    const topBarHeight = 50;
+
+    if (!window || !document) {
+      return;
     }
 
-    makeScrollHandleDraggable() {
-        if (!document || !window) {
-            return
-        }
-        const handle = document.getElementById('YearScroller')
-        const documentElement = document.documentElement
-        if (!handle || !documentElement) {
-            return
-        }
-
-        let grippingOffset = 0
-
-        const repositionElement = (event: any) => {
-            event.stopPropagation()
-            event.preventDefault()
-
-            const newScroll = (event.clientY - grippingOffset) / documentElement.clientHeight * (1 / 0.95) * this.state.documentHeight
-            window.scrollTo(0, newScroll)
-            this.onScroll()
-            //   window.onscroll()
-        }
-
-        handle.addEventListener('mousedown', event => {
-            grippingOffset = event.offsetY
-            documentElement.addEventListener('mousemove', repositionElement, false)
-
-            window.addEventListener('mouseup', _ => {
-                documentElement.removeEventListener('mousemove', repositionElement, false)
-            }, false)
-        }, false)
+    const element = document.getElementById('year-' + year);
+    if (!element) {
+      return;
     }
 
-    onScroll() {
-        let year: number = 0
-        for (let i = 0; i < this.props.years.length - 1; i++) {
-            year = this.props.years[i].year
-            if (this.state.positions[this.props.years[i + 1].year] - 50 > this.state.scrollTop) {
-                break
-            }
-        }
+    window.scrollTo(
+      0,
+      element.getBoundingClientRect().top + window.scrollY - topBarHeight
+    );
+    this.onScroll();
+    // window.onscroll()
+  }
 
-        this.setState({
-            scrollTop: Math.max(
-                document.body.scrollTop,
-                document.documentElement.scrollTop
-            ),
-            documentHeight: Math.max(
-                document.body.scrollHeight,
-                document.body.offsetHeight,
-                document.documentElement.clientHeight,
-                document.documentElement.scrollHeight,
-                document.documentElement.offsetHeight
-            ),
-            year: Number(year)
-        })
-    }
+  render() {
+    const { scrollTop, documentHeight, year, positions } = this.state;
+    const { years } = this.props;
 
-    /**
-     * Update the positions list of the different years.
-     * @return void
-     */
-    updatePositions() {
-        // Lambda function for getting position of year
-        const position = (year: number) => {
-            if (!document || !window) {
-                return 0
-            }
-            const element = document.getElementById('year-' + year)
-            if (!element) {
-                return 0
-            }
-            const elementPos = element.getBoundingClientRect().top + window.scrollY
-            return elementPos
-        }
-
-        // Loop through the years and save their position
-        const positions = {} as any
-        this.props.years.forEach(year => {
-            positions[year.year] = position(year.year)
-        })
-
-        this.setState({ positions })
-    }
-
-    goTo(year: number) {
-        const topBarHeight = 50
-
-        if (!window || !document) {
-            return
-        }
-
-        const element = document.getElementById('year-' + year)
-        if (!element) {
-            return
-        }
-
-        window.scrollTo(0, element.getBoundingClientRect().top + window.scrollY - topBarHeight)
-        this.onScroll()
-        // window.onscroll()
-    }
-
-    render() {
-
-        const { scrollTop, documentHeight, year, positions } = this.state;
-        const { years } = this.props
-
-        return (
-            <StyledScrollLegend id="ScrollLegend">
-                <Scroller
-                    position={scrollTop / documentHeight * 95 + "%"}
-                    id="YearScroller"
-                >
-                    {year}
-                </Scroller>
-                {years?.map(y =>
-                    <Year
-                        key={"year-" + y.year}
-                        onClick={() => this.goTo(y.year)}
-                        position={positions[y.year] / documentHeight * 95 + "%"}
-                    >
-                        {y.year}
-                    </Year>
-                )}
-            </StyledScrollLegend>
-        )
-    }
+    return (
+      <StyledScrollLegend id="ScrollLegend">
+        <Scroller
+          position={(scrollTop / documentHeight) * 95 + '%'}
+          id="YearScroller"
+        >
+          {year}
+        </Scroller>
+        {years?.map((y) => (
+          <Year
+            key={'year-' + y.year}
+            onClick={() => this.goTo(y.year)}
+            position={(positions[y.year] / documentHeight) * 95 + '%'}
+          >
+            {y.year}
+          </Year>
+        ))}
+      </StyledScrollLegend>
+    );
+  }
 }
 
 // export const ScrollLegend: React.FC<Props> = ({ years }) => {
@@ -278,12 +324,7 @@ export class ScrollLegend extends React.Component<Props, State> {
 //     //     setTimeout(updatePositions, 500)
 //     // }, [])
 
-
-
-
 // // --------------------------------------------------
-
-
 
 //     // useEffect(() => {
 //     //     updatePositions();
@@ -399,7 +440,6 @@ export class ScrollLegend extends React.Component<Props, State> {
 //         years?.forEach(y => {
 //             nextPositions[y.year] = position(y.year)
 //         })
-
 
 //         setPositions(nextPositions)
 //     }

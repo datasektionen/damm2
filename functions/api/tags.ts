@@ -48,13 +48,13 @@ export const create = async (
   description = "",
   color: string = DEFAULT_TEXT_COLOR,
   backgroundColor: string = DEFAULT_BG_COLOR,
-  type: string,
+  type: TagType,
   category: TagCategory,
 ): Promise<ApiResponse> => {
   try {
     if (
       (await prisma.tag.findUnique({
-        where: { name_type: { name, type: (<any>TagType)[type] } },
+        where: { name_type: { name, type } },
       })) !== null
     ) {
       return {
@@ -69,7 +69,7 @@ export const create = async (
         description,
         color,
         backgroundColor,
-        type: (<any>TagType)[type],
+        type,
         category,
       },
     });
@@ -112,7 +112,7 @@ export const update = async (
     };
   }
 
-  const data = {} as any;
+  const data: Prisma.TagUpdateInput = {};
 
   if (name) {
     data.name = name;

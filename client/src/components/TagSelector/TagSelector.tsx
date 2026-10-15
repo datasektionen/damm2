@@ -1,10 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ITag } from '../../types/definitions';
-import { TagClickableAsClass as TagClickable } from '../TagClickable/TagClickable';
-import { StyledTagSelector, StyledFlipMove } from './style';
+import { TagClickable } from '../TagClickable/TagClickable';
+import { StyledTagSelector, AnimatedTags } from './style';
 import styled from '@emotion/styled';
 import { useDarkMode } from '../../hooks/useDarkMode';
-import { Checkbox } from '../Checkbox/Checkbox';
 
 interface Props {
   tags: ITag[];
@@ -21,8 +20,14 @@ export const TagSelector: React.FC<Props> = ({
   disabled,
   query,
 }) => {
-  const [filteredTags, setFilteredTags] = useState<ITag[]>([]);
   const { isDarkModeEnabled, isAdminOrPrylis } = useDarkMode();
+  const filteredTags = useMemo(
+    () =>
+      tags.filter((t: ITag) =>
+        t.name.toLowerCase().includes(query.toLowerCase())
+      ),
+    [query, tags]
+  );
 
   const toggleTag = (tag: ITag) => {
     if (disabled) return;
@@ -31,20 +36,10 @@ export const TagSelector: React.FC<Props> = ({
       setSelectedTags(selectedTags.concat(tag));
     } else {
       // Remove the tag we clicked on
-      let nextSelectedTags = [...selectedTags].filter((x) => x.id !== tag.id);
+      const nextSelectedTags = [...selectedTags].filter((x) => x.id !== tag.id);
       setSelectedTags(nextSelectedTags);
     }
   };
-
-  useEffect(() => {
-    setFilteredTags(
-      tags.filter(
-        (t: ITag) =>
-          t.name.toLowerCase().match(new RegExp(query.toLowerCase(), 'g')) !==
-          null
-      )
-    );
-  }, [query, tags]);
 
   const tagSections = useMemo<{ category: ITag['category']; label: string }[]>(
     () => [
@@ -58,12 +53,12 @@ export const TagSelector: React.FC<Props> = ({
       },
       ...(isDarkModeEnabled && !isAdminOrPrylis
         ? []
-        : ([
+        : [
             {
-              category: 'RECEPTION',
+              category: 'RECEPTION' as const,
               label: 'Mottagningen',
             },
-          ] as any)),
+          ]),
       {
         category: 'OTHER',
         label: 'Övrigt',
@@ -100,12 +95,7 @@ export const TagSelector: React.FC<Props> = ({
                 {filteredTags.filter((x) => x.category === s.category)
                   .length === 0 && <span key="notags">Inga taggar</span>}
                 {filteredTags.length !== 0 && (
-                  <StyledFlipMove
-                    enterAnimation="fade"
-                    leaveAnimation="fade"
-                    appearAnimation="fade"
-                    duration={250}
-                  >
+                  <AnimatedTags duration={250}>
                     {filteredTags
                       .filter((x) => x.category === s.category)
                       .map((t: ITag) => (
@@ -120,7 +110,7 @@ export const TagSelector: React.FC<Props> = ({
                           disabled={disabled}
                         />
                       ))}
-                  </StyledFlipMove>
+                  </AnimatedTags>
                 )}
               </div>
             )}
@@ -131,7 +121,7 @@ export const TagSelector: React.FC<Props> = ({
   );
 };
 
-export const Expander = styled.div(
+export const Expander = styled.div<{ expanded: boolean }>(
   {
     cursor: 'pointer',
     userSelect: 'none',
@@ -140,7 +130,7 @@ export const Expander = styled.div(
       margin: '5px',
     },
   },
-  (props: any) => ({
+  (props) => ({
     '> i': {
       transform: props.expanded ? 'rotate(-180deg' : 'rotate(-180deg)',
     },

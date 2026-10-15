@@ -59,7 +59,7 @@ export const uploadImage = async (
   const extension = path.extname(file.originalname);
   const fullFileName = fileName + extension;
 
-  const uploadResults: any[] = [];
+  const uploadResults: Awaited<ReturnType<typeof uploadToS3>>[] = [];
 
   try {
     const result = await uploadToS3({
@@ -213,7 +213,7 @@ export const attachFileTo = async (
 };
 
 export const getFile = async (name: string) => {
-  return new Promise((resolve, reject) => {
+  return new Promise<Buffer>((resolve, reject) => {
     s3.send(
       new GetObjectCommand({
         Bucket: configuration.AWS_S3_BUCKET,

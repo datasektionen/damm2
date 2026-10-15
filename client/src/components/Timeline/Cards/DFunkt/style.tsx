@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import Theme, { maxWidth } from '../../../../common/Theme';
+import { maxWidth } from '../../../../common/Theme';
 
 const DEFAULT_PICTURE = '/images/default-avatar.svg';
 
@@ -21,7 +21,7 @@ export const Users = styled.div({
   },
 });
 
-export const User = styled.div(
+export const User = styled.div<{ picture?: string }>(
   {
     margin: 0,
     height: '74.25px',
@@ -35,7 +35,7 @@ export const User = styled.div(
       width: '10vw',
     },
   },
-  (props: any) => ({
+  (props) => ({
     // Default is layered underneath so it also shows if the picture URL fails to load
     backgroundImage: props.picture
       ? `url(${props.picture}), url(${DEFAULT_PICTURE})`

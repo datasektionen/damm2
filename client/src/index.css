@@ -2,45 +2,52 @@
 
 /* Affect the mantine dropdown only */
 body > div:not(#root) * {
-    transition: none;
+  transition: none;
 }
 
-a[href="/login"] {
-    color: white;
+/* Aurora's global transition makes react-data-grid measure columns mid-transition */
+.rdg,
+.rdg * {
+  transition: none;
 }
-  
-a[href="/logout"] {
-    color: white;
+
+a[href='/login'] {
+  color: white;
+}
+
+a[href='/logout'] {
+  color: white;
 }
 
 a {
-    color: #E83D84;
+  color: #e83d84;
 }
 
 body {
-    background-color: #eee;
-
+  background-color: #eee;
 }
 
 @media screen and (max-width: 600px) {
-    body {
-        font-size: 14px;
-    }
+  body {
+    font-size: 14px;
+  }
 }
 
-input[type="number"] {
-    border: none;
-    box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.1);
-    color: #696969;
-    padding: 10px;
-    border: 1px solid #f7f7f7;
-    height: 50px;
+input[type='number'] {
+  border: none;
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.1);
+  color: #696969;
+  padding: 10px;
+  border: 1px solid #f7f7f7;
+  height: 50px;
 }
 
-input[type="number"]:disabled {
-    cursor: not-allowed;
+input[type='number']:disabled {
+  cursor: not-allowed;
 }
 
-div.rdg-checkbox, div.rdg-row, div.rdg-cell {
-    transition: none;
+div.rdg-checkbox,
+div.rdg-row,
+div.rdg-cell {
+  transition: none;
 }

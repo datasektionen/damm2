@@ -9,16 +9,19 @@
     "copy-files": "cp -r fuzzyfile.json prisma ./dist/",
     "setup": "npx prisma migrate deploy && npm --prefix client install",
     "start": "node dist/app.js",
-    "dev": "nodemon",
-    "test": "NODE_ENV=testing mocha -r ts-node/register test/*.ts --exit",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "dev": "tsx watch app.ts",
+    "test": "NODE_ENV=testing SESSION_SECRET=testing mocha --import=tsx test/*.ts --exit",
+    "lint": "oxlint --disable-nested-config",
+    "lint:fix": "oxlint --disable-nested-config --fix",
+    "format": "prettier --write '**/*.ts'",
+    "format:check": "prettier --check '**/*.ts'",
     "dc:up": "docker compose -f .docker/compose/docker-compose-dev.yml up -d postgres pgadmin",
     "dc:down": "docker compose -f .docker/compose/docker-compose-dev.yml down"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1152.0",
     "@aws-sdk/lib-storage": "^3.1152.0",
+    "@json2csv/plainjs": "^7.0.8",
     "@prisma/client": "^6.19.3",
     "cors": "^2.8.6",
     "cron": "^4.4.0",
@@ -26,31 +29,32 @@
     "express-session": "^1.19.0",
     "express-validator": "^7.3.2",
     "http-status-codes": "^2.3.0",
-    "json2csv": "^5.0.7",
     "morgan": "^1.12.1",
     "multer": "^2.4.0",
-    "openid-client": "^5.7.1",
+    "openid-client": "^6.8.8",
     "prisma": "^6.19.3",
     "sharp": "^0.35.5"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
     "@types/chai": "^5.2.3",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/express-session": "^1.19.0",
-    "@types/json2csv": "^5.0.7",
     "@types/mocha": "^10.0.10",
     "@types/morgan": "^1.9.10",
     "@types/multer": "^2.3.0",
     "@types/node": "^24.19.2",
     "chai": "^6.3.0",
     "chai-http": "^5.1.2",
-    "eslint": "^10.12.0",
     "mocha": "^12.0.3",
-    "nodemon": "^3.1.14",
-    "ts-node": "^10.9.2",
-    "typescript": "~5.9",
-    "typescript-eslint": "^8.71.2"
+    "oxlint": "^1.88.0",
+    "prettier": "^3.9.10",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  },
+  "overrides": {
+    "@prisma/config": {
+      "deepmerge-ts": "^8.0.2"
+    }
   }
 }

@@ -5,10 +5,10 @@
 	Written by Jonas Dahl.
 */
 
-export const generator = (
-  adapter: () => Promise<{ date: Date; template: "DFUNKT"; mandates: any }[]>,
-) => {
-  const events = [] as any[];
+import { IDfunktEvent } from "./dfunkt";
+
+export const generator = (adapter: () => Promise<IDfunktEvent[]>) => {
+  const events: IDfunktEvent[] = [];
   console.log("Generator init", adapter);
 
   adapter().then((adapterEvents) => {

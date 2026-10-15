@@ -1,5 +1,4 @@
-export {}
-
+export {};
 
 // import React, { useEffect, useMemo, useRef, useState } from 'react';
 // import { StyledPatchArchive, StyledFlipMove, StyledPatchArchiveDivider, Left, Right, StyledFlipMoveDetails } from '../PatchArchive/style';

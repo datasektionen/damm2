@@ -1,8 +1,24 @@
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import Methone from 'methone';
 import { Link, Route, Routes, useParams, Navigate } from 'react-router-dom';
 import { PatchArchive } from './views/PatchArchive/PatchArchive';
 import { TagsManager } from './views/TagsManager/TagsManager';
+// Mantine styles for MultiSelect, without baseline.css which would restyle <body>
+import '@mantine/core/styles/default-css-variables.css';
+import '@mantine/core/styles/global.css';
+import '@mantine/core/styles/ScrollArea.css';
+import '@mantine/core/styles/UnstyledButton.css';
+import '@mantine/core/styles/VisuallyHidden.css';
+import '@mantine/core/styles/Paper.css';
+import '@mantine/core/styles/Popover.css';
+import '@mantine/core/styles/CloseButton.css';
+import '@mantine/core/styles/Group.css';
+import '@mantine/core/styles/Loader.css';
+import '@mantine/core/styles/Input.css';
+import '@mantine/core/styles/Combobox.css';
+import '@mantine/core/styles/Pill.css';
+import '@mantine/core/styles/PillsInput.css';
+import 'react-data-grid/lib/styles.css';
 import './index.css';
 import { ROUTES } from './common/routes';
 import { PatchCreator } from './views/PatchCreator/PatchCreator';
@@ -24,10 +40,10 @@ import { DarkModeContextProvider } from './hooks/useDarkMode';
 import { AdminContext } from './hooks/useAppContext';
 
 type Links = {
-  home: JSX.Element;
-  archive: JSX.Element;
-  timeline: JSX.Element;
-  admin?: JSX.Element;
+  home: React.JSX.Element;
+  archive: React.JSX.Element;
+  timeline: React.JSX.Element;
+  admin?: React.JSX.Element;
 };
 
 const defaultLinks: Links = {
@@ -62,6 +78,10 @@ const AppInner = (props: AppInnerProps) => {
         fontFamily: "'Lato', sans-serif",
         primaryColor: 'pink',
         fontFamilyMonospace: "'Lato', sans-serif",
+        // Mantine 9 changed the default from sm to md
+        defaultRadius: 'sm',
+        // Aurora sets the html font-size to 10px; Mantine sizes are in rem (16px)
+        scale: 1.6,
       }}
     >
       <ScrollToTop />
@@ -166,23 +186,25 @@ const AppInner = (props: AppInnerProps) => {
   );
 };
 
-export const App: React.FC = (props) => {
-  const [methoneLinks, setMethoneLinks] = useState(defaultLinks);
-
+export const App: React.FC = () => {
   const { admin, loading, hasToken, user } = useAuthorization();
 
-  useEffect(() => {
-    if (
+  const methoneLinks = useMemo(
+    () =>
       admin.includes('admin') ||
       admin.includes('post') ||
       admin.includes('prylis')
-    ) {
-      setMethoneLinks({
-        ...defaultLinks,
-        admin: <Link to={ROUTES.ADMIN}>Administrera</Link>,
-      });
-    }
-  }, [admin, loading]);
+        ? {
+            ...defaultLinks,
+            admin: (
+              <Link to={ROUTES.ADMIN} key={'methonel-admin'}>
+                Administrera
+              </Link>
+            ),
+          }
+        : defaultLinks,
+    [admin]
+  );
 
   return (
     <div id="application" className="cerise">
@@ -200,14 +222,14 @@ const Token = () => {
   // const navigate = useNavigate();
   useEffect(() => {
     localStorage.setItem('token', token as string);
-  }, []);
+  }, [token]);
 
   return <Navigate to={ROUTES.HOME} />;
 };
 
 const Login = () => {
   useEffect(() => {
-    window.location = `/login` as any;
+    window.location.href = '/login';
   });
 
   return <></>;

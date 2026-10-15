@@ -1,8 +1,14 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Field } from '../../../../components/Field/Field';
 import { Button } from '../../../../components/Button/Button';
 import { TextArea } from '../../../../components/TextArea/TextArea';
-import { Bag, IPatch, IPerson, ITag } from '../../../../types/definitions';
+import {
+  Bag,
+  FormChangeEvent,
+  IPatch,
+  IPerson,
+  ITag,
+} from '../../../../types/definitions';
 import {
   StyledEditDetails,
   Image,
@@ -30,7 +36,7 @@ interface Props {
   tags: ITag[];
   editApiPath: string;
   type: 'patch' | 'artefact';
-  onDeleteClick: (id: number) => any;
+  onDeleteClick: (id: number) => void;
   bags: Bag[];
 }
 
@@ -42,7 +48,6 @@ export const EditDetails: React.FC<Props> = ({
   editApiPath,
   type,
   onDeleteClick,
-  bags,
 }) => {
   const [editState, setEditState] = useState<IPatch>(patch);
   const [creators, setCreators] = useState<string[]>(
@@ -58,28 +63,33 @@ export const EditDetails: React.FC<Props> = ({
 
   const ref = useRef(document.createElement('div'));
 
-  useEffect(() => {
+  // Reset the form when a different (or refetched) patch is passed in
+  const [prevPatch, setPrevPatch] = useState(patch);
+  if (patch !== prevPatch) {
+    setPrevPatch(patch);
     setEditState(patch);
     setFiles([]);
-  }, [patch]);
+  }
 
   useEffect(() => {
     (async () => {
-      const result = await http.get(url('/api/persons/all'));
+      const result = await http.get<{ body: IPerson[] }>(
+        url('/api/persons/all')
+      );
       if (result.status === 200) {
         setPersons(result.data.body);
       }
     })();
   }, []);
 
-  const onChange = (e: any) => {
+  const onChange = (e: FormChangeEvent) => {
     setEditState({ ...editState, [e.target.name]: e.target.value });
   };
 
   const put = async () => {
     setLoading(true);
     setRequestError('');
-    const body = {
+    const body: Record<string, unknown> = {
       id: editState.id,
       name: editState.name,
       description: editState.description,
@@ -87,7 +97,7 @@ export const EditDetails: React.FC<Props> = ({
       tags: editState.tags.map((x: ITag) => x.id),
       creators: creators.map((c) => parseInt(c)),
       amount: parseInt(`${editState.amount}`),
-    } as any;
+    };
 
     if (image) {
       await replaceImage();
@@ -100,7 +110,7 @@ export const EditDetails: React.FC<Props> = ({
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       })
-      .then(async (res) => {
+      .then(async () => {
         if (files.length !== 0) {
           await uploadFiles(
             editState.id,
@@ -123,7 +133,7 @@ export const EditDetails: React.FC<Props> = ({
 
   // Replace images on a patch
   // Uploads the new image, attaches the returned images to the Patch, and deletes the old images from S3.
-  const replaceImage = useCallback(async () => {
+  const replaceImage = async () => {
     if (type !== 'patch') return;
     if (image === null) return;
     const imageFormData = new FormData();
@@ -135,17 +145,15 @@ export const EditDetails: React.FC<Props> = ({
       },
     };
     // Upload new image
-    const uploadImageResult = await http.post(
-      url('/api/files/upload/image?path=patches'),
-      imageFormData,
-      config
-    );
+    const uploadImageResult = await http.post<{
+      body: { Location: string }[];
+    }>(url('/api/files/upload/image?path=patches'), imageFormData, config);
     // Attach the returned image and the compressed image to the Patch
     const result = await http.post(
       url('/api/files/attach/img-to'),
       {
         id: editState.id,
-        images: uploadImageResult.data.body.map((b: any) => b.Location),
+        images: uploadImageResult.data.body.map((b) => b.Location),
         type: 'patch',
       },
       config
@@ -159,7 +167,7 @@ export const EditDetails: React.FC<Props> = ({
       const u = new URL(i, Configuration.apiBaseUrl).pathname.substring(1);
       await http.delete(url(`/api/files/image?key=${u}`), config);
     });
-  }, [image, editState.id]);
+  };
 
   return (
     <StyledEditDetails ref={ref}>
@@ -224,9 +232,10 @@ export const EditDetails: React.FC<Props> = ({
         data={persons}
         disabled={loading}
         onCreate={async (query) => {
-          const result = await http.post(url('/api/persons/person'), {
-            name: query,
-          });
+          const result = await http.post<{ body: IPerson }>(
+            url('/api/persons/person'),
+            { name: query }
+          );
           setPersons([...persons, result.data.body]);
           return result.data.body;
         }}
@@ -237,7 +246,7 @@ export const EditDetails: React.FC<Props> = ({
       <FileUploader
         files={files}
         onAddFile={(f: File) => setFiles([f])}
-        onFileRemove={(f: File) => setFiles([])}
+        onFileRemove={() => setFiles([])}
         disabled={loading}
       />
 

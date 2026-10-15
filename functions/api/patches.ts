@@ -136,7 +136,7 @@ export const update = async (
     amount?: number;
   },
 ): Promise<ApiResponse> => {
-  const data: Partial<Patch & { tags: any; files: any }> = {};
+  const data: Prisma.PatchUpdateInput = {};
 
   if (name) {
     data.name = name;

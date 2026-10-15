@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   StyledPatch,
   Hover,
@@ -9,7 +9,7 @@ import {
   HoverTags,
 } from './style';
 import { Tag } from '../Tag/Tag';
-import Moment from 'react-moment';
+import { formatShortDate } from '../../common/dates';
 import { IPatch } from '../../types/definitions';
 import { useDarkMode } from '../../hooks/useDarkMode';
 
@@ -56,7 +56,7 @@ export const PatchComponent: React.FC<Props> = (props) => {
           <HoverTags>
             {patch.tags.length === 0
               ? 'Inga taggar'
-              : patch.tags.map((tag: any) => (
+              : patch.tags.map((tag) => (
                   <Tag key={`patch-${patch.id}-tag-${tag.id}`} {...tag} />
                 ))}
           </HoverTags>
@@ -78,7 +78,7 @@ export const PatchComponent: React.FC<Props> = (props) => {
           {patch.date.length === 0 ? (
             'Okänt'
           ) : (
-            <Moment format="D MMM YYYY">{patch.date}</Moment>
+            <time>{formatShortDate(patch.date)}</time>
           )}
         </PatchItemDate>
       </PatchInfo>
@@ -89,15 +89,4 @@ export const PatchComponent: React.FC<Props> = (props) => {
   );
 };
 
-// react-flip-move requires class components
-class PatchWrapper extends React.Component<Props, {}> {
-  constructor(props: Props) {
-    super(props);
-  }
-
-  render() {
-    return <PatchComponent {...this.props} />;
-  }
-}
-
-export const Patch = PatchWrapper;
+export const Patch = PatchComponent;

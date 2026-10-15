@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { IPatch, ITag } from '../../../../types/definitions';
-import Moment from 'react-moment';
+import { formatDateTime, formatLongDate } from '../../../../common/dates';
 import {
   PatchImage,
   Left,
@@ -23,6 +23,7 @@ import { Tag } from '../../../../components/Tag/Tag';
 import { url } from '../../../../common/api';
 import http from '../../../../common/api';
 import ReactMarkdown from 'react-markdown';
+import { newTabLinks } from '../../../../common/markdown';
 import { useAppContext } from '../../../../hooks/useAppContext';
 import { useShouldHidePatch } from '../../../../components/Patch/Patch';
 
@@ -63,7 +64,7 @@ export const DetailsView: React.FC<Props> = ({
           },
         }
       )
-      .then(async (res) => {
+      .then(async () => {
         await fetchPatches();
       })
       .finally(() => {
@@ -173,22 +174,16 @@ export const DetailsView: React.FC<Props> = ({
             {patch.date.length === 0 ? (
               'Okänt'
             ) : (
-              <Moment format="D MMMM YYYY" locale="sv">
-                {patch.date}
-              </Moment>
+              <time>{formatLongDate(patch.date)}</time>
             )}
           </span>
           <span title="Uppladdningsdatum">
             <i className="fas fa-cloud-upload-alt" />
-            <Moment format="D MMMM YYYY" locale="sv">
-              {patch.createdAt}
-            </Moment>
+            <time>{formatLongDate(patch.createdAt)}</time>
           </span>
           <span title="Senast redigerad">
             <i className="fas fa-edit"></i>
-            <Moment format="D MMMM YYYY HH:mm:ss" locale="sv">
-              {patch.updatedAt}
-            </Moment>
+            <time>{formatDateTime(patch.updatedAt)}</time>
           </span>
           {patch.createdBy.length !== 0 && (
             <div>
@@ -201,7 +196,7 @@ export const DetailsView: React.FC<Props> = ({
         </Meta>
         <Content>
           <Description>
-            <ReactMarkdown linkTarget="_blank">
+            <ReactMarkdown components={newTabLinks}>
               {patch.description === ''
                 ? 'Ingen beskrivning finns'
                 : patch.description}

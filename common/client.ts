@@ -7,7 +7,6 @@ const prismaClientSingleton = () => {
 
 // Augment globalThis
 declare global {
-   
   var prisma: PrismaClient | undefined;
 }
 

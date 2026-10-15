@@ -1,17 +1,15 @@
 import http from '../../../common/api';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import DataGrid, { Column, SelectColumn, EditorProps } from 'react-data-grid';
-import { url } from '../../../common/api';
+import React, { useCallback, useMemo, useState } from 'react';
+import { TreeDataGrid, SelectColumn, type Column } from 'react-data-grid';
 import { Button } from '../../../components/Button/Button';
 import { Bag, Box, IPatch } from '../../../types/definitions';
-import { groupBy as rowGrouper } from 'lodash';
-import { useHotkeys, getHotkeyHandler } from '@mantine/hooks';
+import { groupBy as rowGrouper } from '../../../functions/groupBy';
 import { CellStringInput } from '../../../components/CellStringInput/CellStringInput';
 import { Field } from '../../../components/Field/Field';
 
 interface BagRow {
   name: string;
-  id: string;
+  id: number;
   belongsTo: string;
   uniquePatches: number;
   '#patches': number;
@@ -21,46 +19,48 @@ interface BagRow {
 interface Props {
   bags: Bag[];
   boxes: Box[];
-  setBags: (bags: Bag[]) => void;
+  setBags: React.Dispatch<React.SetStateAction<Bag[]>>;
 }
 
 const groupByOptions = [{ label: 'Låda', value: 'belongsTo' }];
 
 export const BagDataGrid = ({ bags, boxes, setBags }: Props) => {
-  const [selectedRows, setSelectedRows] = useState<Set<string>>(
+  const [selectedRows, setSelectedRows] = useState<Set<number>>(
     () => new Set()
   );
   const [expandedGroupIds, setExpandedGroupIds] = useState<Set<unknown>>(
     new Set()
   );
 
-  const [selectedBox, setSelectedBox] = useState<string>('');
+  const [selectedBoxState, setSelectedBox] = useState<string>('');
   const [assigningBags, setAssigningBags] = useState<boolean>(false);
   const [deletingBags, setDeletingBags] = useState<boolean>(false);
   const [groupBy, setGroupBy] = useState<string[]>([]);
   const [security, setSecurity] = useState('');
 
-  const updateBagName = async (rowId: number, value: string) => {
-    return http
-      .put('/api/storage/bag/name', {
-        bagId: rowId,
-        name: value,
-      })
-      .then(() => {
-        const bagToUpdate = bags.find((b) => b.id === rowId);
-        if (!bagToUpdate) return;
-        const next = [
-          ...bags.filter((b) => b.id !== rowId),
-          {
-            ...bagToUpdate,
-            name: value,
-          },
-        ].sort((a, b) =>
-          a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
-        );
-        setBags(next);
-      });
-  };
+  // Default to the first box until the user picks one
+  const selectedBox =
+    selectedBoxState || (boxes.length !== 0 ? `${boxes[0].id}` : '');
+
+  const updateBagName = useCallback(
+    async (rowId: number, value: string) => {
+      return http
+        .put('/api/storage/bag/name', {
+          bagId: rowId,
+          name: value,
+        })
+        .then(() => {
+          setBags((bags) =>
+            bags
+              .map((b) => (b.id === rowId ? { ...b, name: value } : b))
+              .sort((a, b) =>
+                a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
+              )
+          );
+        });
+    },
+    [setBags]
+  );
 
   const bagColumns: Column<BagRow>[] = useMemo(() => {
     return [
@@ -70,14 +70,14 @@ export const BagDataGrid = ({ bags, boxes, setBags }: Props) => {
         key: 'name',
         name: 'Namn',
         editable: true,
-        editor: ({ row }) => (
+        renderEditCell: ({ row }) => (
           <CellStringInput
             initial={row.name}
             row={row}
             onSave={updateBagName}
           />
         ),
-        formatter: ({ row }) => (
+        renderCell: ({ row }) => (
           <div style={{ cursor: 'pointer' }}>{row.name}</div>
         ),
       },
@@ -88,7 +88,7 @@ export const BagDataGrid = ({ bags, boxes, setBags }: Props) => {
       {
         key: 'uniquePatches',
         name: 'Antal unika märken',
-        formatter: ({ row }) => (
+        renderCell: ({ row }) => (
           <div title={row.patches.map((p) => p.name).join(', ')}>
             {row.uniquePatches}
           </div>
@@ -96,14 +96,7 @@ export const BagDataGrid = ({ bags, boxes, setBags }: Props) => {
       },
       { key: '#patches', name: 'Antal märken' },
     ];
-  }, [boxes, bags]);
-
-  useEffect(() => {
-    // boxes is empty on first render, making our value for selectedBox undefined. Set it as soon as boxes has data
-    if (!selectedBox && boxes.length !== 0) {
-      setSelectedBox(`${boxes[0].id}`);
-    }
-  });
+  }, [updateBagName]);
 
   const assignBagsToBox = useCallback(() => {
     if (selectedRows.size === 0) return;
@@ -116,19 +109,20 @@ export const BagDataGrid = ({ bags, boxes, setBags }: Props) => {
       })
       .then(() => {
         setSelectedRows(new Set());
-        const next: Bag[] = bags.map((b) => {
-          if (selectedRows.has(b.id as any)) {
-            return {
-              ...b,
-              boxId: parseInt(selectedBox),
-              box: boxes.find((box) => box.id === parseInt(selectedBox))!,
-            };
-          } else return b;
-        });
-        setBags(next);
+        setBags((bags) =>
+          bags.map((b) =>
+            selectedRows.has(b.id)
+              ? {
+                  ...b,
+                  boxId: parseInt(selectedBox),
+                  box: boxes.find((box) => box.id === parseInt(selectedBox))!,
+                }
+              : b
+          )
+        );
       })
       .finally(() => setAssigningBags(false));
-  }, [selectedRows, selectedBox]);
+  }, [selectedRows, selectedBox, boxes, setBags]);
 
   const deleteBags = useCallback(() => {
     if (selectedRows.size === 0) return;
@@ -140,17 +134,13 @@ export const BagDataGrid = ({ bags, boxes, setBags }: Props) => {
       })
       .then(() => {
         setSelectedRows(new Set());
-        const next: Bag[] = bags.reduce((arr: Bag[], bag: Bag) => {
-          if (selectedRows.has(bag.id as any)) return arr;
-          else return [...arr, bag];
-        }, []);
-        setBags(next);
+        setBags((bags) => bags.filter((bag) => !selectedRows.has(bag.id)));
       })
       .finally(() => {
         setDeletingBags(false);
         setSecurity('');
       });
-  }, [selectedRows]);
+  }, [selectedRows, setBags]);
 
   const toggleGroupBy = (key: string) => {
     if (groupBy.includes(key)) setGroupBy(groupBy.filter((o) => o !== key));
@@ -174,19 +164,17 @@ export const BagDataGrid = ({ bags, boxes, setBags }: Props) => {
         ))}
       </div>
       <p>Dubbelklicka på påsens namn för att redigera</p>
-      <DataGrid
+      <TreeDataGrid<BagRow, unknown, number>
         columns={bagColumns}
         groupBy={groupBy}
-        rows={
-          bags.map((b) => ({
-            id: b.id,
-            name: b.name,
-            belongsTo: b.box.name,
-            '#patches': b['#patches'],
-            uniquePatches: b['#uniquePatches'],
-            patches: b.patches ?? [],
-          })) as any
-        }
+        rows={bags.map((b) => ({
+          id: b.id,
+          name: b.name,
+          belongsTo: b.box.name,
+          '#patches': b['#patches'],
+          uniquePatches: b['#uniquePatches'],
+          patches: b.patches ?? [],
+        }))}
         rowKeyGetter={(row) => row.id}
         selectedRows={selectedRows}
         onSelectedRowsChange={setSelectedRows}

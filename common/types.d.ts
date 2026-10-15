@@ -28,7 +28,8 @@ declare module "express-serve-static-core" {
   interface Request {
     session: import("express-session").Session & {
       user?: DammUser;
-      tokens?: Record<string, any>;
+      tokens?: Record<string, unknown>;
+      oidcState?: string;
     };
   }
 }

@@ -1,8 +1,13 @@
 import http from '../../common/api';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import DataGrid, { Column, SelectColumn, SortColumn } from 'react-data-grid';
+import {
+  TreeDataGrid,
+  SelectColumn,
+  type Column,
+  type SortColumn,
+} from 'react-data-grid';
 import { Bag, IPatch, ITag } from '../../types/definitions';
-import { groupBy as rowGrouper } from 'lodash';
+import { groupBy as rowGrouper } from '../../functions/groupBy';
 import { Button } from '../../components/Button/Button';
 import { Checkbox } from '../../components/Checkbox/Checkbox';
 
@@ -23,7 +28,7 @@ const columns: Column<Row>[] = [
     name: 'Bild',
     sortable: true,
     width: 30,
-    formatter: ({ row }) => (
+    renderCell: ({ row }) => (
       <span style={{ display: 'flex', justifyContent: 'center' }}>
         <img
           src={row.image}
@@ -39,7 +44,7 @@ const columns: Column<Row>[] = [
     name: 'Taggar',
     sortable: true,
     resizable: true,
-    formatter: ({ row }) => (
+    renderCell: ({ row }) => (
       <div>
         {row.tags.map((t) => (
           <span
@@ -61,12 +66,12 @@ const columns: Column<Row>[] = [
       </div>
     ),
   },
-  { key: 'bag', name: 'Påse', sortable: true, width: 150},
+  { key: 'bag', name: 'Påse', sortable: true, width: 150 },
   { key: 'box', name: 'Låda', sortable: true },
   {
     key: 'amount',
     name: 'Antal',
-    groupFormatter({ childRows }) {
+    renderGroupCell({ childRows }) {
       return <>{childRows.reduce((acc, { amount }) => acc + amount, 0)}</>;
     },
     sortable: true,
@@ -78,6 +83,45 @@ const groupByOptions = [
   { label: 'Påse', value: 'bag' },
 ];
 
+type Comparator = (a: Row, b: Row) => number;
+
+function getComparator(sortColumn: string): Comparator {
+  switch (sortColumn) {
+    case 'image':
+      return (a, b) => {
+        return a[sortColumn].localeCompare(b[sortColumn]);
+      };
+    case 'name':
+      return (a, b) => {
+        return a[sortColumn].localeCompare(b[sortColumn]);
+      };
+    case 'date':
+      return (a, b) => {
+        return (
+          new Date(a[sortColumn]).getTime() - new Date(b[sortColumn]).getTime()
+        );
+      };
+    case 'tags':
+      return (a, b) => {
+        return a[sortColumn].length - b[sortColumn].length;
+      };
+    case 'bag':
+      return (a, b) => {
+        return a[sortColumn].localeCompare(b[sortColumn]);
+      };
+    case 'box':
+      return (a, b) => {
+        return a[sortColumn].localeCompare(b[sortColumn]);
+      };
+    case 'amount':
+      return (a, b) => {
+        return a[sortColumn] - b[sortColumn];
+      };
+    default:
+      throw new Error(`unsupported sortColumn: "${sortColumn}"`);
+  }
+}
+
 export const PatchList = () => {
   const [patches, setPatches] = useState<IPatch[]>([]);
   const [bags, setBags] = useState<Bag[]>([]);
@@ -88,7 +132,7 @@ export const PatchList = () => {
   const [selectedRows, setSelectedRows] = useState<Set<string>>(
     () => new Set()
   );
-  const [selectedBag, setSelectedBag] = useState<string>('');
+  const [selectedBagState, setSelectedBag] = useState<string>('');
   const [isAssigningPatches, setIsAssigningPatches] = useState(false);
   const [isSavingAmount, setIsSavingAmount] = useState(false);
 
@@ -98,13 +142,15 @@ export const PatchList = () => {
 
   const getPatches = () => {
     http
-      .get('/api/patches/all')
+      .get<{ body: IPatch[] }>('/api/patches/all')
       // http.get("https://damm.datasektionen.se/api/patches/all")
       .then((res) => setPatches(res.data.body));
   };
 
   const getBags = () => {
-    http.get('/api/storage/bag/all').then((res) => setBags(res.data.body));
+    http
+      .get<{ body: Bag[] }>('/api/storage/bag/all')
+      .then((res) => setBags(res.data.body));
   };
 
   const toggleGroupBy = (key: string) => {
@@ -115,12 +161,9 @@ export const PatchList = () => {
   useEffect(getPatches, []);
   useEffect(getBags, []);
 
-  useEffect(() => {
-    // boxes is empty on first render, making our value for selectedBox undefined. Set it as soon as boxes has data
-    if (!selectedBag && bags.length !== 0) {
-      setSelectedBag(`${bags[0].id}`);
-    }
-  });
+  // Default to the first bag until the user picks one
+  const selectedBag =
+    selectedBagState || (bags.length !== 0 ? `${bags[0].id}` : '');
 
   const assignPatchesToBag = useCallback(() => {
     if (selectedRows.size === 0) return;
@@ -133,21 +176,21 @@ export const PatchList = () => {
       })
       .then(() => {
         setSelectedRows(new Set());
-        const next = patches.map((p) => {
-          if (selectedRows.has(p.id as any)) {
-            return {
-              ...p,
-              bagId: parseInt(selectedBag),
-              bag: bags.find((b) => b.id === parseInt(selectedBag)),
-            };
-          } else return p;
-        });
-
-        setPatches(next);
+        setPatches((patches) =>
+          patches.map((p) => {
+            if (selectedRows.has(String(p.id))) {
+              return {
+                ...p,
+                bagId: parseInt(selectedBag),
+                bag: bags.find((b) => b.id === parseInt(selectedBag)),
+              };
+            } else return p;
+          })
+        );
         getPatches();
       })
       .finally(() => setIsAssigningPatches(false));
-  }, [selectedBag, selectedRows]);
+  }, [selectedBag, selectedRows, bags]);
 
   const assignAmountToPatches = useCallback(() => {
     if (selectedRows.size === 0) return;
@@ -160,16 +203,11 @@ export const PatchList = () => {
       })
       .then(() => {
         setSelectedRows(new Set());
-        const next: IPatch[] = patches.map((p) => {
-          if (selectedRows.has(p.id as any)) {
-            return {
-              ...p,
-              amount,
-            };
-          } else return p;
-        });
-
-        setPatches(next);
+        setPatches((patches) =>
+          patches.map((p) =>
+            selectedRows.has(String(p.id)) ? { ...p, amount } : p
+          )
+        );
         getPatches();
       })
       .finally(() => setIsSavingAmount(false));
@@ -188,57 +226,22 @@ export const PatchList = () => {
     [patches]
   );
 
-  type Comparator = (a: Row, b: Row) => number;
-
-  function getComparator(sortColumn: string): Comparator {
-    switch (sortColumn) {
-      case 'image':
-        return (a, b) => {
-          return a[sortColumn].localeCompare(b[sortColumn]);
-        };
-      case 'name':
-        return (a, b) => {
-          return a[sortColumn].localeCompare(b[sortColumn]);
-        };
-      case 'date':
-        return (a, b) => {
-          return (
-            new Date(a[sortColumn]).getTime() -
-            new Date(b[sortColumn]).getTime()
-          );
-        };
-      case 'tags':
-        return (a, b) => {
-          return a[sortColumn].length - b[sortColumn].length;
-        };
-      case 'bag':
-        return (a, b) => {
-          return a[sortColumn].localeCompare(b[sortColumn]);
-        };
-      case 'box':
-        return (a, b) => {
-          return a[sortColumn].localeCompare(b[sortColumn]);
-        };
-      case 'amount':
-        return (a, b) => {
-          return a[sortColumn] - b[sortColumn];
-        };
-      default:
-        throw new Error(`unsupported sortColumn: "${sortColumn}"`);
-    }
-  }
-  const rows: readonly Row[] = patches
-    .filter((x) => (showOnlyNoTags ? x.tags.length === 0 : true))
-    .map((p) => ({
-      id: p.id.toString(),
-      name: p.name,
-      image: p.images[1],
-      tags: p.tags,
-      date: p.date,
-      bag: p.bag?.name ?? 'Ingen påse',
-      amount: p.amount,
-      box: p.bag?.box.name ?? 'Ingen låda',
-    }));
+  const rows = useMemo(
+    (): readonly Row[] =>
+      patches
+        .filter((x) => (showOnlyNoTags ? x.tags.length === 0 : true))
+        .map((p) => ({
+          id: p.id.toString(),
+          name: p.name,
+          image: p.images[1],
+          tags: p.tags,
+          date: p.date,
+          bag: p.bag?.name ?? 'Ingen påse',
+          amount: p.amount,
+          box: p.bag?.box.name ?? 'Ingen låda',
+        })),
+    [patches, showOnlyNoTags]
+  );
 
   const sortedRows = useMemo((): readonly Row[] => {
     if (sortColumns.length === 0) return rows;
@@ -253,7 +256,7 @@ export const PatchList = () => {
       }
       return 0;
     });
-  }, [patches, sortColumns, rows]);
+  }, [sortColumns, rows]);
 
   return (
     <>
@@ -286,7 +289,7 @@ export const PatchList = () => {
           setChecked={setShowOnlyNoTags}
         />
       </div>
-      <DataGrid
+      <TreeDataGrid
         style={{ maxHeight: '100%', minHeight: '500px' }}
         sortColumns={sortColumns}
         onSortColumnsChange={setSortColumns}

@@ -1,17 +1,11 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   StyledPatchArchive,
-  StyledFlipMove,
+  AnimatedPatchGrid,
   StyledPatchArchiveDivider,
   Left,
   Right,
-  StyledFlipMoveDetails,
+  AnimatedPatchDetails,
 } from './style';
 import { FancyHeader } from '../../components/FancyHeader/FancyHeader';
 import http from '../../common/api';
@@ -19,13 +13,12 @@ import { url } from '../../common/api';
 import { Patch } from '../../components/Patch/Patch';
 import { IPatch, ITag } from '../../types/definitions';
 import { FilterAndSort } from './compositions/FilterAndSort/FilterAndSort';
-import { WrappedPatchDetails } from './compositions/PatchDetails/PatchDetails';
+import { PatchDetails } from './compositions/PatchDetails/PatchDetails';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ROUTES } from '../../common/routes';
 import { SpinnerCover } from '../../components/SpinnerCover/SpinnerCover';
-import queryString from 'query-string';
 import useScreenSizeChecker from '../../hooks/useScreenSizeChecker';
-import Helmet from 'react-helmet';
+import { useTitle } from '../../hooks/useTitle';
 import { title } from '../../common/strings';
 import { useAppContext } from '../../hooks/useAppContext';
 import { useDarkMode } from '../../hooks/useDarkMode';
@@ -125,37 +118,67 @@ export const PATCH_SORT_MODES: {
 
 const ITEMS_PER_PAGE = 35;
 
-export const PatchArchive: React.FC = (props) => {
-  const [patches, setPatches] = useState([]);
+export const PatchArchive: React.FC = () => {
+  useTitle(title('Märkesarkiv'));
+  const [patches, setPatches] = useState<IPatch[]>([]);
   const [fetchingPatches, setFetchingPatches] = useState(true);
   const [edit, setEdit] = useState(false);
-  const [tags, setTags] = useState([]);
+  const [tags, setTags] = useState<ITag[]>([]);
   const [patchQuery, setPatchQuery] = useState('');
   const [sortOption, setSortOption] = useState(
-    PATCH_SORT_MODES.find((x) => x.default)?.key!
+    PATCH_SORT_MODES.find((x) => x.default)!.key
   );
-  const [selectedTags, setSelectedTags] = useState([]);
-  const [selectedPatch, setSelectedPatch] = useState<IPatch | null>(null);
+  const [selectedTags, setSelectedTags] = useState<ITag[]>([]);
   const pageRef = useRef(document.createElement('div'));
   // const history = useHistory();
   const navigate = useNavigate();
   const location = useLocation();
   const isSmallScreen = useScreenSizeChecker(1100);
-  // Sorted patches
-  const sortPatches = useMemo(() => {
-    return patches.sort(
-      PATCH_SORT_MODES.find((x) => x.key === sortOption)?.sort
-    );
-  }, [patches, sortOption]);
-  const [resultingPatches, setResultingPatches] = useState<IPatch[]>(
-    sortPatches
+
+  const selectedPatchId = new URLSearchParams(location.search).get('patch');
+  const selectedPatch =
+    selectedPatchId === null
+      ? null
+      : (patches.find((p) => p.id === Number(selectedPatchId)) ?? null);
+
+  // Delay filtering until you have stopped typing/clicking tags/changing sort for 1 second
+  const filterInput = useMemo(
+    () => ({ patchQuery, sortOption, selectedTags, patches }),
+    [patchQuery, sortOption, selectedTags, patches]
   );
-  const [isSorting, setIsSorting] = useState<boolean>(true);
+  const [appliedFilter, setAppliedFilter] = useState(filterInput);
+  useEffect(() => {
+    const delay = setTimeout(() => setAppliedFilter(filterInput), 1000);
+    return () => clearTimeout(delay);
+  }, [filterInput]);
+  const isSorting = appliedFilter !== filterInput;
+
+  const resultingPatches = useMemo(() => {
+    const { patchQuery, sortOption, selectedTags, patches } = appliedFilter;
+    const query = patchQuery.toLowerCase();
+    const selectedTagIds = selectedTags.map((t) => t.id);
+    const sort = PATCH_SORT_MODES.find((x) => x.key === sortOption)?.sort;
+
+    return [...patches]
+      .sort(sort)
+      .filter(
+        (p) =>
+          (p.name.toLowerCase().includes(query) ||
+            p.createdBy.some((c) => c.name.toLowerCase().includes(query))) &&
+          (selectedTagIds.length === 0 ||
+            p.tags.some((t) => selectedTagIds.includes(t.id)))
+      );
+  }, [appliedFilter]);
+
   // Pagination
   const [page, setPage] = useState(1);
   const minPage = 1;
   const numPages = Math.ceil(resultingPatches.length / ITEMS_PER_PAGE);
-  const [itemsOnCurrentPage, setItemsOnCurrentPage] = useState<IPatch[]>([]);
+  const pageStart = (page - 1) * ITEMS_PER_PAGE;
+  const itemsOnCurrentPage = resultingPatches.slice(
+    pageStart,
+    pageStart + ITEMS_PER_PAGE
+  );
 
   const { admin } = useAppContext();
   const { isDarkModeEnabled } = useDarkMode();
@@ -180,18 +203,15 @@ export const PatchArchive: React.FC = (props) => {
     setPage(numPages);
   };
 
-  useEffect(() => {
-    const low = (page - 1) * ITEMS_PER_PAGE;
-    const high = low + ITEMS_PER_PAGE;
-    setItemsOnCurrentPage(resultingPatches.slice(low, high));
-  }, [page, resultingPatches]);
-
   const fetchPatches = async () => {
-    const response = await http.get(url('/api/patches/all'), {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token') ?? ''}`,
-      },
-    });
+    const response = await http.get<{ body: IPatch[] }>(
+      url('/api/patches/all'),
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token') ?? ''}`,
+        },
+      }
+    );
     if (response.status !== 200) {
       // TODO
     } else {
@@ -210,7 +230,9 @@ export const PatchArchive: React.FC = (props) => {
   // Fetch tags on mount
   useEffect(() => {
     (async () => {
-      const response = await http.get(url('/api/tags/all?type=PATCH'));
+      const response = await http.get<{ body: ITag[] }>(
+        url('/api/tags/all?type=PATCH')
+      );
       if (response.status !== 200) {
         // TODO
         return;
@@ -220,26 +242,18 @@ export const PatchArchive: React.FC = (props) => {
     })();
   }, []);
 
-  // Set selected patch when location string or patches array is changed
+  // Scroll to the patch details on small screens when a patch is opened
   useEffect(() => {
-    const { search } = location;
-    const { patch } = queryString.parse(search);
-    if (patch) {
-      setSelectedPatch(
-        patches.filter((p: IPatch) => p.id === Number(patch))[0] ?? null
-      );
-      if (isSmallScreen) {
-        setTimeout(
-          () => pageRef.current.scrollIntoView({ behavior: 'smooth' }),
-          50
-        );
-      }
-    }
-  }, [location, patches]);
+    if (!selectedPatchId || !isSmallScreen) return;
+    const delay = setTimeout(
+      () => pageRef.current.scrollIntoView({ behavior: 'smooth' }),
+      50
+    );
+    return () => clearTimeout(delay);
+  }, [location, patches, selectedPatchId, isSmallScreen]);
 
   const clickPatch = (patch: IPatch) => {
     if (edit) return;
-    setSelectedPatch(patch);
     // history.push({
     //     search: `?patch=${patch.id}`,
     //     // from is used in ScrollToTop.tsx. It makes us not scroll to top
@@ -258,7 +272,6 @@ export const PatchArchive: React.FC = (props) => {
   };
 
   const patchClose = () => {
-    setSelectedPatch(null);
     // history.push({
     //     pathname: ROUTES.PATCH_ARCHIVE,
     //     state: { from: ROUTES.PATCH_ARCHIVE }
@@ -273,44 +286,6 @@ export const PatchArchive: React.FC = (props) => {
     );
     setEdit(false);
   };
-
-  const patchTagsMatchesSelected = (patch: IPatch): boolean => {
-    if (selectedTags.length === 0) return true;
-
-    //If patch has no tags, do not match
-    if (tags.length === 0) return false;
-
-    return patch.tags.some((x) =>
-      selectedTags.map((y: ITag) => y.id).includes(x.id)
-    );
-  };
-
-  const matchesSearch = (patch: IPatch): boolean => {
-    const pname = patch.name.toLowerCase();
-    const query = new RegExp(patchQuery.toLowerCase(), 'g');
-
-    const matchesCreators = patch.createdBy.reduce((result, creator) => {
-      return creator.name.toLowerCase().match(query) !== null || result;
-    }, false);
-
-    return pname.match(query) !== null || matchesCreators;
-  };
-
-  const filterPatches = () => {
-    setResultingPatches(
-      sortPatches.filter(
-        (p: IPatch) => matchesSearch(p) && patchTagsMatchesSelected(p)
-      )
-    );
-    setIsSorting(false);
-  };
-
-  // Delay filter of patches until you have stopped typing/stopped clicking tags/stopped applying sort filters for 1 second
-  useEffect(() => {
-    setIsSorting(true);
-    const delay = setTimeout(filterPatches, 1000);
-    return () => clearTimeout(delay);
-  }, [patchQuery, sortOption, selectedTags, patches]);
 
   const deletePatch = async (id: number) => {
     if (
@@ -362,9 +337,6 @@ export const PatchArchive: React.FC = (props) => {
         )}
         <br />
       </FancyHeader>
-      <Helmet>
-        <title>{title('Märkesarkiv')}</title>
-      </Helmet>
       <StyledPatchArchiveDivider>
         <Left>
           <FilterAndSort
@@ -379,7 +351,7 @@ export const PatchArchive: React.FC = (props) => {
             tags={tags}
           />
           <StyledPatchArchive>
-            {fetchingPatches || (isSorting && <SpinnerCover />)}
+            {(fetchingPatches || isSorting) && <SpinnerCover />}
             {!fetchingPatches &&
               resultingPatches.length === 0 &&
               !isSorting && (
@@ -389,23 +361,20 @@ export const PatchArchive: React.FC = (props) => {
                   Inga märken hittades
                 </div>
               )}
-            {!fetchingPatches && resultingPatches.length !== 0 && !isSorting && (
-              <StyledFlipMove
-                duration={150}
-                appearAnimation="fade"
-                enterAnimation="fade"
-                leaveAnimation="fade"
-              >
-                {itemsOnCurrentPage.map((x: IPatch, i: number) => (
-                  <Patch
-                    key={`patch-${i}-${x.id}`}
-                    patch={x}
-                    onClick={(patch: IPatch) => clickPatch(patch)}
-                    disabled={edit}
-                  />
-                ))}
-              </StyledFlipMove>
-            )}
+            {!fetchingPatches &&
+              resultingPatches.length !== 0 &&
+              !isSorting && (
+                <AnimatedPatchGrid duration={150}>
+                  {itemsOnCurrentPage.map((x: IPatch, i: number) => (
+                    <Patch
+                      key={`patch-${i}-${x.id}`}
+                      patch={x}
+                      onClick={(patch: IPatch) => clickPatch(patch)}
+                      disabled={edit}
+                    />
+                  ))}
+                </AnimatedPatchGrid>
+              )}
             {!fetchingPatches &&
               resultingPatches.length !== 0 &&
               !isSorting && (
@@ -423,13 +392,8 @@ export const PatchArchive: React.FC = (props) => {
         </Left>
         {selectedPatch !== null && (
           <Right>
-            <StyledFlipMoveDetails
-              appearAnimation="fade"
-              leaveAnimation="fade"
-              enterAnimation="fade"
-              duration={250}
-            >
-              <WrappedPatchDetails
+            <AnimatedPatchDetails duration={250}>
+              <PatchDetails
                 editApiPath="/api/patches/update"
                 patch={selectedPatch}
                 onClose={patchClose}
@@ -440,7 +404,7 @@ export const PatchArchive: React.FC = (props) => {
                 type="patch"
                 onDeleteClick={deletePatch}
               />
-            </StyledFlipMoveDetails>
+            </AnimatedPatchDetails>
           </Right>
         )}
       </StyledPatchArchiveDivider>
