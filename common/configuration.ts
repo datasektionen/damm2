@@ -1,7 +1,7 @@
-import dotenv from "dotenv";
+import fs from "fs";
 
 // Read from the .env-file
-dotenv.config();
+if (fs.existsSync(".env")) process.loadEnvFile();
 
 const configuration = {
   PORT: process.env.PORT ?? 8080,
@@ -15,7 +15,8 @@ const configuration = {
   OIDC_PROVIDER: process.env.OIDC_PROVIDER ?? "https://sso.datasektionen.se/op",
   OIDC_CLIENT_ID: process.env.OIDC_CLIENT_ID ?? "damm",
   OIDC_CLIENT_SECRET: process.env.OIDC_CLIENT_SECRET,
-  REDIRECT_URL: process.env.REDIRECT_URL ?? "https://damm.datasektionen.se/oidc/callback",
+  REDIRECT_URL:
+    process.env.REDIRECT_URL ?? "https://damm.datasektionen.se/oidc/callback",
   RFINGER_API_URL:
     process.env.RFINGER_API_URL ?? "https://rfinger.datasektionen.se",
   RFINGER_API_KEY: process.env.RFINGER_API_KEY,
@@ -26,7 +27,7 @@ if (
   configuration.AWS_S3_BUCKET === "dsekt-damm"
 ) {
   console.log(
-    "ERROR: NODE_ENV=development && AWS_S3_BUCKET=dsekt-damm-prod, vill du verkligen jobba med produktions-bucket:en? Stänger ned..."
+    "ERROR: NODE_ENV=development && AWS_S3_BUCKET=dsekt-damm-prod, vill du verkligen jobba med produktions-bucket:en? Stänger ned...",
   );
   process.exit(1);
 }
