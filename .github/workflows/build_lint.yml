@@ -2,36 +2,49 @@ name: Build and lint
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   test:
     runs-on: ubuntu-latest
     env:
       DATABASE_URL: postgresql://admin:12345@localhost:5432/testdb
-
-    strategy:
-      matrix:
-        node-version: [12.x]
+      SESSION_SECRET: ci
 
     steps:
-    - name: Git checkout
-      uses: actions/checkout@v2
-      
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - name: Install packages
-     run: npm ci
-    - name: Lint backend
-     run: npm run lint
-    - name: Build backend
-     run: npm run build
-    - name: Build frontend
-     run: npm run build
-     working-directory: client
-    - name: Run tests
-     run: npm run test
+      - name: Git checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            client/package-lock.json
+
+      - name: Install backend packages
+        run: npm ci
+      - name: Generate Prisma client
+        run: npx prisma generate
+      - name: Lint backend
+        run: npm run lint
+      - name: Check backend formatting
+        run: npm run format:check
+      - name: Build backend
+        run: npm run build
+      - name: Run tests
+        run: npm run test
+
+      - name: Install frontend packages
+        run: npm ci
+        working-directory: client
+      - name: Lint frontend
+        run: npm run lint
+        working-directory: client
+      - name: Build frontend
+        run: npm run build
+        working-directory: client

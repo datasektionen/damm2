@@ -1,3 +1,5 @@
 **/*.lock
 
 .yarn/*
+client
+dist

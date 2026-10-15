@@ -1,8 +1,8 @@
 import http from '../common/api';
 import {
   FC,
+  ReactNode,
   createContext,
-  useCallback,
   useContext,
   useEffect,
   useState,
@@ -17,11 +17,13 @@ type DarkModeContextType = {
 
 const DarkModeContext = createContext<DarkModeContextType>(null as never);
 // TODO: Move to useAuthorization
-export const DarkModeContextProvider: FC = (props) => {
+export const DarkModeContextProvider: FC<{ children?: ReactNode }> = (
+  props
+) => {
   const [isDarkModeEnabled, setIsDarkModeEnabled] = useState(true);
 
   const doFetch = () => {
-    http.get('https://darkmode.datasektionen.se/').then((res) => {
+    http.get<boolean>('https://darkmode.datasektionen.se/').then((res) => {
       setIsDarkModeEnabled(res.data);
     });
   };

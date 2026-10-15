@@ -1,5 +1,3 @@
 import styled from '@emotion/styled';
 
-export const StyledSpinner = styled.img({
-    
-})
+export const StyledSpinner = styled.img({});

@@ -95,7 +95,7 @@ router.post(
   async (req, res) => {
     const { path } = req.query;
 
-    const result = await uploadImage(req.file as any, path as string);
+    const result = await uploadImage(req.file!, path as string);
     return res.status(result.statusCode).json(result);
   },
 );
@@ -107,7 +107,7 @@ router.post(
   body("id").isInt().not().isString().withMessage("should be an integer"),
   body("images").isArray().optional().withMessage("should be an array"),
   check("images.*").isURL().withMessage("should be an image url"),
-  body("type").matches(new RegExp(/^(patch)|(artefact)$/)),
+  body("type").isIn(["patch", "artefact"]),
   validationCheck,
   async (req, res) => {
     const { id, images, type } = req.body;
@@ -131,7 +131,7 @@ router.post(
   async (req, res) => {
     const { path } = req.query;
 
-    const result = await uploadFile(req.file as any, path as string);
+    const result = await uploadFile(req.file!, path as string);
     return res.status(result.statusCode).json(result);
   },
 );
@@ -143,7 +143,7 @@ router.post(
   body("id").isInt().not().isString().withMessage("should be an integer"),
   body("file").trim().isString().notEmpty().withMessage("should be an URL"),
   body("type")
-    .matches(new RegExp(/^(patch)|(artefact)$/))
+    .isIn(["patch", "artefact"])
     .withMessage("should be either 'patch' or 'artefact'"),
   validationCheck,
   async (req, res) => {
@@ -164,7 +164,7 @@ router.get<{ name: string }>(
     const { name } = req.params;
 
     getFile(name)
-      .then((result: any) => {
+      .then((result) => {
         res.status(200).send(result);
       })
       .catch(() => {
@@ -186,7 +186,7 @@ router.get("/get/unprotected/:name", async (req, res) => {
     });
 
   getFile(name)
-    .then((result: any) => {
+    .then((result) => {
       res.status(200).send(result);
     })
     .catch(() => {
@@ -229,7 +229,7 @@ router.delete(
   query("name").isString().trim().notEmpty().withMessage("should be a string"),
   query("id").isInt().withMessage("should be an integer"),
   query("type")
-    .matches(new RegExp(/^(patch)|(artefact)$/))
+    .isIn(["patch", "artefact"])
     .withMessage("should be either 'patch' or 'artefact'"),
   validationCheck,
   async (req, res) => {
@@ -237,7 +237,11 @@ router.delete(
 
     deleteFile(name as string)
       .then(async () => {
-        await deleteFileFrom(Number(id as string), name as string, type as any);
+        await deleteFileFrom(
+          Number(id as string),
+          name as string,
+          type as "patch" | "artefact",
+        );
         res.status(StatusCodes.OK).json({
           statusCode: StatusCodes.OK,
         });

@@ -1,29 +1,27 @@
-import { useEffect, useState } from "react"
-
-const isSmallScreen = (mediaQuery : any): boolean => {
-    return mediaQuery.matches ? true : false;
-}
+import { useCallback, useEffect, useSyncExternalStore } from 'react';
 
 const useScreenSizeChecker = (breakpoint: number) => {
-    const [small, setIsSmallScreen] = useState<boolean>(false);
+  const query = `(max-width: ${breakpoint}px)`;
 
-    useEffect(() => {
-        const mediaQuery : MediaQueryList = window.matchMedia(`(max-width: ${breakpoint}px)`);
-        mediaQuery.addEventListener("change", () => {
-            setIsSmallScreen(isSmallScreen(mediaQuery));
-        });
-        // Initial check
-        setIsSmallScreen(isSmallScreen(mediaQuery));
-        localStorage.setItem("isSmallScreen", isSmallScreen(mediaQuery) + "");
-        
-        return () => {
-            mediaQuery.removeEventListener("change", () => {
-                setIsSmallScreen(isSmallScreen(mediaQuery));
-            });
-        }
-    }, [])
+  const subscribe = useCallback(
+    (onChange: () => void) => {
+      const mediaQuery = window.matchMedia(query);
+      mediaQuery.addEventListener('change', onChange);
+      return () => mediaQuery.removeEventListener('change', onChange);
+    },
+    [query]
+  );
 
-    return small
-}
+  const small = useSyncExternalStore(
+    subscribe,
+    () => window.matchMedia(query).matches
+  );
 
-export default useScreenSizeChecker
+  useEffect(() => {
+    localStorage.setItem('isSmallScreen', small + '');
+  }, [small]);
+
+  return small;
+};
+
+export default useScreenSizeChecker;

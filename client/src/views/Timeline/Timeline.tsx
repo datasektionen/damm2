@@ -14,23 +14,22 @@ import {
   LineEnd,
   LineStart,
 } from './style';
-import moment from 'moment';
+import { getYear } from '../../common/dates';
 import { General } from '../../components/Timeline/Cards/General/General';
 import { SM } from '../../components/Timeline/Cards/SM/SM';
 import { Anniversary } from '../../components/Timeline/Cards/Anniversary/Anniversary';
 import { Filter } from './compositions/Filter';
 import { DFunkt } from '../../components/Timeline/Cards/DFunkt/DFunkt';
-import Helmet from 'react-helmet';
+import { useTitle } from '../../hooks/useTitle';
 import { title } from '../../common/strings';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../common/routes';
-import { useDarkMode } from '../../hooks/useDarkMode';
 
 const templates = {
   SM_DM: {
     title: 'SM och DM',
-    template: (data: IEvent, i: number, onEditClick: any) => (
-      <CardWrapper index={i} key={'card-' + moment(data.date).year() + '-' + i}>
+    template: (data: IEvent, i: number, onEditClick: (id: number) => void) => (
+      <CardWrapper index={i} key={'card-' + getYear(data.date) + '-' + i}>
         <SM
           {...data}
           protocol={data.protocol ?? ''}
@@ -42,16 +41,16 @@ const templates = {
   },
   ANNIVERSARY: {
     title: 'Årsdagar',
-    template: (data: IEvent, i: number, onEditClick: any) => (
-      <CardWrapper index={i} key={'card-' + moment(data.date).year() + '-' + i}>
+    template: (data: IEvent, i: number, onEditClick: (id: number) => void) => (
+      <CardWrapper index={i} key={'card-' + getYear(data.date) + '-' + i}>
         <Anniversary {...data} index={i} onEditClick={onEditClick} />
       </CardWrapper>
     ),
   },
   GENERAL: {
     title: 'Generell historia',
-    template: (data: IEvent, i: number, onEditClick: any) => (
-      <CardWrapper index={i} key={'card-' + moment(data.date).year() + '-' + i}>
+    template: (data: IEvent, i: number, onEditClick: (id: number) => void) => (
+      <CardWrapper index={i} key={'card-' + getYear(data.date) + '-' + i}>
         <General {...data} index={i} onEditClick={onEditClick} />
       </CardWrapper>
     ),
@@ -59,15 +58,15 @@ const templates = {
   DFUNKT: {
     title: 'Funktionärer tillträder',
     template: (data: IEvent, i: number) => (
-      <CardWrapper index={i} key={'card-' + moment(data.date).year() + '-' + i}>
-        <DFunkt {...data} index={i} mandates={data.mandates} />
+      <CardWrapper index={i} key={'card-' + getYear(data.date) + '-' + i}>
+        <DFunkt {...data} index={i} mandates={data.mandates ?? []} />
       </CardWrapper>
     ),
   },
 };
 
-export const Timeline: React.FC = (props) => {
-  const [events, setEvents] = useState<IEvent[]>([]);
+export const Timeline: React.FC = () => {
+  useTitle(title('Tidslinje'));
   const [years, setYears] = useState<IEventsPerYear[]>([]);
   const [show, setShow] = useState<string[]>(Object.keys(templates));
   // const history = useHistory();
@@ -78,12 +77,12 @@ export const Timeline: React.FC = (props) => {
     let year: IEventsPerYear | null = null;
 
     events.forEach((e) => {
-      if (year === null || year?.year !== moment(e.date).year()) {
+      if (year === null || year?.year !== getYear(e.date)) {
         if (year !== null) {
           years.push(year);
         }
         year = {
-          year: moment(e.date).year(),
+          year: getYear(e.date),
           cards: [],
         };
       }
@@ -95,9 +94,8 @@ export const Timeline: React.FC = (props) => {
 
   useEffect(() => {
     (async () => {
-      const events = await http.get(url('/api/events/all'));
+      const events = await http.get<IEvent[]>(url('/api/events/all'));
       const body = events.data ?? [];
-      setEvents(body);
       setYears(eventsPerYear(body));
     })();
   }, []);
@@ -124,9 +122,6 @@ export const Timeline: React.FC = (props) => {
   return (
     <StyledTimeline>
       <FancyHeader title="Sektionshistoria" />
-      <Helmet>
-        <title>{title('Tidslinje')}</title>
-      </Helmet>
       <ScrollLegend years={years} />
       <Filter
         filters={Object.keys(templates)}

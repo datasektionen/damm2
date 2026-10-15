@@ -23,7 +23,7 @@ import {
 import express from "express";
 import { body, check } from "express-validator";
 import { StatusCodes } from "http-status-codes";
-import { parse as json2csv } from "json2csv";
+import { Parser } from "@json2csv/plainjs";
 
 const router = express.Router();
 
@@ -244,7 +244,7 @@ router.get("/export", async (req, res) => {
       },
     },
   });
-  const data = json2csv(
+  const data = new Parser({ fields }).parse(
     patches.map((p) => ({
       ...p,
       creators: p.createdBy.map((t) => t.person.name).join(", "),
@@ -253,7 +253,6 @@ router.get("/export", async (req, res) => {
       boxId: p.bag?.box?.id ?? null,
       boxName: p.bag?.box?.name ?? "Ingen låda",
     })),
-    { fields },
   );
   res.setHeader("Content-Type", "text/csv");
   res.send(data);

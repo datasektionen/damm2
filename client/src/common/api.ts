@@ -4,20 +4,22 @@ export const url = (path: string) => `${Configuration.apiBaseUrl}${path}`;
 
 export type ResponseType = 'json' | 'blob' | 'text';
 
-export interface HttpRequestConfig
-  extends Omit<RequestInit, 'body' | 'headers' | 'method'> {
+export interface HttpRequestConfig extends Omit<
+  RequestInit,
+  'body' | 'headers' | 'method'
+> {
   headers?: HeadersInit;
   responseType?: ResponseType;
 }
 
-export interface HttpResponse<T = any> {
+export interface HttpResponse<T = unknown> {
   data: T;
   status: number;
   statusText: string;
   headers: Headers;
 }
 
-export class HttpRequestError<T = any> extends Error {
+export class HttpRequestError<T = unknown> extends Error {
   response: HttpResponse<T>;
 
   constructor(response: HttpResponse<T>) {
@@ -28,6 +30,22 @@ export class HttpRequestError<T = any> extends Error {
     this.response = response;
   }
 }
+
+// The server's `error` is a string, a validation error list or a raw exception object
+export const errorMessage = (err: unknown, fallback: string): string => {
+  if (!(err instanceof HttpRequestError)) return fallback;
+  const data = err.response.data;
+  const error =
+    typeof data === 'object' && data !== null && 'error' in data
+      ? data.error
+      : undefined;
+  if (typeof error === 'string') return error;
+  if (Array.isArray(error))
+    return error
+      .map((e: { path?: string; msg?: string }) => `${e.path}: ${e.msg}`)
+      .join(', ');
+  return fallback;
+};
 
 const API_ORIGIN = new URL(Configuration.apiBaseUrl).origin;
 
@@ -75,7 +93,7 @@ const serializeBody = (
   return JSON.stringify(body);
 };
 
-const parseResponse = async <T = any>(
+const parseResponse = async <T>(
   response: Response,
   responseType: ResponseType
 ): Promise<T> => {
@@ -109,15 +127,18 @@ const parseResponse = async <T = any>(
   }
 };
 
-const execute = async <T = any>(
+const execute = async <T>(
   method: string,
   target: string,
   body?: unknown,
   config?: HttpRequestConfig
 ): Promise<HttpResponse<T>> => {
   const requestUrl = new URL(target, Configuration.apiBaseUrl);
-  const { responseType = 'json', headers: providedHeaders, ...requestInit } =
-    config ?? {};
+  const {
+    responseType = 'json',
+    headers: providedHeaders,
+    ...requestInit
+  } = config ?? {};
   const headers = buildHeaders(providedHeaders, requestUrl);
 
   const response = await fetch(requestUrl.toString(), {
@@ -143,15 +164,21 @@ const execute = async <T = any>(
 };
 
 const http = {
-  get: <T = any>(target: string, config?: HttpRequestConfig) =>
+  get: <T = unknown>(target: string, config?: HttpRequestConfig) =>
     execute<T>('GET', target, undefined, config),
-  delete: <T = any>(target: string, config?: HttpRequestConfig) =>
+  delete: <T = unknown>(target: string, config?: HttpRequestConfig) =>
     execute<T>('DELETE', target, undefined, config),
-  post: <T = any>(target: string, body?: unknown, config?: HttpRequestConfig) =>
-    execute<T>('POST', target, body, config),
-  put: <T = any>(target: string, body?: unknown, config?: HttpRequestConfig) =>
-    execute<T>('PUT', target, body, config),
-  patch: <T = any>(
+  post: <T = unknown>(
+    target: string,
+    body?: unknown,
+    config?: HttpRequestConfig
+  ) => execute<T>('POST', target, body, config),
+  put: <T = unknown>(
+    target: string,
+    body?: unknown,
+    config?: HttpRequestConfig
+  ) => execute<T>('PUT', target, body, config),
+  patch: <T = unknown>(
     target: string,
     body?: unknown,
     config?: HttpRequestConfig

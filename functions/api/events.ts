@@ -1,9 +1,9 @@
 import ApiResponse from "../../common/ApiResponse";
 import { StatusCodes } from "http-status-codes";
 import prisma from "../../common/client";
-import { EventType } from ".prisma/client";
+import { Event, EventType, Prisma } from ".prisma/client";
 
-export const getAll = async (): Promise<ApiResponse> => {
+export const getAll = async (): Promise<ApiResponse<Event[]>> => {
   const result = await prisma.event.findMany({});
   return {
     statusCode: StatusCodes.OK,
@@ -15,7 +15,7 @@ export const createEvent = async (
   title: string,
   content: string,
   date: string,
-  type: string,
+  type: EventType,
   protocol: string,
   createdBy: string,
 ): Promise<ApiResponse> => {
@@ -25,8 +25,7 @@ export const createEvent = async (
         title,
         content,
         date,
-        // Convert from string to enum
-        type: (<any>EventType)[type],
+        type,
         protocol,
         createdBy,
       },
@@ -56,10 +55,10 @@ export const updateEvent = async ({
   title?: string;
   content?: string;
   date?: string;
-  type?: string;
+  type?: EventType;
   protocol?: string;
 }): Promise<ApiResponse> => {
-  const data = {} as any;
+  const data: Prisma.EventUpdateInput = {};
 
   if (title) data.title = title;
   if (content) data.content = content;

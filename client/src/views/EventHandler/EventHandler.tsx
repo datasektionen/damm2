@@ -1,19 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Helmet } from 'react-helmet';
+import { useTitle } from '../../hooks/useTitle';
 import { title } from '../../common/strings';
 import { StyledEventHandler, Content } from './style';
-import http from '../../common/api';
-import { url } from '../../common/api';
-import { IEvent } from '../../types/definitions';
+import http, { errorMessage, url } from '../../common/api';
+import { FormChangeEvent, IEvent } from '../../types/definitions';
 import useSortableData from '../../hooks/useSortableData';
 import { Button } from '../../components/Button/Button';
 import { EventTable } from './compositions/EventTable/EventTable';
 import { EventEditor } from './compositions/EventEditor/EventEditor';
-import moment from 'moment';
+import { toDateString } from '../../common/dates';
 import { Spinner } from '../../components/Spinner/Spinner';
 import { Alert } from '../../components/Alert/Alert';
-import { useNavigate, useLocation } from 'react-router';
-import queryString from 'query-string';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAppContext } from '../../hooks/useAppContext';
 
 export interface Form {
@@ -28,17 +26,17 @@ export interface Form {
 const defaultForm: Form = {
   title: '',
   content: '',
-  date: moment(Date.now()).format('YYYY-MM-DD'),
+  date: toDateString(Date.now()),
   type: 'SM_DM',
   protocol: '',
 };
 
-export const EventHandler: React.FC = (props) => {
+export const EventHandler: React.FC = () => {
+  useTitle(title('Hantera händelser'));
   const { admin, user } = useAppContext();
 
   const [events, setEvents] = useState<IEvent[]>([]);
   const [form, setForm] = useState(defaultForm);
-  const [isValid, setIsValid] = useState<boolean>(false);
   const [edit, setEdit] = useState(false);
   const [original, setOriginal] = useState(defaultForm);
   const [loading, setLoading] = useState<boolean>(true);
@@ -49,49 +47,47 @@ export const EventHandler: React.FC = (props) => {
   const navigate = useNavigate();
   // const history = useHistory();
 
-  const { items, requestSort, sortConfig } = useSortableData(events as any[], {
+  const { items, requestSort, sortConfig } = useSortableData(events, {
     key: 'date',
     direction: 'desc',
   });
 
   useEffect(() => {
     (async () => {
-      const result = await http.get(url('/api/events/all'));
+      const result = await http.get<IEvent[]>(url('/api/events/all'));
       if (result.status !== 200) {
         // TODO
         return;
       }
-      setEvents((result.data ?? []).filter((e: IEvent) => e.type !== 'DFUNKT'));
+      setEvents((result.data ?? []).filter((e) => e.type !== 'DFUNKT'));
       setLoading(false);
     })();
   }, []);
 
+  const editId = new URLSearchParams(location.search).get('edit_id');
+  const editEvent = editId
+    ? events.find((e) => e.id === Number(editId))
+    : undefined;
+  const canEdit =
+    !!editEvent && (admin.includes('admin') || user === editEvent.createdBy);
+
+  // Leave the edit view if the event doesn't exist or we may not edit it
   useEffect(() => {
-    const { edit_id } = queryString.parse(location.search);
-    if (edit_id) {
-      if (events.length === 0) return;
+    if (editId && events.length !== 0 && !canEdit) navigate({ search: '' });
+  }, [editId, events.length, canEdit, navigate]);
 
-      const event = events.filter((e) => e.id === Number(edit_id))[0];
-      // No event exists, don't render edit view
-      if (!event) {
-        // history.push({ search: "" })
-        navigate({ search: '' });
-        return;
-      }
-      // Not owner of event and not admin, don't render edit view
-      if (!admin.includes('admin') && user !== event.createdBy) {
-        // history.push({ search: "" })
-        navigate({ search: '' });
-        return;
-      }
-
+  // Load the event from the URL into the form once per edit_id
+  const [loadedEditId, setLoadedEditId] = useState<string | null>(null);
+  if (editId !== loadedEditId && (editId === null || canEdit)) {
+    setLoadedEditId(editId);
+    if (editEvent && canEdit) {
       setEdit(true);
-      setOriginal(event);
-      setForm(event);
+      setOriginal(editEvent);
+      setForm(editEvent);
     }
-  }, [location, events]);
+  }
 
-  const onChange = (e: any) => {
+  const onChange = (e: FormChangeEvent) => {
     const name = e.target.name;
     const value = e.target.value;
 
@@ -133,16 +129,17 @@ export const EventHandler: React.FC = (props) => {
     setSuccess('');
     setError('');
     setLoading(true);
-    if (form.type !== 'SM_DM') delete form.protocol;
+    const body =
+      form.type === 'SM_DM' ? form : { ...form, protocol: undefined };
     http
-      .post(url('/api/events/create'), form, authConfig)
+      .post<{ body: IEvent }>(url('/api/events/create'), body, authConfig)
       .then((res) => {
         onCancel();
         setSuccess('Händelsen skapad');
-        setEvents([...events, res.data.body]);
+        setEvents((events) => [...events, res.data.body]);
       })
       .catch((err) => {
-        setError(JSON.stringify(err.response.data));
+        setError(errorMessage(err, 'Kunde inte skapa händelsen'));
       })
       .finally(() => {
         setLoading(false);
@@ -153,13 +150,16 @@ export const EventHandler: React.FC = (props) => {
     setSuccess('');
     setError('');
     setLoading(true);
-    if (form.type !== 'SM_DM') delete form.protocol;
+    const body =
+      form.type === 'SM_DM' ? form : { ...form, protocol: undefined };
     http
-      .put(url('/api/events/update'), form, authConfig)
+      .put<{ body: IEvent }>(url('/api/events/update'), body, authConfig)
       .then((res) => {
         onCancel();
         setSuccess('Händelsen uppdaterad');
-        setEvents(events.filter((e) => e.id !== form.id).concat(res.data.body));
+        setEvents((events) =>
+          events.filter((e) => e.id !== form.id).concat(res.data.body)
+        );
         // history.push({
         //     search: "",
         // })
@@ -185,8 +185,8 @@ export const EventHandler: React.FC = (props) => {
     setError('');
     http
       .delete(url(`/api/events/${id}`), authConfig)
-      .then((res) => {
-        setEvents(events.filter((e) => e.id !== id));
+      .then(() => {
+        setEvents((events) => events.filter((e) => e.id !== id));
         setSuccess('Händelsen raderad');
       })
       .catch((err) => {
@@ -197,27 +197,17 @@ export const EventHandler: React.FC = (props) => {
       });
   };
 
-  useEffect(() => {
-    let valid = true;
-    if (form.title.length === 0) valid = false;
-    if (form.date.length === 0) valid = false;
-    if (form.type === 'SM_DM') {
+  const isValid =
+    form.title.length !== 0 &&
+    form.date.length !== 0 &&
+    (form.type !== 'SM_DM' ||
       // https://stackoverflow.com/a/3809435
-      const validUrl = (form.protocol ?? '').match(
-        new RegExp(
-          /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi
-        )
-      );
-      if (form.protocol?.length === 0 || !validUrl) valid = false;
-    }
-    setIsValid(valid);
-  }, [form]);
+      /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/i.test(
+        form.protocol ?? ''
+      ));
 
   return (
     <>
-      <Helmet>
-        <title>{title('Hantera händelser')}</title>
-      </Helmet>
       {/* <Header title={edit ? (form.title.length === 0 ? "Titel" : form.title) : "Hantera händelser"} /> */}
       <StyledEventHandler>
         <Content>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyledHeader, Logo, H1, H2 } from './style';
-import logo from '../../skold.png'
+import logo from '../../skold.png';
 
 interface Props {
   children?: React.ReactNode;
@@ -17,5 +17,5 @@ export const FancyHeader: React.FC<Props> = ({ title, children }) => {
         {children}
       </div>
     </StyledHeader>
-  )
-}
+  );
+};

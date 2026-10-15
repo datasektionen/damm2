@@ -16,7 +16,7 @@ export const uploadFiles = async (
   const formData = new FormData();
   formData.append('file', files);
 
-  const uploadResult = await http.post(
+  const uploadResult = await http.post<{ body: { Key: string } }>(
     url(`/api/files/upload/file?path=${path}`),
     formData,
     config

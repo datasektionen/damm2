@@ -7,7 +7,7 @@ import {
   silentAuthorization,
   validationCheck,
 } from "../common/middlewares";
-import { DATE_FORMAT, EVENT_TYPE } from "../common/patterns";
+import { DATE_FORMAT } from "../common/patterns";
 import { IUserRequest } from "../common/requests";
 import {
   getAll,
@@ -15,9 +15,13 @@ import {
   updateEvent,
   deleteEvent,
 } from "../functions/api/events";
-import { dfunkt } from "../functions/generator/dfunkt";
+import {
+  dfunkt,
+  IDfunktEvent,
+  isDfunktEvent,
+} from "../functions/generator/dfunkt";
 import { generator } from "../functions/generator/generator";
-import { EventType } from ".prisma/client";
+import { Event, EventType } from ".prisma/client";
 import { CronJob } from "cron";
 import express from "express";
 import { body, param } from "express-validator";
@@ -61,14 +65,15 @@ router.get("/all", silentAuthorization, async (req: IUserRequest, res) => {
   }
 
   const events = await getAll();
-  events.body = [...events.body, ...cachedData].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-  );
+  const timeline: (Event | IDfunktEvent)[] = [
+    ...(events.body ?? []),
+    ...cachedData,
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   // Get picture links for mandates
-  const kthids = events.body
-    .filter((element: any) => element.type == "DFUNKT")
-    .flatMap((element: any) => element.mandates.map((e: any) => e.user.kthid));
+  const kthids = timeline
+    .filter(isDfunktEvent)
+    .flatMap((element) => element.mandates.map((e) => e.user.kthid));
 
   const unique = [...new Set(kthids)];
 
@@ -101,9 +106,9 @@ router.get("/all", silentAuthorization, async (req: IUserRequest, res) => {
       return {};
     });
 
-  const updated_events = events.body.map((element: any) => {
-    if (element.type == "DFUNKT") {
-      element.mandates = element.mandates.map((e: any) => {
+  const updated_events = timeline.map((element) => {
+    if (isDfunktEvent(element)) {
+      element.mandates = element.mandates.map((e) => {
         e.user.picture = pictures?.[e.user.kthid];
         return e;
       });
@@ -134,7 +139,7 @@ router.post(
     .matches(DATE_FORMAT)
     .withMessage("should be a date with format YYYY-MM-DD"),
   body("type")
-    .matches(EVENT_TYPE)
+    .isIn(Object.values(EventType))
     .withMessage("should be one of 'GENERAL', 'ANNIVERSARY' or 'SM_DM'"),
   body("protocol")
     .trim()
@@ -191,7 +196,7 @@ router.put(
     .optional()
     .withMessage("should be a date with format YYYY-MM-DD"),
   body("type")
-    .matches(EVENT_TYPE)
+    .isIn(Object.values(EventType))
     .optional()
     .withMessage("should be one of 'GENERAL', 'ANNIVERSARY' or 'SM_DM'"),
   body("protocol")

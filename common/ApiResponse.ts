@@ -1,15 +1,15 @@
 import express from "express";
 import { StatusCodes } from "http-status-codes";
-export interface ApiResponse {
+export interface ApiResponse<T = unknown> {
   statusCode: number;
-  body?: any;
-  error?: any;
+  body?: T;
+  error?: unknown;
 }
 
 export const errorResponse = (
   res: express.Response,
   statusCode: number,
-  error: any,
+  error: unknown,
 ): void => {
   const response: ApiResponse = {
     statusCode,

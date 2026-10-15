@@ -7,6 +7,7 @@ import express from "express";
 import session from "express-session";
 import fs from "fs";
 import morgan from "morgan";
+import * as oidc from "openid-client";
 import path from "path";
 
 const app = express();
@@ -29,18 +30,21 @@ if (configuration.NODE_ENV === "development") {
   app.use(morgan("common"));
 }
 
-let client: any;
+let oidcConfig: oidc.Configuration;
 
 async function initOIDC() {
-  const { Issuer } = await import("openid-client");
-  const issuer = await Issuer.discover(configuration.OIDC_PROVIDER!);
-
-  client = new issuer.Client({
-    client_id: configuration.OIDC_CLIENT_ID,
-    client_secret: configuration.OIDC_CLIENT_SECRET,
-    redirect_uris: [configuration.REDIRECT_URL],
-    // response_types: ['code'],
-  });
+  const provider = new URL(configuration.OIDC_PROVIDER);
+  oidcConfig = await oidc.discovery(
+    provider,
+    configuration.OIDC_CLIENT_ID,
+    undefined,
+    // SSO only supports client_secret_basic, v6 defaults to client_secret_post
+    oidc.ClientSecretBasic(configuration.OIDC_CLIENT_SECRET),
+    // Local mock SSO (nyckeln) runs over plain http. "Deprecated" is only a warning flag, there is no replacement
+    configuration.NODE_ENV === "development" && provider.protocol === "http:"
+      ? { execute: [oidc.allowInsecureRequests] }
+      : undefined,
+  );
 
   console.log("OIDC client initialized");
 }
@@ -48,20 +52,35 @@ async function initOIDC() {
 initOIDC();
 
 app.get("/login", (req, res) => {
-  const authUrl = client.authorizationUrl({
+  const state = oidc.randomState();
+  req.session.oidcState = state;
+
+  const authUrl = oidc.buildAuthorizationUrl(oidcConfig, {
+    redirect_uri: configuration.REDIRECT_URL,
     scope: "openid profile email permissions",
+    state,
   });
 
-  res.redirect(authUrl);
+  res.redirect(authUrl.href);
 });
 
 // Callback
 app.get("/oidc/callback", async (req, res, next) => {
   try {
-    const params = client.callbackParams(req);
-    const tokenSet = await client.callback(configuration.REDIRECT_URL, params);
+    // Build from REDIRECT_URL rather than req, since we run behind a proxy
+    const currentUrl = new URL(configuration.REDIRECT_URL);
+    currentUrl.search = new URL(req.originalUrl, currentUrl).search;
 
-    const userinfo: SsoUser = await client.userinfo(tokenSet.access_token);
+    const tokenSet = await oidc.authorizationCodeGrant(oidcConfig, currentUrl, {
+      expectedState: req.session.oidcState,
+    });
+    delete req.session.oidcState;
+
+    const userinfo = (await oidc.fetchUserInfo(
+      oidcConfig,
+      tokenSet.access_token,
+      tokenSet.claims()?.sub ?? oidc.skipSubjectCheck,
+    )) as unknown as SsoUser;
 
     const permissions = [];
     for (const perm of userinfo.permissions) {

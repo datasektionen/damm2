@@ -2,7 +2,7 @@
 	Adapter that gather data from dfunkt.datasektionen.se. Specifically it gathers information about elections.
 	Written by Jonas Dahl.
 */
-import { DammUser } from "../../common/types";
+import { Event } from "@prisma/client";
 
 export interface IRole {
   id: number;
@@ -13,9 +13,32 @@ export interface IRole {
   active: boolean;
 }
 
+interface IDfunktUser {
+  first_name: string;
+  last_name: string;
+  kthid: string;
+  ugkthid: string;
+  picture?: string;
+}
+
+export interface IMandate {
+  date: Date;
+  role: IRole;
+  user: IDfunktUser;
+}
+
+export interface IDfunktEvent {
+  date: Date;
+  type: "DFUNKT";
+  mandates: IMandate[];
+}
+
+export const isDfunktEvent = (e: Event | IDfunktEvent): e is IDfunktEvent =>
+  e.type === "DFUNKT";
+
 interface IMandatesForRole {
   role: IRole;
-  mandates: { start: string; end: string; User: DammUser }[];
+  mandates: { start: string; end: string; User: IDfunktUser }[];
 }
 
 const fetchJson = async <T>(
@@ -36,9 +59,7 @@ const fetchJson = async <T>(
   }
 };
 
-const fetchMandatesForRole = async (
-  role: IRole,
-): Promise<{ date: Date; role: IRole; user: DammUser }[]> => {
+const fetchMandatesForRole = async (role: IRole): Promise<IMandate[]> => {
   const response = await fetchJson<IMandatesForRole>(
     `https://dfunkt.datasektionen.se/api/role/${encodeURIComponent(role.identifier)}`,
     `Couldn't fetch dfunkt mandates for role ${role.identifier}`,
@@ -64,11 +85,9 @@ const fetchMandatesForRole = async (
   // })))
 };
 
-export const dfunkt: () => Promise<
-  { date: Date; template: "DFUNKT"; mandates: any }[]
-> = () => {
+export const dfunkt: () => Promise<IDfunktEvent[]> = () => {
   return new Promise((resolve) => {
-    let events = [] as any[];
+    let events: IDfunktEvent[] = [];
 
     // First, we need to fetch all roles, to then be able to fetch their mandates
     // At the moment, dfunkt does not support fetching it all in one request
@@ -81,18 +100,14 @@ export const dfunkt: () => Promise<
         return;
       }
 
-      const promises = [] as any[];
-
-      roles.forEach((role) => promises.push(fetchMandatesForRole(role)));
+      const promises = roles.map((role) => fetchMandatesForRole(role));
 
       Promise.all(promises)
-        .then((results: { date: Date; role: IRole; user: DammUser }[]) => {
-          const mandates = (
-            [] as { date: Date; role: IRole; user: DammUser }[]
-          ).concat.apply([], results);
+        .then((results) => {
+          const mandates = results.flat();
           mandates.sort((a, b) => b.date.getTime() - a.date.getTime());
 
-          const dates = [] as any;
+          const dates: Record<string, IMandate[]> = {};
           mandates.forEach((mandate) => {
             const key = mandate.date.toLocaleDateString("sv-SE");
             if (!(key in dates)) dates[key] = [];
@@ -101,7 +116,7 @@ export const dfunkt: () => Promise<
 
           events = Object.keys(dates).map((key) => ({
             date: dates[key][0].date,
-            type: "DFUNKT",
+            type: "DFUNKT" as const,
             mandates: dates[key],
           }));
         })

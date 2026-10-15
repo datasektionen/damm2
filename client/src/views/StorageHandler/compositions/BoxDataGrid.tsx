@@ -1,25 +1,25 @@
 import http from '../../../common/api';
 import React, { useCallback, useMemo, useState } from 'react';
-import DataGrid, { Column, SelectColumn } from 'react-data-grid';
+import { DataGrid, SelectColumn, type Column } from 'react-data-grid';
 import { Button } from '../../../components/Button/Button';
 import { Box } from '../../../types/definitions';
-import { groupBy as rowGrouper } from 'lodash';
 import { CellStringInput } from '../../../components/CellStringInput/CellStringInput';
 
 interface BoxRow {
   name: string;
-  id: string;
-  '#bags': number;
+  id: number;
+  '#bags'?: number;
+  '#uniquePatches': number;
   '#patches': number;
 }
 
 interface Props {
   boxes: Box[];
-  setBoxes: (boxes: Box[]) => void;
+  setBoxes: React.Dispatch<React.SetStateAction<Box[]>>;
 }
 
 export const BoxDataGrid = ({ boxes, setBoxes }: Props) => {
-  const [selectedRows, setSelectedRows] = useState<Set<string>>(
+  const [selectedRows, setSelectedRows] = useState<Set<number>>(
     () => new Set()
   );
   const [isDeletingBoxes, setIsDeletingBoxes] = useState<boolean>(false);
@@ -34,14 +34,30 @@ export const BoxDataGrid = ({ boxes, setBoxes }: Props) => {
       })
       .then(() => {
         setSelectedRows(new Set());
-        const next = boxes.reduce((arr: Box[], box: Box) => {
-          if (selectedRows.has(box.id as any)) return arr;
-          else return [...arr, box];
-        }, []);
-        setBoxes(next);
+        setBoxes((boxes) => boxes.filter((box) => !selectedRows.has(box.id)));
       })
       .finally(() => setIsDeletingBoxes(false));
-  }, [selectedRows]);
+  }, [selectedRows, setBoxes]);
+
+  const updateBoxName = useCallback(
+    async (rowId: number, value: string) => {
+      return http
+        .put('/api/storage/box/name', {
+          boxId: rowId,
+          name: value,
+        })
+        .then(() => {
+          setBoxes((boxes) =>
+            boxes
+              .map((b) => (b.id === rowId ? { ...b, name: value } : b))
+              .sort((a, b) =>
+                a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
+              )
+          );
+        });
+    },
+    [setBoxes]
+  );
 
   const boxColumns: Column<BoxRow>[] = useMemo(() => {
     return [
@@ -50,14 +66,14 @@ export const BoxDataGrid = ({ boxes, setBoxes }: Props) => {
       {
         key: 'name',
         name: 'Namn',
-        editor: ({ row }) => (
+        renderEditCell: ({ row }) => (
           <CellStringInput
             initial={row.name}
             row={row}
             onSave={updateBoxName}
           />
         ),
-        formatter: ({ row }) => (
+        renderCell: ({ row }) => (
           <div
             title="Dubbelklicka för att redigera"
             style={{ cursor: 'pointer' }}
@@ -70,48 +86,23 @@ export const BoxDataGrid = ({ boxes, setBoxes }: Props) => {
       { key: '#uniquePatches', name: 'Antal unika märken' },
       { key: '#patches', name: 'Antal märken' },
     ];
-  }, [boxes]);
-
-  const updateBoxName = async (rowId: number, value: string) => {
-    return http
-      .put('/api/storage/box/name', {
-        boxId: rowId,
-        name: value,
-      })
-      .then(() => {
-        const boxToUpdate = boxes.find((b) => b.id === rowId);
-        if (!boxToUpdate) return;
-        const next = [
-          ...boxes.filter((b) => b.id !== rowId),
-          {
-            ...boxToUpdate,
-            name: value,
-          },
-        ].sort((a, b) =>
-          a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
-        );
-        setBoxes(next);
-      });
-  };
+  }, [updateBoxName]);
 
   return (
     <>
       <p>Dubbelklicka på lådans namn för att redigera</p>
-      <DataGrid
+      <DataGrid<BoxRow, unknown, number>
         columns={boxColumns}
         rowKeyGetter={(row) => row.id}
-        rows={
-          boxes.map((b) => ({
-            id: b.id,
-            name: b.name,
-            '#uniquePatches': b['#uniquePatches'],
-            '#bags': b.bags?.length,
-            '#patches': b['#patches'],
-          })) as any
-        }
+        rows={boxes.map((b) => ({
+          id: b.id,
+          name: b.name,
+          '#uniquePatches': b['#uniquePatches'],
+          '#bags': b.bags?.length,
+          '#patches': b['#patches'],
+        }))}
         selectedRows={selectedRows}
         onSelectedRowsChange={setSelectedRows}
-        rowGrouper={rowGrouper}
       />
       <div style={{ marginTop: '10px' }}>
         <Button

@@ -3,11 +3,10 @@ import { Spinner } from '../Spinner/Spinner';
 
 import { StyledSpinnerCover } from './style';
 
-
-export const SpinnerCover: React.FC = props =>{
-    return (
-        <StyledSpinnerCover>
-            <Spinner />
-        </StyledSpinnerCover>
-    )
-}
+export const SpinnerCover: React.FC = () => {
+  return (
+    <StyledSpinnerCover>
+      <Spinner />
+    </StyledSpinnerCover>
+  );
+};

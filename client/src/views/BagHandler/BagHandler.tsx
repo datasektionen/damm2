@@ -1,4 +1,4 @@
-import http from '../../common/api';
+import http, { errorMessage } from '../../common/api';
 import { useCallback, useEffect, useState } from 'react';
 import { Alert } from '../../components/Alert/Alert';
 import { Button } from '../../components/Button/Button';
@@ -11,66 +11,65 @@ export const BagHandler = () => {
   const [bags, setBags] = useState<Bag[]>([]);
   const [bagName, setBagName] = useState('');
   const [isCreatingBag, setIsCreatingBag] = useState(false);
-  const [selectedBox, setSelectedBox] = useState('');
+  const [selectedBoxState, setSelectedBox] = useState('');
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    // boxes is empty in first render, set selectedBox once when boxes is filled with data
-    if (!selectedBox && boxes.length !== 0) {
-      setSelectedBox(`${boxes[0].id}`);
-    }
-  });
+  // Default to the first box until the user picks one
+  const selectedBox =
+    selectedBoxState || (boxes.length !== 0 ? `${boxes[0].id}` : '');
 
   const createBag = useCallback(() => {
+    const box = boxes.find((b) => `${b.id}` === selectedBox);
+    if (!box) return;
     setIsCreatingBag(true);
     setError('');
 
     http
-      .post('/api/storage/bag/create', {
-        name: bagName,
-        boxId: parseInt(selectedBox),
-      })
+      .post<{ body: Omit<Bag, 'box' | '#patches' | '#uniquePatches'> }>(
+        '/api/storage/bag/create',
+        {
+          name: bagName,
+          boxId: box.id,
+        }
+      )
       .then((res) => {
-        setBags(
+        setBags((bags) =>
           [
             ...bags,
             {
               ...res.data.body,
               '#patches': 0,
               '#uniquePatches': 0,
-              box: {
-                id: selectedBox,
-                name: boxes.find((b) => `${b.id}` === selectedBox)?.name,
-              },
+              box: { id: box.id, name: box.name },
             },
-          ].sort((a: Bag, b: Bag) =>
+          ].sort((a, b) =>
             a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
           )
         );
         setBagName('');
       })
       .catch((err) => {
-        setError(err.response.data.error);
+        setError(errorMessage(err, 'Kunde inte skapa påsen'));
       })
       .finally(() => {
         setIsCreatingBag(false);
       });
-  }, [bagName, selectedBox]);
+  }, [bagName, selectedBox, boxes]);
 
   const getBoxes = useCallback(() => {
-    http.get('/api/storage/box/all').then((res) => {
+    http.get<{ body: Box[] }>('/api/storage/box/all').then((res) => {
       setBoxes(res.data.body);
     });
   }, []);
 
   const getBags = useCallback(() => {
-    http.get('/api/storage/bag/all').then((res) => {
+    http.get<{ body: Bag[] }>('/api/storage/bag/all').then((res) => {
       setBags(res.data.body);
     });
   }, []);
 
-  useEffect(getBoxes, []);
-  useEffect(getBags, []);
+  useEffect(getBoxes, [getBoxes]);
+  useEffect(getBags, [getBags]);
 
   return (
     <>

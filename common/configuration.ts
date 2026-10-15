@@ -3,10 +3,12 @@ import fs from "fs";
 // Read from the .env-file
 if (fs.existsSync(".env")) process.loadEnvFile();
 
+const NODE_ENV = process.env.NODE_ENV ?? "production";
+
 const configuration = {
   PORT: process.env.PORT ?? 8080,
   SESSION_SECRET: process.env.SESSION_SECRET,
-  NODE_ENV: process.env.NODE_ENV ?? "production",
+  NODE_ENV,
   AWS_REGION: process.env.AWS_REGION ?? "eu-north-1",
   // Default to dev bucket, just in case
   AWS_S3_BUCKET: process.env.AWS_S3_BUCKET ?? "dsekt-damm-dev",
@@ -16,7 +18,11 @@ const configuration = {
   OIDC_CLIENT_ID: process.env.OIDC_CLIENT_ID ?? "damm",
   OIDC_CLIENT_SECRET: process.env.OIDC_CLIENT_SECRET,
   REDIRECT_URL:
-    process.env.REDIRECT_URL ?? "https://damm.datasektionen.se/oidc/callback",
+    process.env.REDIRECT_URL ??
+    (NODE_ENV === "development"
+      ? // The Vite dev server proxies /oidc to us
+        "http://localhost:3000/oidc/callback"
+      : "https://damm.datasektionen.se/oidc/callback"),
   RFINGER_API_URL:
     process.env.RFINGER_API_URL ?? "https://rfinger.datasektionen.se",
   RFINGER_API_KEY: process.env.RFINGER_API_KEY,

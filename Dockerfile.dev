@@ -1,7 +1,6 @@
 FROM node:24-alpine AS base
 
 WORKDIR /app
-ENV NODE_OPTIONS=--openssl-legacy-provider
 # RUN apk add --no-cache openssl1.1-compat # needed for prisma to work
 
 FROM base AS frontend
@@ -12,8 +11,8 @@ RUN npm install
 
 COPY client/ .
 
-ARG REACT_APP_API_ENDPOINT=https://damm.datasektionen.se
-ARG REACT_APP_S3_BUCKET=dsekt-damm-prod
+ARG VITE_API_ENDPOINT=https://damm.datasektionen.se
+ARG VITE_S3_BUCKET=dsekt-damm-prod
 
 RUN npm run build --ignore-scripts
 

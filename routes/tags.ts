@@ -4,22 +4,30 @@ import {
   silentAuthorization,
   validationCheck,
 } from "../common/middlewares";
-import { TAG_TYPES } from "../common/patterns";
 import { IUserRequest } from "../common/requests";
 import { getAll, create, update, deleteTag } from "../functions/api/tags";
 import { TagType } from "@prisma/client";
 import express from "express";
-import { body, param } from "express-validator";
+import { body, matchedData, param, query } from "express-validator";
 import { StatusCodes } from "http-status-codes";
 
 const router = express.Router();
 
-router.get("/all", silentAuthorization, async (req: IUserRequest, res) => {
-  const { type } = req.query;
-  const tags = await getAll(req.user, type as TagType);
+router.get(
+  "/all",
+  silentAuthorization,
+  query("type")
+    .optional()
+    .isIn(Object.values(TagType))
+    .withMessage("should be either 'PATCH' or 'ARTEFACT'"),
+  validationCheck,
+  async (req: IUserRequest, res) => {
+    const { type } = matchedData<{ type?: TagType }>(req);
+    const tags = await getAll(req.user, type);
 
-  return res.status(StatusCodes.OK).json(tags);
-});
+    return res.status(StatusCodes.OK).json(tags);
+  },
+);
 
 const tagValidators = [
   body("name").trim().isString().notEmpty().withMessage("should be a string"),
@@ -52,7 +60,7 @@ router.post(
   body("type")
     .isString()
     .trim()
-    .matches(TAG_TYPES)
+    .isIn(Object.values(TagType))
     .withMessage("should be either 'PATCH' or 'ARTEFACT'"),
   body("category").isString().withMessage("should be a string"),
   ...tagValidators,
